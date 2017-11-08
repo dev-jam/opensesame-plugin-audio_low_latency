@@ -1,0 +1,76 @@
+description: Low Latency Audio - starts audio recording on the foreground.
+version: 2017.11-1
+author: "Bob Rosbag"
+url: "http://osdoc.cogsci.nl/"
+category: "Audio Low Latency Recording"
+date: "2017"
+controls:
+-
+    label: "Audio Filename"
+    name: "filepool_filename"
+    tooltip: "Give filename"
+    type: "filepool"
+    var: "filename"
+-
+    label: "Enable duration"
+    name: "checkbox_duration_check"
+    tooltip: "Enable duration?"
+    type: "checkbox"
+    var: "duration_check"
+-
+    label: "Duration (ms)"
+    name: "spinbox_duration"
+    tooltip: "Value in ms"
+    type: "spinbox"
+    min_val: 0
+    max_val: 1000000000
+    var: "duration"
+-
+    label: "Bit Depth"
+    name: "combobox_bitdepth"
+    tooltip: "Choose bitdepth"
+    type: "combobox"
+    var: "bitdepth"
+    options:
+      - "8"
+      - "16"
+      - "24"
+      - "32"
+-
+    label: "Sample Rate"
+    name: "combobox_samplerate"
+    tooltip: "Choose sample Rate"
+    type: "combobox"
+    var: "samplerate"
+    options:
+      - "44100"
+      - "48000"
+      - "96000"
+      - "192000"
+-
+    label: "Channels"
+    name: "combobox_channels"
+    tooltip: "Channels"
+    type: "combobox"
+    var: "channels"
+    options:
+      - "1"
+      - "2"
+-
+    label: "Cache to RAM before saving?"
+    name: "checkbox_ram_cache"
+    tooltip: "RAM Cache"
+    type: "checkbox"
+    var: "ram_cache"
+-
+    label: |
+      <b>IMPORTANT:</b> this is a foreground item, it will wait for the recording to finish before advancing to the next item.
+    type: "text"
+-
+    label: |
+      <small><b>Note:</b> Audio Low Latency Record Init item at the begin of the experiment is needed for initialisation of the audio device</small>
+    type: text
+-
+    type: text
+    label: DUMMY
+    name: text_version

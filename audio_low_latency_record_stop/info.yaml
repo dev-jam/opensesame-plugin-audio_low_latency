@@ -1,0 +1,15 @@
+description: Low Latency Audio - stops the background audio recording.
+version: 2017.11-1
+author: "Bob Rosbag"
+url: "http://osdoc.cogsci.nl/"
+category: "Audio Low Latency Recording"
+date: "2017"
+controls:
+-
+    type: text
+    label: DUMMY
+    name: text_version
+-
+    label: |
+      <small><b>Note:</b> Audio Low Latency Record Init item at the begin of the experiment is needed for initialisation of the audio device</small>
+    type: text

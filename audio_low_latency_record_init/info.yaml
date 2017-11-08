@@ -1,0 +1,49 @@
+description: Low Latency Audio - initializes the recording audio device.
+version: 2017.11-1
+author: "Bob Rosbag"
+url: "http://osdoc.cogsci.nl/"
+category: "Audio Low Latency Recording"
+date: "2017"
+controls:
+-
+    label: "Dummy Mode"
+    name: "checkbox_dummy"
+    tooltip: "Run in dummy mode"
+    type: "checkbox"
+    var: "dummy_mode"
+-
+    label: "Verbose Mode"
+    name: "checkbox_verbose"
+    tooltip: "Show actions in debug window"
+    type: "checkbox"
+    var: "verbose"
+-
+    label: "Choose module"
+    name: "combobox_module"
+    tooltip: "Module name"
+    type: "combobox"
+    var: "module"
+    options:
+      - 
+-
+    label: "Choose device"
+    name: "combobox_device"
+    tooltip: "Device name"
+    type: "combobox"
+    var: "device"
+    options:
+      - 
+-
+    label: "Buffer size"
+    name: "line_edit_buffer"
+    tooltip: "Buffer size, value is number of samples (8 seems to be the bare minimum)"
+    type: "line_edit"
+    var: "audio_buffer"
+-
+    type: text
+    label: DUMMY
+    name: text_version
+-
+    label: |
+      <small><b>Note:</b> Audio Low Latency Record Init item at the begin of the experiment is needed for initialisation of the audio device</small>
+    type: text

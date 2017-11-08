@@ -1,0 +1,46 @@
+description: Low Latency Audio - starts audio playback in the background.
+version: 2017.11-1
+author: "Bob Rosbag"
+url: "http://osdoc.cogsci.nl/"
+category: "Audio Low Latency Playback"
+date: "2017"
+controls:
+-
+    label: "Audio Filename"
+    name: "filepool_filename"
+    tooltip: "Give filename"
+    type: "filepool"
+    var: "filename"
+-
+    label: "Enable duration"
+    name: "checkbox_duration_check"
+    tooltip: "Enable duration?"
+    type: "checkbox"
+    var: "duration_check"
+-
+    label: "Duration (ms)"
+    name: "spinbox_duration"
+    tooltip: "Value in ms"
+    type: "spinbox"
+    min_val: 0
+    max_val: 1000000000
+    var: "duration"
+-
+    label: "Preload file to RAM?"
+    name: "checkbox_ram_cache"
+    tooltip: "RAM Cache"
+    type: "checkbox"
+    var: "ram_cache"
+-
+    label: |
+      <b>IMPORTANT:</b> this is a multithreaded background item, it will immediately advance to the next item, it will NOT wait for the playback to finish.
+    type: "text"
+-
+    label: |
+      <small><b>Note:</b> Audio Low Latency Play Init item at the begin of the experiment is needed for initialisation of the audio device</small>
+    type: text
+-
+    type: text
+    label: DUMMY
+    name: text_version
+
