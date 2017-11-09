@@ -88,7 +88,7 @@ class audio_low_latency_play_start(item):
 #        else:
 #            self.filename = self.var.filename
 #            print('pad')
-        self.filename = self.var.filename
+        self.filename = self.experiment.pool[self.var.filename]
         self.ram_cache = self.var.ram_cache
 
         self.experiment.audio_low_latency_play_continue = 1

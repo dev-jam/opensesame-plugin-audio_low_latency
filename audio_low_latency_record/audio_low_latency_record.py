@@ -82,15 +82,6 @@ class audio_low_latency_record(item):
             raise osexception(
                     u'Audio Low Latency Record Init item is missing')
 
-
-#        if self.var.filename in self.experiment.pool():
-#            self.filename = self.experiment.pool([self.var.filename])
-#            print('pool')
-#        else:
-#            self.filename = self.var.filename
-#            print('pad')
-
-
         self.filename = self.var.filename
         self.bitdepth = int(self.var.bitdepth)
         self.samplewidth = self.bitdepth / 8
