@@ -61,10 +61,10 @@ class audio_low_latency_record_start(item):
         # Set default experimental variables and values
         self.var.filename = u''
         self.var.duration_check = u'no'
-        self.var.duration = 0
+        self.var.duration = 1000
         self.var.bitdepth = str(16)
         self.var.samplerate = str(44100)
-        self.var.channels = str(2)
+        self.var.channels = str(1)
         self.var.ram_cache = u'yes'
 
     def init_var(self):

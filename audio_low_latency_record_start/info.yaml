@@ -12,6 +12,12 @@ controls:
     type: "filepool"
     var: "filename"
 -
+    label: "Enable duration"
+    name: "checkbox_duration_check"
+    tooltip: "Enable duration?"
+    type: "checkbox"
+    var: "duration_check"
+-
     label: "Duration (ms)"
     name: "spinbox_duration"
     tooltip: "Value in ms"

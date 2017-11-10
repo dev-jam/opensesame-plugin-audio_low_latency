@@ -60,10 +60,11 @@ class audio_low_latency_record(item):
 
         # Set default experimental variables and values
         self.var.filename = u''
+        self.var.duration_check = u'yes'
         self.var.duration = 1000
         self.var.bitdepth = str(16)
         self.var.samplerate = str(44100)
-        self.var.channels = str(2)
+        self.var.channels = str(1)
         self.var.ram_cache = u'yes'
 
     def init_var(self):
@@ -273,3 +274,41 @@ class qtaudio_low_latency_record(audio_low_latency_record, qtautoplugin):
         self.text_version.setText(
         u'<small>Audio Low Latency version %s</small>' % VERSION)
 
+    def apply_edit_changes(self):
+
+        """
+        desc:
+            Applies the controls.
+        """
+
+        if not qtautoplugin.apply_edit_changes(self) or self.lock:
+            return False
+        self.custom_interactions()
+
+    def edit_widget(self):
+
+        """
+        Refreshes the controls.
+
+        Returns:
+        The QWidget containing the controls
+        """
+
+        if self.lock:
+            return
+        self.lock = True
+        w = qtautoplugin.edit_widget(self)
+        self.custom_interactions()
+        self.lock = False
+        return w
+
+    def custom_interactions(self):
+
+        """
+        desc:
+            Activates the relevant controls for each tracker.
+        """
+        if self.var.duration_check == u'yes':
+            self.spinbox_duration.setEnabled(True)
+        elif self.var.duration_check == u'no':
+            self.spinbox_duration.setDisabled(True)
