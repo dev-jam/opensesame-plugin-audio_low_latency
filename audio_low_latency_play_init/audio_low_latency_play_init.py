@@ -29,6 +29,7 @@ from libopensesame import debug
 from libopensesame.item import item
 from libqtopensesame.items.qtautoplugin import qtautoplugin
 from libopensesame.exceptions import osexception
+import pygame
 
 VERSION = u'2017.11-1'
 
@@ -155,6 +156,10 @@ class audio_low_latency_play_init(item):
         self.init_var()
 
         if self.dummy_mode == u'no':
+
+            # disable the internal audio device / mixer
+            pygame.mixer.stop()
+            pygame.mixer.quit()
 
             if not hasattr(self.experiment, "audio_low_latency_play_device"):
                 if self.module == self.pyalsaaudio_module_name and self.pyalsaaudio_module_name in self.experiment.audio_low_latency_play_module_list:
