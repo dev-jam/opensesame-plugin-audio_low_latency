@@ -136,7 +136,7 @@ class audio_low_latency_record(item):
             if self.module == u'PyAlsaAudio (Low Latency)':
                 import alsaaudio
                 self.device.close()
-                self.device = alsaaudio.PCM(type=alsaaudio.PCM_RECORDING, device=self.device_name)
+                self.device = alsaaudio.PCM(type=alsaaudio.PCM_CAPTURE, device=self.device_name)
                 self.experiment.audio_low_latency_record_device = self.device
 
                 # 8bit is unsigned in wav files
