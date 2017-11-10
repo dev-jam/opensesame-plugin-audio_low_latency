@@ -155,6 +155,7 @@ class audio_low_latency_record_init(item):
         self.init_var()
 
         if self.dummy_mode == u'no':
+
             # disable the internal audio device / mixer
             pygame.mixer.stop()
             pygame.mixer.quit()
@@ -163,10 +164,12 @@ class audio_low_latency_record_init(item):
                 if self.module == self.pyalsaaudio_module_name and self.pyalsaaudio_module_name in self.experiment.audio_low_latency_record_module_list:
                     import alsaaudio
                     self.experiment.audio_low_latency_record_device_index = self.experiment.audio_low_latency_record_device_dict[self.pyalsaaudio_module_name].index(self.device)
+                    self.experiment.audio_low_latency_record_device_name = self.device
                     self.experiment.audio_low_latency_record_device = alsaaudio.PCM(type=alsaaudio.PCM_CAPTURE, device=self.device)
                 elif self.module == self.pyaudio_module_name and self.pyaudio_module_name in self.experiment.audio_low_latency_record_module_list:
                     import pyaudio
                     self.experiment.audio_low_latency_record_device_index = self.experiment.audio_low_latency_record_device_dict[self.pyaudio_module_name].index(self.device)
+                    self.experiment.audio_low_latency_record_device_name = self.device
                     self.experiment.audio_low_latency_record_device = pyaudio.PyAudio()
                 self.experiment.cleanup_functions.append(self.close)
                 self.python_workspace[u'audio_low_latency_record'] = self.experiment.audio_low_latency_record_device

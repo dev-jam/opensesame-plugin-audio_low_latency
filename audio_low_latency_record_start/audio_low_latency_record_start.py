@@ -77,6 +77,7 @@ class audio_low_latency_record_start(item):
             if self.dummy_mode == u'no':
                 self.module = self.experiment.audio_low_latency_record_module
                 self.device = self.experiment.audio_low_latency_record_device
+                self.device_name = self.experiment.audio_low_latency_record_device_name
                 self.device_index = self.experiment.audio_low_latency_record_device_index
                 self.audio_buffer = self.experiment.audio_low_latency_record_buffer
 
@@ -138,6 +139,9 @@ class audio_low_latency_record_start(item):
 
             if self.module == u'PyAlsaAudio (Low Latency)':
                 import alsaaudio
+                self.device.close()
+                self.device = alsaaudio.PCM(type=alsaaudio.PCM_RECORDING, device=self.device_name)
+                self.experiment.audio_low_latency_record_device = self.device
 
                 # 8bit is unsigned in wav files
                 if self.bitdepth == 8:
@@ -174,18 +178,24 @@ class audio_low_latency_record_start(item):
                 self.device.setchannels(self.channels)
                 self.device.setperiodsize(self.period_size)
                 self.audio_stream = self.device
+                self.experiment.audio_low_latency_record_stream = self.audio_stream
             elif self.module == u'PyAudio (Compatibility)':
                if self.bitdepth == 33:
                     raise osexception(
                         u'32bit not yet supported')
                else:
                     try:
+
+                        if hasattr(self.experiment, "audio_low_latency_record_stream"):
+                            self.experiment.audio_low_latency_record_stream.close()
+
                         self.audio_stream = self.device.open(format=self.device.get_format_from_width(self.samplewidth),
                                 channels=self.channels,
                                 rate=self.samplerate,
                                 input=True,
                                 frames_per_buffer=self.period_size,
                                 output_device_index=self.device_index)
+                        self.experiment.audio_low_latency_record_stream = self.audio_stream
                     except Exception as e:
                         raise osexception(
                             u'Could not start audio device', exception=e)
@@ -253,7 +263,8 @@ class audio_low_latency_record_start(item):
 
         if self.module == u'PyAudio (Compatibility)':
             stream.stop_stream()  # stop stream
-            stream.close()
+        
+        #stream.close()
         wav_file.close()
 
         self.show_message(u'Stopped recording audio')

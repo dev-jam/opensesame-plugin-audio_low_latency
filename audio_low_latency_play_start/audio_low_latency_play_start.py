@@ -75,19 +75,13 @@ class audio_low_latency_play_start(item):
             if self.dummy_mode == u'no':
                 self.module = self.experiment.audio_low_latency_play_module
                 self.device = self.experiment.audio_low_latency_play_device
+                self.device_name = self.experiment.audio_low_latency_play_device_name
                 self.device_index = self.experiment.audio_low_latency_play_device_index
                 self.audio_buffer = self.experiment.audio_low_latency_play_buffer
         else:
             raise osexception(
                     u'Audio Low Latency Play Init item is missing')
 
-
-#        if self.var.filename in self.experiment.pool():
-#            self.filename = self.experiment.pool([self.var.filename])
-#            print('pool')
-#        else:
-#            self.filename = self.var.filename
-#            print('pad')
         self.filename = self.experiment.pool[self.var.filename]
         self.ram_cache = self.var.ram_cache
 
@@ -135,7 +129,9 @@ class audio_low_latency_play_start(item):
 
             if self.module == u'PyAlsaAudio (Low Latency)':
                 import alsaaudio
-                # Set attributes
+                self.device.close()
+                self.device = alsaaudio.PCM(type=alsaaudio.PCM_PLAYBACK, device=self.device_name)
+                self.experiment.audio_low_latency_play_device = self.device
                 self.device.setchannels(self.wav_file.getnchannels())
                 self.device.setrate(self.wav_file.getframerate())
 
@@ -173,18 +169,24 @@ class audio_low_latency_play_start(item):
                 self.device.setrate(self.wav_file.getframerate())
                 self.device.setperiodsize(self.period_size)
                 self.audio_stream = self.device
+                self.experiment.audio_low_latency_play_stream = self.audio_stream
             elif self.module == u'PyAudio (Compatibility)':
                if self.wav_file.getsampwidth() == 4:
                     raise osexception(
                         u'32bit not yet supported')
                else:
                     try:
+                        
+                        if hasattr(self.experiment, "audio_low_latency_play_stream"):
+                            self.experiment.audio_low_latency_play_stream.close()
+
                         self.audio_stream = self.device.open(format=self.device.get_format_from_width(self.wav_file.getsampwidth()),
                                 channels=self.wav_file.getnchannels(),
                                 rate=self.wav_file.getframerate(),
                                 output=True,
                                 frames_per_buffer=self.period_size,
                                 output_device_index=self.device_index)
+                        self.experiment.audio_low_latency_play_stream = self.audio_stream
                     except Exception as e:
                         raise osexception(
                             u'Could not start audio device', exception=e)
@@ -245,9 +247,9 @@ class audio_low_latency_play_start(item):
 
         if self.module == u'PyAudio (Compatibility)':
             stream.stop_stream()  # stop stream
-            stream.close()
 
         wav_file.close()
+        #stream.close()
 
         self.show_message(u'Stopped audio')
         self.experiment.audio_low_latency_play_locked = 0
@@ -271,7 +273,8 @@ class audio_low_latency_play_start(item):
 
         if self.module == u'PyAudio (Compatibility)':
             stream.stop_stream()  # stop stream
-            stream.close()
+       
+        #stream.close()
 
         self.show_message(u'Stopped audio')
         self.experiment.audio_low_latency_play_locked = 0

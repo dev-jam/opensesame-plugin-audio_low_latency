@@ -31,6 +31,7 @@ from libopensesame.exceptions import osexception
 from openexp.keyboard import keyboard
 import time
 import wave
+import pygame
 #from libopensesame.file_pool_store import file_pool_store
 
 
@@ -73,6 +74,7 @@ class audio_low_latency_play(item):
             if self.dummy_mode == u'no':
                 self.module = self.experiment.audio_low_latency_play_module
                 self.device = self.experiment.audio_low_latency_play_device
+                self.device_name = self.experiment.audio_low_latency_play_device_name
                 self.device_index = self.experiment.audio_low_latency_play_device_index
                 self.audio_buffer = self.experiment.audio_low_latency_play_buffer
         else:
@@ -80,7 +82,6 @@ class audio_low_latency_play(item):
                     u'Audio Low Latency Play Init item is missing')
 
         self.filename = self.experiment.pool[self.var.filename]
-        #self.filename = self.var.filename
         self.ram_cache = self.var.ram_cache
 
 
@@ -124,7 +125,9 @@ class audio_low_latency_play(item):
 
             if self.module == u'PyAlsaAudio (Low Latency)':
                 import alsaaudio
-                # Set attributes
+                self.device.close()
+                self.device = alsaaudio.PCM(type=alsaaudio.PCM_PLAYBACK, device=self.device_name)
+                self.experiment.audio_low_latency_play_device = self.device
                 self.device.setchannels(self.wav_file.getnchannels())
                 self.device.setrate(self.wav_file.getframerate())
 
@@ -162,27 +165,33 @@ class audio_low_latency_play(item):
                 self.device.setrate(self.wav_file.getframerate())
                 self.device.setperiodsize(self.period_size)
                 self.audio_stream = self.device
+                self.experiment.audio_low_latency_play_stream = self.audio_stream
             elif self.module == u'PyAudio (Compatibility)':
                if self.wav_file.getsampwidth() == 4:
                     raise osexception(
                         u'32bit not yet supported')
                else:
                     try:
+                        
+                        if hasattr(self.experiment, "audio_low_latency_play_stream"):
+                            self.experiment.audio_low_latency_play_stream.close()
+
                         self.audio_stream = self.device.open(format=self.device.get_format_from_width(self.wav_file.getsampwidth()),
                                 channels=self.wav_file.getnchannels(),
                                 rate=self.wav_file.getframerate(),
                                 output=True,
                                 frames_per_buffer=self.period_size,
                                 output_device_index=self.device_index)
+                        self.experiment.audio_low_latency_play_stream = self.audio_stream
                     except Exception as e:
                         raise osexception(
                             u'Could not start audio device', exception=e)
-
 
             if self.ram_cache == u'yes':
                 wav_file_nframes = self.wav_file.getnframes()
                 self.wav_file_data = self.wav_file.readframes(wav_file_nframes)
                 self.wav_file.close()
+
 
     def run(self):
 
@@ -227,7 +236,8 @@ class audio_low_latency_play(item):
 
         if self.module == u'PyAudio (Compatibility)':
             stream.stop_stream()  # stop stream
-            stream.close()
+        
+        #stream.close()
         wav_file.close()
 
         self.show_message(u'Stopped audio')
@@ -244,13 +254,12 @@ class audio_low_latency_play(item):
             if self.duration_check == u'yes':
                 time_passed = (time.time() - start_time) * 1000
                 if time_passed >= self.duration:
-                    print('yes')
                     break
 
         if self.module == u'PyAudio (Compatibility)':
             stream.stop_stream()  # stop stream
-            stream.close()
-
+        
+        #stream.close()
         self.show_message(u'Stopped audio')
 
 

@@ -165,10 +165,12 @@ class audio_low_latency_play_init(item):
                 if self.module == self.pyalsaaudio_module_name and self.pyalsaaudio_module_name in self.experiment.audio_low_latency_play_module_list:
                     import alsaaudio
                     self.experiment.audio_low_latency_play_device_index = self.experiment.audio_low_latency_play_device_dict[self.pyalsaaudio_module_name].index(self.device)
+                    self.experiment.audio_low_latency_play_device_name = self.device
                     self.experiment.audio_low_latency_play_device = alsaaudio.PCM(type=alsaaudio.PCM_PLAYBACK, device=self.device)
                 elif self.module == self.pyaudio_module_name and self.pyaudio_module_name in self.experiment.audio_low_latency_play_module_list:
                     import pyaudio
                     self.experiment.audio_low_latency_play_device_index = self.experiment.audio_low_latency_play_device_dict[self.pyaudio_module_name].index(self.device)
+                    self.experiment.audio_low_latency_play_device_name = self.device
                     self.experiment.audio_low_latency_play_device = pyaudio.PyAudio()
                 self.experiment.cleanup_functions.append(self.close)
                 self.python_workspace[u'audio_low_latency_play'] = self.experiment.audio_low_latency_play_device
