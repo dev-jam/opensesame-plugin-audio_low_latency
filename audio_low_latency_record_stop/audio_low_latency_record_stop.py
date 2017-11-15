@@ -29,7 +29,7 @@ from libopensesame.item import item
 from libqtopensesame.items.qtautoplugin import qtautoplugin
 from libopensesame.exceptions import osexception
 from openexp.keyboard import keyboard
-import time
+
 
 VERSION = u'2017.11-1'
 
@@ -47,7 +47,7 @@ class audio_low_latency_record_stop(item):
 
         item.__init__(self, name, experiment, string)
         self.verbose = u'no'
-        self.poll_time = 0.1
+        self.poll_time = 100
 
 
     def reset(self):
@@ -93,14 +93,13 @@ class audio_low_latency_record_stop(item):
             raise osexception(
                     u'Audio Low Latency Record Start item is missing')
 
-        from time import sleep
         self.set_item_onset()
 
         if self.dummy_mode == u'no':
 
             ## wait if thread has not started yet
             while not self.experiment.audio_low_latency_record_thread_running:
-                time.sleep(self.poll_time)
+                self.clock.sleep(self.poll_time)
 
             ## send stop signal to thread
             self.show_message(u'Sending stop signal')

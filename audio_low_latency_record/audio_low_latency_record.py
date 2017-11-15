@@ -29,7 +29,6 @@ from libopensesame.item import item
 from libqtopensesame.items.qtautoplugin import qtautoplugin
 from libopensesame.exceptions import osexception
 from openexp.keyboard import keyboard
-import time
 import wave
 import pygame
 #from libopensesame.file_pool_store import file_pool_store
@@ -51,7 +50,7 @@ class audio_low_latency_record(item):
 
         item.__init__(self, name, experiment, string)
         self.verbose = u'no'
-        self.poll_time = 0.01
+        self.poll_time = 10
 
 
     def reset(self):
@@ -126,8 +125,8 @@ class audio_low_latency_record(item):
             self.show_message(u'Channels: ' + str(self.channels))
             self.show_message(u'Buffer: ' + str(self.audio_buffer_time)+'ms')
 
-            frame_size = self.samplerate * 8 * self.channels
-            self.period_size = self.audio_buffer #* frame_size
+            self.frame_size = self.samplerate * 8 * self.channels
+            self.period_size = self.audio_buffer
 
             self.wav_file.setsampwidth(self.samplewidth)
             self.wav_file.setframerate(self.samplerate)
@@ -209,7 +208,7 @@ class audio_low_latency_record(item):
 
         if self.dummy_mode == u'no':
             while self.experiment.audio_low_latency_record_locked:
-                time.sleep(self.poll_time)
+                self.clock.sleep(self.poll_time)
 
             self.show_message(u'Starting recording audio')
 
@@ -223,11 +222,11 @@ class audio_low_latency_record(item):
 
     def record(self, stream, wav_file, chunk):
 
-        start_time = time.time()
+        start_time = self.clock.time()
         frames = []
         self.experiment.var.audio_low_latency_record = self.clock.time()
 
-        while self.duration >= (time.time() - start_time) * 1000:
+        while self.duration >= (self.clock.time() - start_time) * 1000:
             # Read data from stdin
             if self.module == u'PyAlsaAudio (Low Latency)':
                 l, data = stream.read()

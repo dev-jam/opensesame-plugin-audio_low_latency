@@ -47,7 +47,7 @@ class audio_low_latency_play_wait(item):
 
         item.__init__(self, name, experiment, string)
         self.verbose = u'no'
-        self.poll_time = 0.1
+        self.poll_time = 100
 
 
     def reset(self):
@@ -94,7 +94,7 @@ class audio_low_latency_play_wait(item):
 
             ## wait if thread has not started yet
             while not self.experiment.audio_low_latency_play_thread_running:
-                time.sleep(self.poll_time)
+                self.clock.sleep(self.poll_time)
 
             ## join thread if thread is still running
             if self.experiment.audio_low_latency_play_locked:

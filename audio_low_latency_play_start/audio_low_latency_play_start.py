@@ -30,9 +30,7 @@ from libqtopensesame.items.qtautoplugin import qtautoplugin
 from libopensesame.exceptions import osexception
 from openexp.keyboard import keyboard
 import threading
-import time
 import wave
-#from libopensesame.file_pool_store import file_pool_store
 
 
 VERSION = u'2017.11-1'
@@ -51,7 +49,7 @@ class audio_low_latency_play_start(item):
 
         item.__init__(self, name, experiment, string)
         self.verbose = u'no'
-        self.poll_time = 0.01
+        self.poll_time = 10
 
 
     def reset(self):
@@ -212,7 +210,7 @@ class audio_low_latency_play_start(item):
 
         if self.dummy_mode == u'no':
             while self.experiment.audio_low_latency_play_locked:
-                time.sleep(self.poll_time)
+                self.clock.sleep(self.poll_time)
 
             self.show_message(u'Starting audio')
             self.experiment.audio_low_latency_play_locked = 1
@@ -233,7 +231,7 @@ class audio_low_latency_play_start(item):
         self.experiment.audio_low_latency_play_thread_running = 1
         data = wav_file.readframes(chunk)
         self.experiment.var.audio_low_latency_play_start_onset = self.clock.time()
-        start_time = time.time()
+        start_time = self.clock.time()
 
         while len(data) > 0 and self.experiment.audio_low_latency_play_continue:
             # Read data from stdin
@@ -241,7 +239,7 @@ class audio_low_latency_play_start(item):
             data = wav_file.readframes(chunk)
 
             if self.duration_check == u'yes':
-                time_passed = (time.time() - start_time) * 1000
+                time_passed = (self.clock.time() - start_time) * 1000
                 if time_passed >= self.duration:
                     break
 
@@ -259,7 +257,7 @@ class audio_low_latency_play_start(item):
 
         self.experiment.audio_low_latency_play_thread_running = 1
         self.experiment.var.audio_low_latency_play_start_onset = self.clock.time()
-        start_time = time.time()
+        start_time = self.clock.time()
 
         for start in range(0,len(wav_data),chunk):
             stream.write(wav_data[start:start+chunk])
@@ -267,7 +265,7 @@ class audio_low_latency_play_start(item):
             if self.experiment.audio_low_latency_play_continue == 0:
                 break
             elif self.duration_check == u'yes':
-                time_passed = (time.time() - start_time) * 1000
+                time_passed = (self.clock.time() - start_time) * 1000
                 if time_passed >= self.duration:
                     break
 

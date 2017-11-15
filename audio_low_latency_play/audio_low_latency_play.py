@@ -29,10 +29,7 @@ from libopensesame.item import item
 from libqtopensesame.items.qtautoplugin import qtautoplugin
 from libopensesame.exceptions import osexception
 from openexp.keyboard import keyboard
-import time
 import wave
-import pygame
-#from libopensesame.file_pool_store import file_pool_store
 
 
 VERSION = u'2017.11-1'
@@ -51,6 +48,7 @@ class audio_low_latency_play(item):
 
         item.__init__(self, name, experiment, string)
         self.verbose = u'no'
+        self.poll_time = 10
 
 
     def reset(self):
@@ -207,6 +205,9 @@ class audio_low_latency_play(item):
                     u'Audio Low Latency Play Stop or Audio Low Latency Play Wait item is missing')
 
         if self.dummy_mode == u'no':
+            while self.experiment.audio_low_latency_play_locked:
+                self.clock.sleep(self.poll_time)
+            
             self.show_message(u'Starting audio')
             if self.ram_cache == u'No':
                 self.play_file(self.audio_stream, self.wav_file, self.period_size)
@@ -222,7 +223,7 @@ class audio_low_latency_play(item):
 
         data = wav_file.readframes(chunk)
         self.experiment.var.audio_low_latency_play_onset = self.clock.time()
-        start_time = time.time()
+        start_time = self.clock.time()
 
         while len(data) > 0:
             # Read data from stdin
@@ -230,7 +231,7 @@ class audio_low_latency_play(item):
             data = wav_file.readframes(chunk)
 
             if self.duration_check == u'yes':
-                time_passed = (time.time() - start_time) * 1000
+                time_passed = (self.clock.time() - start_time) * 1000
                 if time_passed >= self.duration:
                     break
 
@@ -246,13 +247,13 @@ class audio_low_latency_play(item):
     def play_data(self, stream, wav_data, chunk):
 
         self.experiment.var.audio_low_latency_play_onset = self.clock.time()
-        start_time = time.time()
+        start_time = self.clock.time()
 
         for start in range(0,len(wav_data),chunk):
             stream.write(wav_data[start:start+chunk])
 
             if self.duration_check == u'yes':
-                time_passed = (time.time() - start_time) * 1000
+                time_passed = (self.clock.time() - start_time) * 1000
                 if time_passed >= self.duration:
                     break
 

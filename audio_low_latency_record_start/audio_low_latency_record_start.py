@@ -30,9 +30,7 @@ from libqtopensesame.items.qtautoplugin import qtautoplugin
 from libopensesame.exceptions import osexception
 from openexp.keyboard import keyboard
 import threading
-import time
 import wave
-#from libopensesame.file_pool_store import file_pool_store
 
 
 VERSION = u'2017.11-1'
@@ -51,7 +49,7 @@ class audio_low_latency_record_start(item):
 
         item.__init__(self, name, experiment, string)
         self.verbose = u'no'
-        self.poll_time = 0.01
+        self.poll_time = 10
 
 
     def reset(self):
@@ -129,8 +127,8 @@ class audio_low_latency_record_start(item):
             self.show_message(u'Channels: ' + str(self.channels))
             self.show_message(u'Buffer: ' + str(self.audio_buffer_time)+'ms')
 
-            frame_size = self.samplerate * 8 * self.channels
-            self.period_size = self.audio_buffer #* frame_size
+            self.frame_size = self.samplerate * 8 * self.channels
+            self.period_size = self.audio_buffer
 
             self.wav_file.setsampwidth(self.samplewidth)
             self.wav_file.setframerate(self.samplerate)
@@ -215,10 +213,7 @@ class audio_low_latency_record_start(item):
 
         if self.dummy_mode == u'no':
             while self.experiment.audio_low_latency_record_locked:
-                time.sleep(self.poll_time)
-
-#            from threading import Event
-#            self.experiment.ready = Event()
+                self.clock.sleep(self.poll_time)
 
             self.show_message(u'Starting recording audio')
             self.experiment.audio_low_latency_record_locked = 1
@@ -235,7 +230,7 @@ class audio_low_latency_record_start(item):
         self.experiment.audio_low_latency_record_thread_running = 1
         frames = []
         self.experiment.var.audio_low_latency_record_start = self.clock.time()
-        start_time = time.time()
+        start_time = self.clock.time()
 
         while self.experiment.audio_low_latency_record_continue:
 
@@ -253,7 +248,7 @@ class audio_low_latency_record_start(item):
 
             # check for stop
             if self.duration_check == u'yes':
-                time_passed = (time.time() - start_time) * 1000
+                time_passed = (self.clock.time() - start_time) * 1000
                 if time_passed >= self.duration:
                     break
 
