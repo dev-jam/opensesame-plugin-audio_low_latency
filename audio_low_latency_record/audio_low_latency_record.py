@@ -199,7 +199,12 @@ class audio_low_latency_record(item):
 
         """Run phase"""
 
-        self.duration = self.var.duration
+
+        if isinstance(self.var.duration,int):
+            self.duration = int(self.var.duration)
+        else:
+            raise osexception(u'Duration should be a integer')
+
         self.set_item_onset()
 
         if not (hasattr(self.experiment, "audio_low_latency_record_stop") or hasattr(self.experiment, "audio_low_latency_record_wait")):
@@ -308,6 +313,6 @@ class qtaudio_low_latency_record(audio_low_latency_record, qtautoplugin):
             Activates the relevant controls for each tracker.
         """
         if self.var.duration_check == u'yes':
-            self.spinbox_duration.setEnabled(True)
+            self.line_edit_duration.setEnabled(True)
         elif self.var.duration_check == u'no':
-            self.spinbox_duration.setDisabled(True)
+            self.line_edit_duration.setDisabled(True)

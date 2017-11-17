@@ -202,8 +202,13 @@ class audio_low_latency_record_start(item):
 
         """Run phase"""
 
-        self.duration = self.var.duration
         self.duration_check  = self.var.duration_check
+
+        if self.duration_check == u'yes' :
+            if isinstance(self.var.duration,int):
+                self.duration = int(self.var.duration)
+            else:
+                raise osexception(u'Duration should be a integer')
 
         self.set_item_onset()
 
@@ -228,7 +233,9 @@ class audio_low_latency_record_start(item):
     def record(self, stream, wav_file, chunk):
 
         self.experiment.audio_low_latency_record_thread_running = 1
+
         frames = []
+
         self.experiment.var.audio_low_latency_record_start = self.clock.time()
         start_time = self.clock.time()
 
@@ -249,8 +256,9 @@ class audio_low_latency_record_start(item):
             # check for stop
             if self.experiment.audio_low_latency_record_continue == 0:
                 break
-            elif self.duration_check == u'yes' and self.clock.time() - start_time >= self.duration:
-                break
+            elif self.duration_check == u'yes':
+                if self.clock.time() - start_time >= self.duration:
+                    break
 
         if self.ram_cache == u'yes':
             wav_file.writeframes(b''.join(frames))
@@ -321,6 +329,6 @@ class qtaudio_low_latency_record_start(audio_low_latency_record_start, qtautoplu
             Activates the relevant controls for each tracker.
         """
         if self.var.duration_check == u'yes':
-            self.spinbox_duration.setEnabled(True)
+            self.line_edit_duration.setEnabled(True)
         elif self.var.duration_check == u'no':
-            self.spinbox_duration.setDisabled(True)
+            self.line_edit_duration.setDisabled(True)

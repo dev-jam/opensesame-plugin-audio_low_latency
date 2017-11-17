@@ -34,7 +34,7 @@ controls:
     options:
       - 
 -
-    label: "Buffer size"
+    label: "Buffer size (frames)"
     name: "line_edit_buffer"
     tooltip: "Buffer size, value is number of samples (8 seems to be the bare minimum)"
     type: "line_edit"
