@@ -232,7 +232,7 @@ class audio_low_latency_record_start(item):
         self.experiment.var.audio_low_latency_record_start = self.clock.time()
         start_time = self.clock.time()
 
-        while self.experiment.audio_low_latency_record_continue:
+        while True:
 
             # Read data from device
             if self.module == u'PyAlsaAudio (Low Latency)':
@@ -247,18 +247,17 @@ class audio_low_latency_record_start(item):
                 wav_file.writeframes(data)
 
             # check for stop
-            if self.duration_check == u'yes':
-                time_passed = (self.clock.time() - start_time) * 1000
-                if time_passed >= self.duration:
-                    break
+            if self.experiment.audio_low_latency_record_continue == 0:
+                break
+            elif self.duration_check == u'yes' and self.clock.time() - start_time >= self.duration:
+                break
 
         if self.ram_cache == u'yes':
             wav_file.writeframes(b''.join(frames))
 
         if self.module == u'PyAudio (Compatibility)':
             stream.stop_stream()  # stop stream
-        
-        #stream.close()
+
         wav_file.close()
 
         self.show_message(u'Stopped recording audio')

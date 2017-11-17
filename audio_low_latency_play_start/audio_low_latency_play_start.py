@@ -174,7 +174,7 @@ class audio_low_latency_play_start(item):
                         u'32bit not yet supported')
                else:
                     try:
-                        
+
                         if hasattr(self.experiment, "audio_low_latency_play_stream"):
                             self.experiment.audio_low_latency_play_stream.close()
 
@@ -229,25 +229,26 @@ class audio_low_latency_play_start(item):
     def play_file(self, stream, wav_file, chunk):
 
         self.experiment.audio_low_latency_play_thread_running = 1
+
         data = wav_file.readframes(chunk)
+
         self.experiment.var.audio_low_latency_play_start_onset = self.clock.time()
         start_time = self.clock.time()
 
-        while len(data) > 0 and self.experiment.audio_low_latency_play_continue:
+        while len(data) > 0:
             # Read data from stdin
             stream.write(data)
             data = wav_file.readframes(chunk)
 
-            if self.duration_check == u'yes':
-                time_passed = (self.clock.time() - start_time) * 1000
-                if time_passed >= self.duration:
-                    break
+            if self.experiment.audio_low_latency_play_continue == 0:
+                break
+            elif self.duration_check == u'yes' and self.clock.time() - start_time >= self.duration:
+                break
 
         if self.module == u'PyAudio (Compatibility)':
             stream.stop_stream()  # stop stream
 
         wav_file.close()
-        #stream.close()
 
         self.show_message(u'Stopped audio')
         self.experiment.audio_low_latency_play_locked = 0
@@ -256,6 +257,7 @@ class audio_low_latency_play_start(item):
     def play_data(self, stream, wav_data, chunk):
 
         self.experiment.audio_low_latency_play_thread_running = 1
+
         self.experiment.var.audio_low_latency_play_start_onset = self.clock.time()
         start_time = self.clock.time()
 
@@ -264,15 +266,11 @@ class audio_low_latency_play_start(item):
 
             if self.experiment.audio_low_latency_play_continue == 0:
                 break
-            elif self.duration_check == u'yes':
-                time_passed = (self.clock.time() - start_time) * 1000
-                if time_passed >= self.duration:
-                    break
+            elif self.duration_check == u'yes' and self.clock.time() - start_time >= self.duration:
+                break
 
         if self.module == u'PyAudio (Compatibility)':
             stream.stop_stream()  # stop stream
-       
-        #stream.close()
 
         self.show_message(u'Stopped audio')
         self.experiment.audio_low_latency_play_locked = 0

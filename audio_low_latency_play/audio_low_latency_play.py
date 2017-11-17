@@ -222,6 +222,7 @@ class audio_low_latency_play(item):
     def play_file(self, stream, wav_file, chunk):
 
         data = wav_file.readframes(chunk)
+
         self.experiment.var.audio_low_latency_play_onset = self.clock.time()
         start_time = self.clock.time()
 
@@ -230,15 +231,12 @@ class audio_low_latency_play(item):
             stream.write(data)
             data = wav_file.readframes(chunk)
 
-            if self.duration_check == u'yes':
-                time_passed = (self.clock.time() - start_time) * 1000
-                if time_passed >= self.duration:
-                    break
+            if self.duration_check == u'yes' and self.clock.time() - start_time >= self.duration:
+                break
 
         if self.module == u'PyAudio (Compatibility)':
             stream.stop_stream()  # stop stream
         
-        #stream.close()
         wav_file.close()
 
         self.show_message(u'Stopped audio')
@@ -252,15 +250,12 @@ class audio_low_latency_play(item):
         for start in range(0,len(wav_data),chunk):
             stream.write(wav_data[start:start+chunk])
 
-            if self.duration_check == u'yes':
-                time_passed = (self.clock.time() - start_time) * 1000
-                if time_passed >= self.duration:
-                    break
+            if self.duration_check == u'yes' and self.clock.time() - start_time >= self.duration:
+                break
 
         if self.module == u'PyAudio (Compatibility)':
             stream.stop_stream()  # stop stream
         
-        #stream.close()
         self.show_message(u'Stopped audio')
 
 
