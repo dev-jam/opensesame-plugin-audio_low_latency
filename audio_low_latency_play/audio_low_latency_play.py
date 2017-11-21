@@ -214,10 +214,13 @@ class audio_low_latency_play(item):
                 self.clock.sleep(self.poll_time)
 
             self.show_message(u'Starting audio')
+
             if self.ram_cache == u'No':
                 self.play_file(self.audio_stream, self.wav_file, self.period_size)
             elif self.ram_cache == u'yes':
                 self.play_data(self.audio_stream, self.wav_file_data, self.data_size)
+
+
         elif self.dummy_mode == u'yes':
             self.show_message(u'Dummy mode enabled, NOT playing audio')
         else:

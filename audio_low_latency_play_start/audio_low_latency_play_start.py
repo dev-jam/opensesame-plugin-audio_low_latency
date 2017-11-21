@@ -219,10 +219,13 @@ class audio_low_latency_play_start(item):
 
             self.show_message(u'Starting audio')
             self.experiment.audio_low_latency_play_locked = 1
+            
+
             if self.ram_cache == u'no':
                 self.experiment.audio_low_latency_play_thread = threading.Thread(target=self.play_file, args=(self.audio_stream, self.wav_file, self.period_size))
             elif self.ram_cache == u'yes':
                 self.experiment.audio_low_latency_play_thread = threading.Thread(target=self.play_data, args=(self.audio_stream, self.wav_file_data, self.data_size))
+
             self.experiment.audio_low_latency_play_thread.start()
 
         elif self.dummy_mode == u'yes':
