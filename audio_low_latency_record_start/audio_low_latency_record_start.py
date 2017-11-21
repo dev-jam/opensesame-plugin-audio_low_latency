@@ -134,7 +134,7 @@ class audio_low_latency_record_start(item):
             self.wav_file.setframerate(self.samplerate)
             self.wav_file.setnchannels(self.channels)
 
-            if self.module == u'PyAlsaAudio (Low Latency)':
+            if self.module == self.experiment.pyalsaaudio_module_name:
                 import alsaaudio
                 self.device.close()
                 self.device = alsaaudio.PCM(type=alsaaudio.PCM_CAPTURE, device=self.device_name)
@@ -176,7 +176,7 @@ class audio_low_latency_record_start(item):
                 self.device.setperiodsize(self.period_size)
                 self.audio_stream = self.device
                 self.experiment.audio_low_latency_record_stream = self.audio_stream
-            elif self.module == u'PyAudio (Compatibility)':
+            elif self.module == self.experiment.pyaudio_module_name:
                if self.bitdepth == 33:
                     raise osexception(
                         u'32bit not yet supported')
@@ -242,9 +242,9 @@ class audio_low_latency_record_start(item):
         while True:
 
             # Read data from device
-            if self.module == u'PyAlsaAudio (Low Latency)':
+            if self.module == self.experiment.pyalsaaudio_module_name:
                 l, data = stream.read()
-            elif  self.module == u'PyAudio (Compatibility)':
+            elif  self.module == self.experiment.pyaudio_module_name:
                 data = stream.read(chunk)
 
             # save data to file/ram
@@ -263,7 +263,7 @@ class audio_low_latency_record_start(item):
         if self.ram_cache == u'yes':
             wav_file.writeframes(b''.join(frames))
 
-        if self.module == u'PyAudio (Compatibility)':
+        if self.module == self.experiment.pyaudio_module_name:
             stream.stop_stream()  # stop stream
 
         wav_file.close()

@@ -125,7 +125,7 @@ class audio_low_latency_play_start(item):
             self.period_size = self.audio_buffer #* frame_size
             self.data_size = self.frame_size * self.period_size
 
-            if self.module == u'PyAlsaAudio (Low Latency)':
+            if self.module == self.experiment.pyalsaaudio_module_name:
                 import alsaaudio
                 self.device.close()
                 self.device = alsaaudio.PCM(type=alsaaudio.PCM_PLAYBACK, device=self.device_name)
@@ -168,7 +168,7 @@ class audio_low_latency_play_start(item):
                 self.device.setperiodsize(self.period_size)
                 self.audio_stream = self.device
                 self.experiment.audio_low_latency_play_stream = self.audio_stream
-            elif self.module == u'PyAudio (Compatibility)':
+            elif self.module == self.experiment.pyaudio_module_name:
                if self.wav_file.getsampwidth() == 4:
                     raise osexception(
                         u'32bit not yet supported')
@@ -251,7 +251,7 @@ class audio_low_latency_play_start(item):
                 if self.clock.time() - start_time >= self.duration:
                     break
 
-        if self.module == u'PyAudio (Compatibility)':
+        if self.module == self.experiment.pyaudio_module_name:
             stream.stop_stream()  # stop stream
 
         wav_file.close()
@@ -276,7 +276,7 @@ class audio_low_latency_play_start(item):
                 if self.clock.time() - start_time >= self.duration:
                     break
 
-        if self.module == u'PyAudio (Compatibility)':
+        if self.module == self.experiment.pyaudio_module_name:
             stream.stop_stream()  # stop stream
 
         self.show_message(u'Stopped audio')
