@@ -24,6 +24,8 @@ The plug-in has an *init* item which should be placed at the beginning of an exp
 Audio Low Latency Play Start options:
 
 - *Audio Filename* path to the audio file.
+- *Duration* in ms or string 'sound'.
+- *Delay* in ms.
 - *Preload file to RAM* file will be preloaded to RAM in the prepare phase.
 
 

@@ -24,7 +24,8 @@ The plug-in has an *init* item which should be placed at the beginning of an exp
 Audio Low Latency Record Start options:
 
 - *Audio Filename* path to the audio file.
-- *Duration* in ms, or infinite.
+- *Duration* in ms, or string 'infinite'.
+- *Delay* in ms.
 - *Bit depth* number of bits per sample.
 - *Sample Rate* number of samples/second.
 - *Channels* number of channels.

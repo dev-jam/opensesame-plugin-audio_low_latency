@@ -12,17 +12,17 @@ controls:
     type: "filepool"
     var: "filename"
 -
-    label: "Enable duration"
-    name: "checkbox_duration_check"
-    tooltip: "Enable duration?"
-    type: "checkbox"
-    var: "duration_check"
--
     label: "Duration (ms)"
     name: "line_edit_duration"
     tooltip: "Value in ms"
     type: "line_edit"
     var: "duration"
+-
+    label: "Delay (ms)"
+    name: "line_edit_delay"
+    tooltip: "Value in ms"
+    type: "line_edit"
+    var: "delay"
 -
     label: "Bit Depth"
     name: "combobox_bitdepth"

@@ -101,8 +101,6 @@ class audio_low_latency_record_init(item):
 
         if self.pyalsaaudio_module_name in self.experiment.audio_low_latency_record_module_list:
             self.var.module = self.pyalsaaudio_module_name
-
-            #self.var.device = self.experiment.device_dict[u'PyAlsaAudio (Low Latency)']
         elif self.pyaudio_module_name in self.experiment.audio_low_latency_record_module_list:
             self.var.module = self.pyaudio_module_name
 
@@ -211,10 +209,10 @@ class audio_low_latency_record_init(item):
                 return
         try:
             self.show_message(u"Closing audio device")
-            self.experiment.audio_low_latency_play_device.close()
+            self.experiment.audio_low_latency_record_device.close()
             if  self.module == self.experiment.pyaudio_module_name:
-                self.experiment.audio_low_latency_play_device.terminate()
-            self.experiment.audio_low_latency_play_device = None
+                self.experiment.audio_low_latency_record_device.terminate()
+            self.experiment.audio_low_latency_record_device = None
             self.show_message(u"Audio device closed")
         except:
             self.show_message(u"failed to close Audio Device")

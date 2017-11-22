@@ -49,7 +49,7 @@ class audio_low_latency_play_start(item):
 
         item.__init__(self, name, experiment, string)
         self.verbose = u'no'
-        self.poll_time = 10
+        self.poll_time = 1
 
 
     def reset(self):
@@ -58,8 +58,8 @@ class audio_low_latency_play_start(item):
 
         # Set default experimental variables and values
         self.var.filename = u''
-        self.var.duration_check = u'no'
-        self.var.duration = 0
+        self.var.duration = u'sound'
+        self.var.delay = 0
         self.var.ram_cache = u'yes'
 
 
@@ -199,46 +199,79 @@ class audio_low_latency_play_start(item):
 
         """Run phase"""
 
-        self.duration_check  = self.var.duration_check
-
-        if self.duration_check == u'yes' :
-            if isinstance(self.var.duration,int):
-                self.duration = int(self.var.duration)
-            else:
-                raise osexception(u'Duration should be a integer')
-
-        self.set_item_onset()
-
         if not (hasattr(self.experiment, "audio_low_latency_play_stop") or hasattr(self.experiment, "audio_low_latency_play_wait")):
             raise osexception(
                     u'Audio Low Latency Play Stop or Audio Low Latency Play Wait item is missing')
+
+        start_time = self.clock.time()
+
+        error_msg = u'Duration must be a string named sound or a an integer greater than 1'
+
+        if isinstance(self.var.duration,str):
+            if self.var.duration == u'sound':
+                self.duration_check = False
+                self.duration = self.var.duration
+            else:
+                raise osexception(error_msg)
+        elif isinstance(self.var.duration,int):
+            if self.var.duration >= 1:
+                self.duration_check = True
+                self.duration = int(self.var.duration)
+            else:
+                raise osexception(error_msg)
+        else:
+            raise osexception(error_msg)
+
+        if isinstance(self.var.delay,int):
+            if self.var.delay >= 0:
+                self.delay = int(self.var.delay)
+                if self.delay > 0:
+                    self.delay_check = True
+                else:
+                    self.delay_check = False
+            else:
+                raise osexception(u'Delay can not be negative')
+        else:
+            raise osexception(u'Delay should be a integer')
+
+        self.set_item_onset()
 
         if self.dummy_mode == u'no':
             while self.experiment.audio_low_latency_play_locked:
                 self.clock.sleep(self.poll_time)
 
+            if self.delay_check:
+                time_passed = self.clock.time() - start_time
+                delay = self.delay - time_passed
+            else:
+                delay = self.delay
+
+
             self.show_message(u'Starting audio')
             self.experiment.audio_low_latency_play_locked = 1
-            
 
             if self.ram_cache == u'no':
-                self.experiment.audio_low_latency_play_thread = threading.Thread(target=self.play_file, args=(self.audio_stream, self.wav_file, self.period_size))
+                self.experiment.audio_low_latency_play_thread = threading.Thread(target=self.play_file, args=(self.audio_stream, self.wav_file, self.period_size, delay))
             elif self.ram_cache == u'yes':
-                self.experiment.audio_low_latency_play_thread = threading.Thread(target=self.play_data, args=(self.audio_stream, self.wav_file_data, self.data_size))
+                self.experiment.audio_low_latency_play_thread = threading.Thread(target=self.play_data, args=(self.audio_stream, self.wav_file_data, self.data_size, delay))
 
             self.experiment.audio_low_latency_play_thread.start()
 
         elif self.dummy_mode == u'yes':
             self.show_message(u'Dummy mode enabled, NOT playing audio')
         else:
-            self.show_message(u'Error with dummy mode!')
+            raise osexception(u'Error with dummy mode!')
 
 
-    def play_file(self, stream, wav_file, chunk):
+    def play_file(self, stream, wav_file, chunk, delay):
 
         self.experiment.audio_low_latency_play_thread_running = 1
 
         data = wav_file.readframes(chunk)
+
+        if self.delay_check:
+            if delay >= 1:
+                self.clock.sleep(delay)
 
         self.experiment.var.audio_low_latency_play_start_onset = self.clock.time()
         start_time = self.clock.time()
@@ -250,7 +283,7 @@ class audio_low_latency_play_start(item):
 
             if self.experiment.audio_low_latency_play_continue == 0:
                 break
-            elif self.duration_check == u'yes':
+            elif self.duration_check:
                 if self.clock.time() - start_time >= self.duration:
                     break
 
@@ -263,9 +296,13 @@ class audio_low_latency_play_start(item):
         self.experiment.audio_low_latency_play_locked = 0
 
 
-    def play_data(self, stream, wav_data, chunk):
+    def play_data(self, stream, wav_data, chunk, delay):
 
         self.experiment.audio_low_latency_play_thread_running = 1
+
+        if self.delay_check:
+            if delay >= 1:
+                self.clock.sleep(delay)
 
         self.experiment.var.audio_low_latency_play_start_onset = self.clock.time()
         start_time = self.clock.time()
@@ -307,42 +344,3 @@ class qtaudio_low_latency_play_start(audio_low_latency_play_start, qtautoplugin)
         qtautoplugin.__init__(self, __file__)
         self.text_version.setText(
         u'<small>Audio Low Latency version %s</small>' % VERSION)
-
-    def apply_edit_changes(self):
-
-        """
-        desc:
-            Applies the controls.
-        """
-
-        if not qtautoplugin.apply_edit_changes(self) or self.lock:
-            return False
-        self.custom_interactions()
-
-    def edit_widget(self):
-
-        """
-        Refreshes the controls.
-
-        Returns:
-        The QWidget containing the controls
-        """
-
-        if self.lock:
-            return
-        self.lock = True
-        w = qtautoplugin.edit_widget(self)
-        self.custom_interactions()
-        self.lock = False
-        return w
-
-    def custom_interactions(self):
-
-        """
-        desc:
-            Activates the relevant controls for each tracker.
-        """
-        if self.var.duration_check == u'yes':
-            self.line_edit_duration.setEnabled(True)
-        elif self.var.duration_check == u'no':
-            self.line_edit_duration.setDisabled(True)
