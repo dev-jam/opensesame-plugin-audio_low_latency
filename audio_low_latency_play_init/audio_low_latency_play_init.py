@@ -58,7 +58,7 @@ class audio_low_latency_play_init(item):
         self.var.verbose = u'no'
         self.var.bitdepth = str(16)
         self.var.samplerate = str(44100)
-        self.var.channels = str(1)
+        self.var.channels = str(2)
         self.var.buffer = 1024
 
         self.experiment.audio_low_latency_play_module_list = list()
