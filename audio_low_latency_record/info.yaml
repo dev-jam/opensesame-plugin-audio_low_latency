@@ -24,37 +24,6 @@ controls:
     type: "line_edit"
     var: "delay"
 -
-    label: "Bit Depth"
-    name: "combobox_bitdepth"
-    tooltip: "Choose bitdepth"
-    type: "combobox"
-    var: "bitdepth"
-    options:
-      - "8"
-      - "16"
-      - "24"
-      - "32"
--
-    label: "Sample Rate (Hz)"
-    name: "combobox_samplerate"
-    tooltip: "Choose sample Rate"
-    type: "combobox"
-    var: "samplerate"
-    options:
-      - "44100"
-      - "48000"
-      - "96000"
-      - "192000"
--
-    label: "Channels"
-    name: "combobox_channels"
-    tooltip: "Channels"
-    type: "combobox"
-    var: "channels"
-    options:
-      - "1"
-      - "2"
--
     label: "Cache to RAM before saving?"
     name: "checkbox_ram_cache"
     tooltip: "RAM Cache"

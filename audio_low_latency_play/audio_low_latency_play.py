@@ -72,9 +72,12 @@ class audio_low_latency_play(item):
             if self.dummy_mode == u'no':
                 self.module = self.experiment.audio_low_latency_play_module
                 self.device = self.experiment.audio_low_latency_play_device
-                self.device_name = self.experiment.audio_low_latency_play_device_name
-                self.device_index = self.experiment.audio_low_latency_play_device_index
-                self.audio_buffer = self.experiment.audio_low_latency_play_buffer
+                self.buffer = self.experiment.audio_low_latency_play_buffer
+                self.data_size = self.experiment.audio_low_latency_play_data_size
+                self.bitdepth = self.experiment.audio_low_latency_play_bitdepth
+                self.samplewidth = self.experiment.audio_low_latency_play_samplewidth
+                self.samplerate = self.experiment.audio_low_latency_play_samplerate
+                self.channels = self.experiment.audio_low_latency_play_channels
         else:
             raise osexception(
                     u'Audio Low Latency Play Init item is missing')
@@ -105,85 +108,12 @@ class audio_low_latency_play(item):
                 raise osexception(
                     u'Could not load audio file', exception=e)
 
-            self.buffer_time = round(float(self.audio_buffer) / float(self.wav_file.getframerate()) * 1000, 1)
-
-            self.experiment.var.audio_low_latency_play_bitdepth = self.wav_file.getsampwidth()*8
-            self.experiment.var.audio_low_latency_play_samplerate = self.wav_file.getframerate()
-            self.experiment.var.audio_low_latency_play_channels = self.wav_file.getnchannels()
-            self.experiment.var.audio_low_latency_play_buffer_time = self.buffer_time
-
-            self.show_message(u'Bitdepth: ' +str(self.wav_file.getsampwidth()*8)+'bit')
-            self.show_message(u'Samplerate: ' + str(self.wav_file.getframerate())+ 'Hz')
-            self.show_message(u'Channels: ' + str(self.wav_file.getnchannels()))
-            self.show_message(u'Buffer: ' + str(self.buffer_time)+'ms')
-
-            self.frame_size = self.wav_file.getsampwidth() * 8 * self.wav_file.getnchannels()
-            self.period_size = self.audio_buffer #* frame_size
-            self.data_size = self.frame_size * self.period_size
-
-            if self.module == self.experiment.pyalsaaudio_module_name:
-                import alsaaudio
-                self.device.close()
-                self.device = alsaaudio.PCM(type=alsaaudio.PCM_PLAYBACK, device=self.device_name)
-                self.experiment.audio_low_latency_play_device = self.device
-                self.device.setchannels(self.wav_file.getnchannels())
-                self.device.setrate(self.wav_file.getframerate())
-
-                # 8bit is unsigned in wav files
-                if self.wav_file.getsampwidth() == 1:
-                    try:
-                        self.device.setformat(alsaaudio.PCM_FORMAT_U8)
-                    except Exception as e:
-                        raise osexception(
-                            u'Device does not support ' + str(self.wav_file.getsampwidth()*8) + u'bit audio', exception=e)
-                # Otherwise we assume signed data, little endian
-                elif self.wav_file.getsampwidth() == 2:
-                    try:
-                        self.device.setformat(alsaaudio.PCM_FORMAT_S16_LE)
-                    except Exception as e:
-                        raise osexception(
-                            u'Device does not support ' + str(self.wav_file.getsampwidth()*8) + u'bit audio', exception=e)
-                elif self.wav_file.getsampwidth() == 3:
-                    raise osexception(
-                        u'24bit will be supported in the next release')
-#                    try:
-#                        self.device.setformat(alsaaudio.PCM_FORMAT_S24_3LE)
-#                    except Exception as e:
-#                        raise osexception(
-#                            u'Device does not support ' + str(self.wav_file.getsampwidth()*8) + u'bit audio', exception=e)
-                elif self.wav_file.getsampwidth() == 4:
-                    try:
-                        self.device.setformat(alsaaudio.PCM_FORMAT_S32_LE)
-                    except Exception as e:
-                        raise osexception(
-                            u'Device does not support ' + str(self.wav_file.getsampwidth()*8) + u'bit audio', exception=e)
-                else:
-                    raise ValueError('Unsupported format')
-
-                self.device.setrate(self.wav_file.getframerate())
-                self.device.setperiodsize(self.period_size)
-                self.audio_stream = self.device
-                self.experiment.audio_low_latency_play_stream = self.audio_stream
-            elif self.module == self.experiment.pyaudio_module_name:
-               if self.wav_file.getsampwidth() == 4:
-                    raise osexception(
-                        u'32bit not yet supported')
-               else:
-                    try:
-
-                        if hasattr(self.experiment, "audio_low_latency_play_stream"):
-                            self.experiment.audio_low_latency_play_stream.close()
-
-                        self.audio_stream = self.device.open(format=self.device.get_format_from_width(self.wav_file.getsampwidth()),
-                                channels=self.wav_file.getnchannels(),
-                                rate=self.wav_file.getframerate(),
-                                output=True,
-                                frames_per_buffer=self.period_size,
-                                output_device_index=self.device_index)
-                        self.experiment.audio_low_latency_play_stream = self.audio_stream
-                    except Exception as e:
-                        raise osexception(
-                            u'Could not start audio device', exception=e)
+            if self.wav_file.getsampwidth() != self.samplewidth:
+                raise osexception(u'wave file has incorrect bitdepth')
+            if self.wav_file.getframerate() != self.samplerate:
+                raise osexception(u'wave file has incorrect samplerate')
+            if self.wav_file.getnchannels() != self.channels:
+                raise osexception(u'wave file has incorrect number of channels')
 
             if self.ram_cache == u'yes':
                 wav_file_nframes = self.wav_file.getnframes()
@@ -241,9 +171,9 @@ class audio_low_latency_play(item):
             self.show_message(u'Starting audio')
 
             if self.ram_cache == u'No':
-                self.play_file(self.audio_stream, self.wav_file, self.period_size, delay)
+                self.play_file(self.device, self.wav_file, self.buffer, delay)
             elif self.ram_cache == u'yes':
-                self.play_data(self.audio_stream, self.wav_file_data, self.data_size, delay)
+                self.play_data(self.device, self.wav_file_data, self.data_size, delay)
 
 
         elif self.dummy_mode == u'yes':
@@ -272,8 +202,8 @@ class audio_low_latency_play(item):
                 if self.clock.time() - start_time >= self.duration:
                     break
 
-        if self.module == self.experiment.pyaudio_module_name:
-            stream.stop_stream()  # stop stream
+#        if self.module == self.experiment.pyaudio_module_name:
+#            stream.stop_stream()  # stop stream
 
         wav_file.close()
 
@@ -286,13 +216,16 @@ class audio_low_latency_play(item):
             if delay >= 1:
                 self.clock.sleep(delay)
 
+        if self.module == self.experiment.pyaudio_module_name:
+            stream.start_stream()  # stop stream
+                
         self.experiment.var.audio_low_latency_play_onset = self.clock.time()
         start_time = self.clock.time()
 
         for start in range(0,len(wav_data),chunk):
             stream.write(wav_data[start:start+chunk])
 
-            if self.duration_check == u'yes':
+            if self.duration_check:
                 if self.clock.time() - start_time >= self.duration:
                     break
 

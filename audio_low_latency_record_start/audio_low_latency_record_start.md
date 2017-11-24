@@ -26,9 +26,6 @@ Audio Low Latency Record Start options:
 - *Audio Filename* path to the audio file.
 - *Duration* in ms, or string 'infinite'.
 - *Delay* in ms.
-- *Bit depth* number of bits per sample.
-- *Sample Rate* number of samples/second.
-- *Channels* number of channels.
 - *Cache to RAM before saving?* file will be cached to RAM before saving.
 
 

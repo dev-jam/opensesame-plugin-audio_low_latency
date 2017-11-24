@@ -56,7 +56,10 @@ class audio_low_latency_record_init(item):
         # Set default experimental variables and values
         self.var.dummy_mode = u'no'
         self.var.verbose = u'no'
-        self.var.audio_buffer = 1024
+        self.var.bitdepth = str(16)
+        self.var.samplerate = str(44100)
+        self.var.channels = str(1)
+        self.var.buffer = 1024
 
         self.experiment.audio_low_latency_record_module_list = list()
         self.experiment.audio_low_latency_record_device_dict = dict()
@@ -107,7 +110,7 @@ class audio_low_latency_record_init(item):
         self.current_module = self.var.module
         device_list = self.experiment.audio_low_latency_record_device_dict[self.current_module]
         self.current_device = device_list[0]
-        self.var.device = self.current_device
+        self.var.device_name = self.current_device
 
 
     def init_var(self):
@@ -121,27 +124,46 @@ class audio_low_latency_record_init(item):
         self.dummy_mode = self.var.dummy_mode
         self.verbose = self.var.verbose
         self.module = self.var.module
-        self.device = self.var.device
+        self.device_name = self.var.device_name
+        self.bitdepth = int(self.var.bitdepth)
+        self.samplewidth = self.bitdepth / 8
+        self.samplerate = int(self.var.samplerate)
+        self.channels = int(self.var.channels)
 
-        if isinstance(self.var.audio_buffer,int):
-            self.experiment.audio_low_latency_record_buffer = int(self.var.audio_buffer)
+        if isinstance(self.var.buffer,int):
+            self.buffer = int(self.var.buffer)
         else:
             raise osexception(u'Buffer value should be a integer')
 
-        self.experiment.audio_low_latency_record_dummy_mode = self.var.dummy_mode
-        self.experiment.audio_low_latency_record_verbose = self.var.verbose
+
+        self.frame_size = self.bitdepth * self.channels
+        self.data_size = self.frame_size * self.buffer 
+
+        self.experiment.audio_low_latency_record_dummy_mode = self.dummy_mode
+        self.experiment.audio_low_latency_record_verbose = self.verbose
         self.experiment.audio_low_latency_record_locked = 0
-        self.experiment.audio_low_latency_record_module = self.var.module
-
-        self.experiment.var.audio_low_latency_record_module = self.var.module
-        self.experiment.var.audio_low_latency_record_device_name = self.var.device
-        self.experiment.var.audio_low_latency_record_buffer = int(self.var.audio_buffer)
-
+        self.experiment.audio_low_latency_record_module = self.module
+        self.experiment.audio_low_latency_record_bitdepth = self.bitdepth
+        self.experiment.audio_low_latency_record_samplewidth = self.samplewidth
+        self.experiment.audio_low_latency_record_samplerate = self.samplerate
+        self.experiment.audio_low_latency_record_channels = self.channels
+        self.experiment.audio_low_latency_record_buffer = self.buffer
+        self.experiment.audio_low_latency_record_data_size = self.data_size
+        
+        self.experiment.var.audio_low_latency_record_module = self.module
+        self.experiment.var.audio_low_latency_record_device_name = self.device_name
+        self.experiment.var.audio_low_latency_record_buffer = self.buffer
+        self.experiment.var.audio_low_latency_record_bitdepth = self.bitdepth
+        self.experiment.var.audio_low_latency_record_samplewidth = self.samplewidth
+        self.experiment.var.audio_low_latency_record_samplerate = self.samplerate
+        self.experiment.var.audio_low_latency_record_channels = self.channels
+    
         # reset experimental variables
         self.experiment.audio_low_latency_record_wait = None
         self.experiment.audio_low_latency_record_stop = None
         self.experiment.audio_low_latency_record_start = None
 
+        self.experiment.audio_low_latency_record_thread_running = 0
 
     def prepare(self):
 
@@ -154,23 +176,86 @@ class audio_low_latency_record_init(item):
 
         if self.dummy_mode == u'no':
 
-            # disable the internal audio device / mixer
-            pygame.mixer.stop()
-            pygame.mixer.quit()
 
-            if not hasattr(self.experiment, "audio_low_latency_record_device"):
-                if self.module == self.pyalsaaudio_module_name and self.pyalsaaudio_module_name in self.experiment.audio_low_latency_record_module_list:
-                    import alsaaudio
-                    self.experiment.audio_low_latency_record_device_index = self.experiment.audio_low_latency_record_device_dict[self.pyalsaaudio_module_name].index(self.device)
-                    self.experiment.audio_low_latency_record_device_name = self.device
-                    self.experiment.audio_low_latency_record_device = alsaaudio.PCM(type=alsaaudio.PCM_CAPTURE, device=self.device)
-                elif self.module == self.pyaudio_module_name and self.pyaudio_module_name in self.experiment.audio_low_latency_record_module_list:
-                    import pyaudio
-                    self.experiment.audio_low_latency_record_device_index = self.experiment.audio_low_latency_record_device_dict[self.pyaudio_module_name].index(self.device)
-                    self.experiment.audio_low_latency_record_device_name = self.device
-                    self.experiment.audio_low_latency_record_device = pyaudio.PyAudio()
-                self.experiment.cleanup_functions.append(self.close)
-                self.python_workspace[u'audio_low_latency_record'] = self.experiment.audio_low_latency_record_device
+            self.buffer_time = round(float(self.buffer) / float(self.samplerate) * 1000, 1)
+
+            self.show_message(u'Bitdepth: ' +str(self.bitdepth)+'bit')
+            self.show_message(u'Samplerate: ' + str(self.samplerate) + 'Hz')
+            self.show_message(u'Channels: ' + str(self.channels))
+            self.show_message(u'Buffer: ' + str(self.buffer_time)+'ms')
+            
+            try:
+                # disable the internal audio device / mixer
+                pygame.mixer.stop()
+                pygame.mixer.quit()
+                self.show_message(u'Stopped pygame mixer')
+            except:
+                self.show_message(u'pygame mixer not active')
+
+            if self.module == self.pyalsaaudio_module_name and self.pyalsaaudio_module_name in self.experiment.audio_low_latency_record_module_list:
+                import alsaaudio
+                self.device_index = self.experiment.audio_low_latency_record_device_dict[self.pyalsaaudio_module_name].index(self.device_name)
+
+                self.device = alsaaudio.PCM(type=alsaaudio.PCM_CAPTURE, device=self.device_name)
+                self.device.setchannels(self.channels)
+                self.device.setrate(self.samplerate)
+                self.device.setperiodsize(self.buffer) 
+
+                # 8bit is unsigned in wav files
+                if self.bitdepth == 8:
+                    try:
+                        self.device.setformat(alsaaudio.PCM_FORMAT_U8)
+                    except Exception as e:
+                        raise osexception(
+                            u'Device does not support ' + str(self.bitdepth) + u'bit audio', exception=e)
+                # Otherwise we assume signed data, little endian
+                elif self.bitdepth == 16:
+                    try:
+                        self.device.setformat(alsaaudio.PCM_FORMAT_S16_LE)
+                    except Exception as e:
+                        raise osexception(
+                            u'Device does not support ' + str(self.bitdepth) + u'bit audio', exception=e)
+                elif self.bitdepth == 24:
+                    raise osexception(
+                        u'24bit will be supported in the next release')
+#                    try:
+#                        self.device.setformat(alsaaudio.PCM_FORMAT_S24_3LE)
+#                    except Exception as e:
+#                        raise osexception(
+#                            u'Device does not support ' + str(self.bitdepth) + u'bit audio', exception=e)
+                elif self.bitdepth == 32:
+                    try:
+                        self.device.setformat(alsaaudio.PCM_FORMAT_S32_LE)
+                    except Exception as e:
+                        raise osexception(
+                            u'Device does not support ' + str(self.bitdepth) + u'bit audio', exception=e)
+                else:
+                    raise ValueError('Unsupported format')
+
+            elif self.module == self.pyaudio_module_name and self.pyaudio_module_name in self.experiment.audio_low_latency_record_module_list:
+                import pyaudio
+                self.device_index = self.experiment.audio_low_latency_record_device_dict[self.pyaudio_module_name].index(self.device_name)
+                self.device_init = pyaudio.PyAudio()
+
+                if self.bitdepth == 32:
+                    raise osexception(
+                        u'32bit not yet supported')
+                else:
+                    try:
+                        self.device = self.device_init.open(format=self.device_init.get_format_from_width(self.samplewidth),
+                                channels=self.channels,
+                                rate=self.samplerate,
+                                input=True,
+                                frames_per_buffer=self.buffer,
+                                output_device_index=self.device_index)
+
+                    except Exception as e:
+                        raise osexception(
+                            u'Could not start audio device', exception=e)
+    
+            self.experiment.audio_low_latency_record_device = self.device
+            self.experiment.cleanup_functions.append(self.close)
+            self.python_workspace[u'audio_low_latency_record'] = self.experiment.audio_low_latency_record_device
 
         elif self.dummy_mode == u'yes':
             self.show_message(u'Dummy mode enabled, run phase')
@@ -209,9 +294,10 @@ class audio_low_latency_record_init(item):
                 return
         try:
             self.show_message(u"Closing audio device")
-            self.experiment.audio_low_latency_record_device.close()
-            if  self.module == self.experiment.pyaudio_module_name:
-                self.experiment.audio_low_latency_record_device.terminate()
+            self.device.close()
+            if  self.module == self.pyaudio_module_name:
+                self.device.terminate()
+            self.device = None
             self.experiment.audio_low_latency_record_device = None
             self.show_message(u"Audio device closed")
         except:
@@ -232,12 +318,12 @@ class qtaudio_low_latency_record_init(audio_low_latency_record_init, qtautoplugi
         self.combobox_module.addItems(self.experiment.audio_low_latency_record_module_list)
         self.combobox_module.setCurrentIndex(self.experiment.audio_low_latency_record_module_list.index(self.var.module))
 
-        self.combobox_device.clear()
-        self.combobox_device.addItems(self.experiment.audio_low_latency_record_device_dict[self.current_module])
+        self.combobox_device_name.clear()
+        self.combobox_device_name.addItems(self.experiment.audio_low_latency_record_device_dict[self.current_module])
 
         device_name = self.experiment.audio_low_latency_record_device_selected_dict[self.current_module]
         device_index = self.experiment.audio_low_latency_record_device_dict[self.current_module].index(device_name)
-        self.combobox_device.setCurrentIndex(device_index)
+        self.combobox_device_name.setCurrentIndex(device_index)
 
     def apply_edit_changes(self):
 
@@ -277,23 +363,23 @@ class qtaudio_low_latency_record_init(audio_low_latency_record_init, qtautoplugi
 
         if self.current_module != self.var.module:
             ## save old device
-            old_device = self.var.device
-            self.experiment.audio_low_latency_record_device_selected_dict[self.current_module] = old_device
+            old_device_name = self.var.device_name
+            self.experiment.audio_low_latency_record_device_selected_dict[self.current_module] = old_device_name
 
             new_module_name = self.var.module
-            self.combobox_device.clear()
-            self.combobox_device.addItems(self.experiment.audio_low_latency_record_device_dict[new_module_name])
+            self.combobox_device_name.clear()
+            self.combobox_device_name.addItems(self.experiment.audio_low_latency_record_device_dict[new_module_name])
 
             new_device_name = self.experiment.audio_low_latency_record_device_selected_dict[new_module_name]
             new_device_index = self.experiment.audio_low_latency_record_device_dict[new_module_name].index(new_device_name)
-            self.combobox_device.setCurrentIndex(new_device_index)
+            self.combobox_device_name.setCurrentIndex(new_device_index)
 
             self.current_module = new_module_name
-            self.var.device = new_device_name
+            self.var.device_name = new_device_name
 
         if self.var.dummy_mode == u'yes':
             self.combobox_module.setDisabled(True)
-            self.combobox_device.setDisabled(True)
+            self.combobox_device_name.setDisabled(True)
         elif self.var.dummy_mode == u'no':
             self.combobox_module.setEnabled(True)
-            self.combobox_device.setEnabled(True)
+            self.combobox_device_name.setEnabled(True)

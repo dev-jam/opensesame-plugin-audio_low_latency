@@ -99,7 +99,7 @@ class audio_low_latency_record_wait(item):
                 self.clock.sleep(self.poll_time)
 
             ## join thread if thread is still running
-            if self.experiment.audio_low_latency_play_locked:
+            if self.experiment.audio_low_latency_record_locked:
                 self.experiment.audio_low_latency_record_thread.join()
 
             ## set end of thread

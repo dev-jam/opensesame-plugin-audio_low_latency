@@ -25,6 +25,9 @@ Audio Low Latency Play Init options:
 - *Verbose Mode* for testing experiments.
 - *Module* selection of audio module.
 - *Device* selection of audio device.
+- *Bit depth* number of bits per sample.
+- *Sample Rate* number of samples/second.
+- *Channels* number of channels.
 - *Buffer size* is a positive integer and represents the number of frames.
 
 
