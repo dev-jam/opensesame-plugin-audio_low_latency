@@ -233,7 +233,7 @@ class audio_low_latency_record(item):
 
         if time is None:
             time = self.clock.time()
-        self.experiment.var.set(u'time_%s_stimulus_onset' % self.name, time)
+        self.experiment.var.set(u'time_stimulus_onset_%s' % self.name, time)
         return time
 
 
