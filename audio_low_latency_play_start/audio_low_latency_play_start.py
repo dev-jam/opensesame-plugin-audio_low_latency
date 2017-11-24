@@ -210,6 +210,9 @@ class audio_low_latency_play_start(item):
             if delay >= 1:
                 self.clock.sleep(delay)
 
+        if self.module == self.experiment.pyaudio_module_name:
+            stream.start_stream()
+
         self.set_stimulus_onset()
         start_time = self.clock.time()
 
@@ -224,8 +227,8 @@ class audio_low_latency_play_start(item):
                 if self.clock.time() - start_time >= self.duration:
                     break
 
-#        if self.module == self.experiment.pyaudio_module_name:
-#            stream.stop_stream()  # stop stream
+        if self.module == self.experiment.pyaudio_module_name:
+            stream.stop_stream()
 
         wav_file.close()
 
@@ -240,6 +243,9 @@ class audio_low_latency_play_start(item):
         if self.delay_check:
             if delay >= 1:
                 self.clock.sleep(delay)
+
+        if self.module == self.experiment.pyaudio_module_name:
+            stream.start_stream()
 
         self.set_stimulus_onset()
         start_time = self.clock.time()
@@ -257,7 +263,7 @@ class audio_low_latency_play_start(item):
                     break
 
         if self.module == self.experiment.pyaudio_module_name:
-            stream.stop_stream()  # stop stream
+            stream.stop_stream()
 
         self.show_message(u'Stopped audio')
         self.experiment.audio_low_latency_play_locked = 0

@@ -196,7 +196,7 @@ class audio_low_latency_record_start(item):
         start_time = self.clock.time()
 
         if self.module == self.experiment.pyaudio_module_name:
-            stream.start_stream()  # stop stream
+            stream.start_stream()
 
         while True:
 
@@ -223,7 +223,7 @@ class audio_low_latency_record_start(item):
             wav_file.writeframes(b''.join(frames))
 
         if self.module == self.experiment.pyaudio_module_name:
-            stream.stop_stream()  # stop stream
+            stream.stop_stream()
 
         wav_file.close()
 
