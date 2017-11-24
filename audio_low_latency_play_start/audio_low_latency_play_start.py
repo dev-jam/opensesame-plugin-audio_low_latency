@@ -114,17 +114,17 @@ class audio_low_latency_play_start(item):
             error_msg_list = []
 
             if self.wav_file.getsampwidth() * 8 != self.bitdepth:
-                error_msg_list.append(u'- wave file has incorrect bitdepth\n')
+                error_msg_list.append(u'- bitdepth incorrect, file is %dbit but experiment is set to %dbit\n' % (self.wav_file.getsampwidth()*8,self.bitdepth))
                 #raise osexception(u'wave file has incorrect bitdepth')
             if self.wav_file.getframerate() != self.samplerate:
-                error_msg_list.append(u'- wave file has incorrect samplerate\n')
+                error_msg_list.append(u'- samplerate incorrect, file is %dHz but experiment is set to %dHz\n' % (self.wav_file.getframerate(),self.samplerate))
                 #raise osexception(u'wave file has incorrect samplerate')
             if self.wav_file.getnchannels() != self.channels:
-                error_msg_list.append(u'- wave file has incorrect number of channels\n')
+                error_msg_list.append(u'- number of channels incorrect, file has %d channel(s) but experiment is set to %d channel(s)\n' % (self.wav_file.getnchannels(), self.channels))
                 #raise osexception(u'wave file has incorrect number of channels')
 
             if error_msg_list:
-                raise osexception(''.join(error_msg_list))
+                raise osexception(u'Error with audio file %s\n%s' % (self.filename, ''.join(error_msg_list)))
 
 
             if self.ram_cache == u'yes':
