@@ -136,7 +136,7 @@ class audio_low_latency_play_init(item):
             raise osexception(u'Buffer value should be a integer')
 
         self.frame_size = self.bitdepth * self.channels
-        self.data_size = self.frame_size * self.buffer 
+        self.data_size = self.frame_size * self.buffer
 
         self.experiment.audio_low_latency_play_dummy_mode = self.dummy_mode
         self.experiment.audio_low_latency_play_verbose = self.verbose
@@ -148,7 +148,7 @@ class audio_low_latency_play_init(item):
         self.experiment.audio_low_latency_play_channels = self.channels
         self.experiment.audio_low_latency_play_buffer = self.buffer
         self.experiment.audio_low_latency_play_data_size = self.data_size
-        
+
         self.experiment.var.audio_low_latency_play_module = self.module
         self.experiment.var.audio_low_latency_play_device_name = self.device_name
         self.experiment.var.audio_low_latency_play_buffer = self.buffer
@@ -156,7 +156,7 @@ class audio_low_latency_play_init(item):
         self.experiment.var.audio_low_latency_play_samplewidth = self.samplewidth
         self.experiment.var.audio_low_latency_play_samplerate = self.samplerate
         self.experiment.var.audio_low_latency_play_channels = self.channels
-    
+
         # reset experimental variables
         self.experiment.audio_low_latency_play_wait = None
         self.experiment.audio_low_latency_play_stop = None
@@ -182,7 +182,7 @@ class audio_low_latency_play_init(item):
             self.show_message(u'Samplerate: ' + str(self.samplerate) + 'Hz')
             self.show_message(u'Channels: ' + str(self.channels))
             self.show_message(u'Buffer: ' + str(self.buffer_time)+'ms')
-            
+
             try:
                 # disable the internal audio device / mixer
                 pygame.mixer.stop()
@@ -231,12 +231,12 @@ class audio_low_latency_play_init(item):
                 else:
                     raise ValueError('Unsupported format')
 
- 
+
             elif self.module == self.pyaudio_module_name and self.pyaudio_module_name in self.experiment.audio_low_latency_play_module_list:
                 import pyaudio
                 self.device_index = self.experiment.audio_low_latency_play_device_dict[self.pyaudio_module_name].index(self.device_name)
                 self.device_init = pyaudio.PyAudio()
-                
+
                 if self.bitdepth == 32:
                     raise osexception(
                         u'32bit not yet supported')
@@ -252,7 +252,7 @@ class audio_low_latency_play_init(item):
                     except Exception as e:
                         raise osexception(
                             u'Could not start audio device', exception=e)
-              
+
             self.experiment.audio_low_latency_play_device = self.device
             self.experiment.cleanup_functions.append(self.close)
             self.python_workspace[u'audio_low_latency_play'] = self.experiment.audio_low_latency_play_device
@@ -279,6 +279,25 @@ class audio_low_latency_play_init(item):
         debug.msg(message)
         if self.verbose == u'yes':
             print(message)
+
+
+    def set_stimulus_onset(self, time=None):
+
+        """
+        desc:
+            Set a timestamp for the onset time of the item's execution.
+
+        keywords:
+            time:    A timestamp or None to use the current time.
+
+        returns:
+            desc:    A timestamp.
+        """
+
+        if time is None:
+            time = self.clock.time()
+        self.experiment.var.set(u'time_%s_stimulus_onset' % self.name, time)
+        return time
 
 
     def close(self):

@@ -125,6 +125,8 @@ class audio_low_latency_record_start(item):
 
         """Run phase"""
 
+        self.set_item_onset()
+
         if not (hasattr(self.experiment, "audio_low_latency_record_stop") or hasattr(self.experiment, "audio_low_latency_record_wait")):
             raise osexception(
                     u'Audio Low Latency Record Stop or Audio Low Latency Record Wait item is missing')
@@ -160,8 +162,6 @@ class audio_low_latency_record_start(item):
         else:
             raise osexception(u'Delay should be a integer')
 
-        self.set_item_onset()
-
         if self.dummy_mode == u'no':
             while self.experiment.audio_low_latency_record_locked:
                 self.clock.sleep(self.poll_time)
@@ -192,7 +192,7 @@ class audio_low_latency_record_start(item):
             if delay >= 1:
                 self.clock.sleep(delay)
 
-        self.experiment.var.audio_low_latency_record_start = self.clock.time()
+        self.set_stimulus_onset()
         start_time = self.clock.time()
 
         if self.module == self.experiment.pyaudio_module_name:
@@ -240,6 +240,25 @@ class audio_low_latency_record_start(item):
         debug.msg(message)
         if self.verbose == u'yes':
             print(message)
+
+
+    def set_stimulus_onset(self, time=None):
+
+        """
+        desc:
+            Set a timestamp for the onset time of the item's execution.
+
+        keywords:
+            time:    A timestamp or None to use the current time.
+
+        returns:
+            desc:    A timestamp.
+        """
+
+        if time is None:
+            time = self.clock.time()
+        self.experiment.var.set(u'time_%s_stimulus_onset' % self.name, time)
+        return time
 
 
 class qtaudio_low_latency_record_start(audio_low_latency_record_start, qtautoplugin):

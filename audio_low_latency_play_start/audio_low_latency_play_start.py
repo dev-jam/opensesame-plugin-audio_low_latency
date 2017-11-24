@@ -128,6 +128,7 @@ class audio_low_latency_play_start(item):
 
         """Run phase"""
 
+        self.set_item_onset()
         start_time = self.clock.time()
 
         if not (hasattr(self.experiment, "audio_low_latency_play_stop") or hasattr(self.experiment, "audio_low_latency_play_wait")):
@@ -162,8 +163,6 @@ class audio_low_latency_play_start(item):
                 raise osexception(u'Delay can not be negative')
         else:
             raise osexception(u'Delay should be a integer')
-
-        self.set_item_onset()
 
         if self.dummy_mode == u'no':
             while self.experiment.audio_low_latency_play_locked:
@@ -202,7 +201,7 @@ class audio_low_latency_play_start(item):
             if delay >= 1:
                 self.clock.sleep(delay)
 
-        self.experiment.var.audio_low_latency_play_start_onset = self.clock.time()
+        self.set_stimulus_onset()
         start_time = self.clock.time()
 
         while len(data) > 0:
@@ -233,7 +232,7 @@ class audio_low_latency_play_start(item):
             if delay >= 1:
                 self.clock.sleep(delay)
 
-        self.experiment.var.audio_low_latency_play_start_onset = self.clock.time()
+        self.set_stimulus_onset()
         start_time = self.clock.time()
 
         if self.module == self.experiment.pyaudio_module_name:
@@ -264,6 +263,25 @@ class audio_low_latency_play_start(item):
         debug.msg(message)
         if self.verbose == u'yes':
             print(message)
+
+
+    def set_stimulus_onset(self, time=None):
+
+        """
+        desc:
+            Set a timestamp for the onset time of the item's execution.
+
+        keywords:
+            time:    A timestamp or None to use the current time.
+
+        returns:
+            desc:    A timestamp.
+        """
+
+        if time is None:
+            time = self.clock.time()
+        self.experiment.var.set(u'time_%s_stimulus_onset' % self.name, time)
+        return time
 
 
 class qtaudio_low_latency_play_start(audio_low_latency_play_start, qtautoplugin):
