@@ -51,8 +51,10 @@ controls:
     type: "combobox"
     var: "samplerate"
     options:
+      - "22050"
       - "44100"
       - "48000"
+      - "88200"
       - "96000"
       - "192000"
 -
