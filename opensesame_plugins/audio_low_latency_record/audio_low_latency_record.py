@@ -1,24 +1,21 @@
 #-*- coding:utf-8 -*-
 
 """
-22-10-2017
 Author: Bob Rosbag
-Version: 2017.11-1
+2017
 
-This file is part of OpenSesame.
-
-OpenSesame is free software: you can redistribute it and/or modify
+This plug-in is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
-OpenSesame is distributed in the hope that it will be useful,
+This software is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with OpenSesame.  If not, see <http://www.gnu.org/licenses/>.
+along with this plug-in.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 #import warnings
@@ -29,13 +26,13 @@ from libopensesame.item import item
 from libqtopensesame.items.qtautoplugin import qtautoplugin
 from libopensesame.exceptions import osexception
 from openexp.keyboard import keyboard
-import threading
 import wave
+import pygame
 
 
 VERSION = u'2017.11-1'
 
-class audio_low_latency_record_start(item):
+class audio_low_latency_record(item):
 
     """
     Class handles the basic functionality of the item.
@@ -43,7 +40,7 @@ class audio_low_latency_record_start(item):
     """
 
     # Provide an informative description for your plug-in.
-    description = u'Low Latency Audio: starts audio recording in the background.'
+    description = u'Low Latency Audio: starts audio recording on the foreground.'
 
     def __init__(self, name, experiment, string=None):
 
@@ -58,13 +55,12 @@ class audio_low_latency_record_start(item):
 
         # Set default experimental variables and values
         self.var.filename = u''
-        self.var.duration = u'infinite'
+        self.var.duration = 1000
         self.var.delay = 0
         self.var.bitdepth = str(16)
         self.var.samplerate = str(44100)
         self.var.channels = str(1)
         self.var.ram_cache = u'yes'
-
 
     def init_var(self):
 
@@ -79,19 +75,14 @@ class audio_low_latency_record_start(item):
                 self.buffer = self.experiment.audio_low_latency_record_buffer
                 self.data_size = self.experiment.audio_low_latency_record_data_size
                 self.bitdepth = self.experiment.audio_low_latency_record_bitdepth
-                self.samplewidth = self.experiment.audio_low_latency_record_samplewidth
                 self.samplerate = self.experiment.audio_low_latency_record_samplerate
                 self.channels = self.experiment.audio_low_latency_record_channels
-
         else:
             raise osexception(
                     u'Audio Low Latency Record Init item is missing')
 
         self.filename = self.var.filename
         self.ram_cache = self.var.ram_cache
-
-        self.experiment.audio_low_latency_record_continue = 1
-        self.experiment.audio_low_latency_record_start = 1
 
 
     def prepare(self):
@@ -127,28 +118,20 @@ class audio_low_latency_record_start(item):
 
         self.set_item_onset()
 
-        if not (hasattr(self.experiment, "audio_low_latency_record_stop") or hasattr(self.experiment, "audio_low_latency_record_wait")):
-            raise osexception(
-                    u'Audio Low Latency Record Stop or Audio Low Latency Record Wait item is missing')
-
         start_time = self.clock.time()
 
-        error_msg = u'Duration must be a string named infinity or a an integer greater than 1'
+        if isinstance(self.var.duration,int):
+            self.duration = int(self.var.duration)
+        else:
+            raise osexception(u'Duration should be a integer')
 
-        if isinstance(self.var.duration,str):
-            if self.var.duration == u'infinity':
-                self.duration_check = False
-                self.duration = self.var.duration
-            else:
-                raise osexception(error_msg)
-        elif isinstance(self.var.duration,int):
+        if isinstance(self.var.duration,int):
             if self.var.duration >= 1:
-                self.duration_check = True
                 self.duration = int(self.var.duration)
             else:
-                raise osexception(error_msg)
+                raise osexception(u'Delay can not be negative')
         else:
-            raise osexception(error_msg)
+            raise osexception(u'Delay should be a integer')
 
         if isinstance(self.var.delay,int):
             if self.var.delay >= 0:
@@ -162,6 +145,7 @@ class audio_low_latency_record_start(item):
         else:
             raise osexception(u'Delay should be a integer')
 
+
         if self.dummy_mode == u'no':
             while self.experiment.audio_low_latency_record_locked:
                 self.clock.sleep(self.poll_time)
@@ -173,18 +157,16 @@ class audio_low_latency_record_start(item):
                 delay = self.delay
 
             self.show_message(u'Starting recording audio')
-            self.experiment.audio_low_latency_record_locked = 1
-            self.experiment.audio_low_latency_record_thread = threading.Thread(target=self.record, args=(self.device, self.wav_file, self.buffer, delay))
-            self.experiment.audio_low_latency_record_thread.start()
+
+            self.record(self.device, self.wav_file, self.buffer, self.duration, delay)
+
         elif self.dummy_mode == u'yes':
             self.show_message(u'Dummy mode enabled, NOT recording audio')
         else:
             raise osexception(u'Error with dummy mode!')
 
 
-    def record(self, stream, wav_file, chunk, delay):
-
-        self.experiment.audio_low_latency_record_thread_running = 1
+    def record(self, stream, wav_file, chunk, duration, delay):
 
         frames = []
 
@@ -198,26 +180,17 @@ class audio_low_latency_record_start(item):
         if self.module == self.experiment.pyaudio_module_name:
             stream.start_stream()
 
-        while True:
-
-            # Read data from device
+        while duration >= self.clock.time() - start_time:
+            # Read data from stdin
             if self.module == self.experiment.pyalsaaudio_module_name:
                 l, data = stream.read()
             elif  self.module == self.experiment.pyaudio_module_name:
                 data = stream.read(chunk)
 
-            # save data to file/ram
             if self.ram_cache == u'yes':
                 frames.append(data)
             elif self.ram_cache == u'no':
                 wav_file.writeframes(data)
-
-            # check for stop
-            if self.experiment.audio_low_latency_record_continue == 0:
-                break
-            elif self.duration_check:
-                if self.clock.time() - start_time >= self.duration:
-                    break
 
         if self.ram_cache == u'yes':
             wav_file.writeframes(b''.join(frames))
@@ -261,13 +234,13 @@ class audio_low_latency_record_start(item):
         return time
 
 
-class qtaudio_low_latency_record_start(audio_low_latency_record_start, qtautoplugin):
+class qtaudio_low_latency_record(audio_low_latency_record, qtautoplugin):
 
     def __init__(self, name, experiment, script=None):
 
         """plug-in GUI"""
 
-        audio_low_latency_record_start.__init__(self, name, experiment, script)
+        audio_low_latency_record.__init__(self, name, experiment, script)
         qtautoplugin.__init__(self, __file__)
         self.text_version.setText(
         u'<small>Audio Low Latency version %s</small>' % VERSION)
