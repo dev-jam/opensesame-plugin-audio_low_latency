@@ -253,7 +253,6 @@ class audio_low_latency_record(item):
         return time
 
 
-
     def set_stimulus_timing(self, _type, time=None):
 
         """
