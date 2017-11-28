@@ -71,6 +71,7 @@ class audio_low_latency_play_start(item):
                 self.module = self.experiment.audio_low_latency_play_module
                 self.device = self.experiment.audio_low_latency_play_device
                 self.period_size = self.experiment.audio_low_latency_play_period_size
+                self.period_size_time = self.experiment.audio_low_latency_play_period_size_time
                 self.data_size = self.experiment.audio_low_latency_play_data_size
                 self.bitdepth = self.experiment.audio_low_latency_play_bitdepth
                 self.samplerate = self.experiment.audio_low_latency_play_samplerate
@@ -108,6 +109,10 @@ class audio_low_latency_play_start(item):
                 raise osexception(
                     u'Could not load audio file', exception=e)
 
+            self.wav_duration = round(float(self.wav_file.getnframes()) / float(self.wav_file.getframerate()) * 1000, 1)
+            self.show_message(u'Audio file duration: %d ms' % (self.wav_duration))
+            self.show_message(u'Period duration: %d ms' % (self.period_size_time))
+
             error_msg_list = []
 
             if self.wav_file.getsampwidth() * 8 != self.bitdepth:
@@ -119,10 +124,10 @@ class audio_low_latency_play_start(item):
             if self.wav_file.getnchannels() != self.channels:
                 error_msg_list.append(u'- number of channels incorrect, file has %d channel(s) but experiment is set to %d channel(s)\n' % (self.wav_file.getnchannels(), self.channels))
                 #raise osexception(u'wave file has incorrect number of channels')
-
+            if self.wav_file.getnframes() < self.period_size:
+                error_msg_list.append(u'- Period size is larger than total number of frames in wave file, use a period size smaller than %d frames\n' % (self.wav_file.getnframes()))
             if error_msg_list:
                 raise osexception(u'Error with audio file %s\n%s' % (self.filename, ''.join(error_msg_list)))
-
 
             if self.ram_cache == u'yes':
                 wav_file_nframes = self.wav_file.getnframes()
@@ -227,6 +232,8 @@ class audio_low_latency_play_start(item):
         if self.module == self.experiment.pyaudio_module_name:
             stream.stop_stream()
 
+        self.set_stimulus_offset()
+
         wav_file.close()
 
         self.show_message(u'Stopped audio')
@@ -262,6 +269,8 @@ class audio_low_latency_play_start(item):
         if self.module == self.experiment.pyaudio_module_name:
             stream.stop_stream()
 
+        self.set_stimulus_offset()
+
         self.show_message(u'Stopped audio')
         self.experiment.audio_low_latency_play_locked = 0
 
@@ -293,6 +302,44 @@ class audio_low_latency_play_start(item):
         if time is None:
             time = self.clock.time()
         self.experiment.var.set(u'time_stimulus_onset_%s' % self.name, time)
+        return time
+
+
+    def set_stimulus_offset(self, time=None):
+
+        """
+        desc:
+            Set a timestamp for the onset time of the item's execution.
+
+        keywords:
+            time:    A timestamp or None to use the current time.
+
+        returns:
+            desc:    A timestamp.
+        """
+
+        if time is None:
+            time = self.clock.time()
+        self.experiment.var.set(u'time_stimulus_offset_%s' % self.name, time)
+        return time
+
+
+    def set_stimulus_timing(self, _type, time=None):
+
+        """
+        desc:
+            Set a timestamp for the onset time of the item's execution.
+
+        keywords:
+            time:    A timestamp or None to use the current time.
+
+        returns:
+            desc:    A timestamp.
+        """
+
+        if time is None:
+            time = self.clock.time()
+        self.experiment.var.set(u'time_stimulus_%s_%s' % (_type, self.name), time)
         return time
 
 

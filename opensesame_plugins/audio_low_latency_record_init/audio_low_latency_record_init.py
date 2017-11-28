@@ -173,10 +173,12 @@ class audio_low_latency_record_init(item):
 
         if self.dummy_mode == u'no':
 
-
             self.period_size_time = round(float(self.period_size) / float(self.samplerate) * 1000, 1)
+            self.experiment.audio_low_latency_record_period_size_time = self.period_size_time
 
-            self.show_message(u'Bitdepth: ' +str(self.bitdepth)+'bit')
+            self.show_message(u'Module: ' + self.module)
+            self.show_message(u'Device: ' + self.device_name)
+            self.show_message(u'Bitdepth: ' + str(self.bitdepth)+'bit')
             self.show_message(u'Samplerate: ' + str(self.samplerate) + 'Hz')
             self.show_message(u'Channels: ' + str(self.channels))
             self.show_message(u'Period size time: ' + str(self.period_size_time)+'ms')
@@ -194,27 +196,25 @@ class audio_low_latency_record_init(item):
                 self.device_index = self.experiment.audio_low_latency_record_device_dict[self.pyalsaaudio_module_name].index(self.device_name)
 
                 self.device = alsaaudio.PCM(type=alsaaudio.PCM_CAPTURE, device=self.device_name)
-                self.device.setchannels(self.channels)
-                self.device.setrate(self.samplerate)
-                self.device.setperiodsize(self.period_size)
+                channels_set = self.device.setchannels(self.channels)
+                samplerate_set = self.device.setrate(self.samplerate)
+                period_size_set = self.device.setperiodsize(self.period_size)
 
-                # 8bit is unsigned in wav files
+                error_msg_list = []
+                error_msg_bitdepth = u'%dbit audio not supported\n' % (self.bitdepth)
+
                 if self.bitdepth == 8:
                     try:
                         self.device.setformat(alsaaudio.PCM_FORMAT_U8)
                     except Exception as e:
-                        raise osexception(
-                            u'Device does not support ' + str(self.bitdepth) + u'bit audio', exception=e)
-                # Otherwise we assume signed data, little endian
+                        error_msg_list.append(error_msg_bitdepth)
                 elif self.bitdepth == 16:
                     try:
                         self.device.setformat(alsaaudio.PCM_FORMAT_S16_LE)
                     except Exception as e:
-                        raise osexception(
-                            u'Device does not support ' + str(self.bitdepth) + u'bit audio', exception=e)
+                        error_msg_list.append(error_msg_bitdepth)
                 elif self.bitdepth == 24:
-                    raise osexception(
-                        u'24bit will be supported in the next release')
+                    error_msg_list.append(error_msg_bitdepth)
 #                    try:
 #                        self.device.setformat(alsaaudio.PCM_FORMAT_S24_3LE)
 #                    except Exception as e:
@@ -224,10 +224,19 @@ class audio_low_latency_record_init(item):
                     try:
                         self.device.setformat(alsaaudio.PCM_FORMAT_S32_LE)
                     except Exception as e:
-                        raise osexception(
-                            u'Device does not support ' + str(self.bitdepth) + u'bit audio', exception=e)
+                        error_msg_list.append(error_msg_bitdepth)
                 else:
                     raise ValueError('Unsupported format')
+
+                if channels_set != self.channels:
+                    error_msg_list.append(u'%d channel(s) not supported\n' % (self.channels))
+                if samplerate_set != self.samplerate:
+                    error_msg_list.append(u'Samplerate of %d Hz not supported\n' % (self.samplerate))
+                if period_size_set != self.period_size:
+                    error_msg_list.append(u'Period size of %d frames not supported\n' % (self.period_size))
+                if error_msg_list:
+                    raise osexception(u'Error with device: %s\n%s' % (self.device_name, ''.join(error_msg_list)))
+
 
             elif self.module == self.pyaudio_module_name and self.pyaudio_module_name in self.experiment.audio_low_latency_record_module_list:
                 import pyaudio
@@ -247,8 +256,7 @@ class audio_low_latency_record_init(item):
                                 output_device_index=self.device_index)
 
                     except Exception as e:
-                        raise osexception(
-                            u'Could not start audio device', exception=e)
+                        raise osexception(u'%dbit audio not supported\n' % (self.bitdepth), exception=e)
 
             self.experiment.audio_low_latency_record_device = self.device
             self.experiment.cleanup_functions.append(self.close)

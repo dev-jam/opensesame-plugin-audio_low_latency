@@ -73,6 +73,7 @@ class audio_low_latency_record(item):
                 self.module = self.experiment.audio_low_latency_record_module
                 self.device = self.experiment.audio_low_latency_record_device
                 self.period_size = self.experiment.audio_low_latency_record_period_size
+                self.period_size_time = self.experiment.audio_low_latency_record_period_size_time
                 self.data_size = self.experiment.audio_low_latency_record_data_size
                 self.bitdepth = self.experiment.audio_low_latency_record_bitdepth
                 self.samplerate = self.experiment.audio_low_latency_record_samplerate
@@ -121,17 +122,14 @@ class audio_low_latency_record(item):
         start_time = self.clock.time()
 
         if isinstance(self.var.duration,int):
-            self.duration = int(self.var.duration)
-        else:
-            raise osexception(u'Duration should be a integer')
-
-        if isinstance(self.var.duration,int):
             if self.var.duration >= 1:
                 self.duration = int(self.var.duration)
+                if self.duration < self.period_size_time:
+                    raise osexception(u'Duration should be larger than period duration')
             else:
-                raise osexception(u'Delay can not be negative')
+                raise osexception(u'Duration can not be negative')
         else:
-            raise osexception(u'Delay should be a integer')
+            raise osexception(u'Duration should be a integer')
 
         if isinstance(self.var.delay,int):
             if self.var.delay >= 0:
@@ -192,6 +190,8 @@ class audio_low_latency_record(item):
             elif self.ram_cache == u'no':
                 wav_file.writeframes(data)
 
+        self.set_stimulus_offset()
+
         if self.ram_cache == u'yes':
             wav_file.writeframes(b''.join(frames))
 
@@ -231,6 +231,45 @@ class audio_low_latency_record(item):
         if time is None:
             time = self.clock.time()
         self.experiment.var.set(u'time_stimulus_onset_%s' % self.name, time)
+        return time
+
+
+    def set_stimulus_offset(self, time=None):
+
+        """
+        desc:
+            Set a timestamp for the onset time of the item's execution.
+
+        keywords:
+            time:    A timestamp or None to use the current time.
+
+        returns:
+            desc:    A timestamp.
+        """
+
+        if time is None:
+            time = self.clock.time()
+        self.experiment.var.set(u'time_stimulus_offset_%s' % self.name, time)
+        return time
+
+
+
+    def set_stimulus_timing(self, _type, time=None):
+
+        """
+        desc:
+            Set a timestamp for the onset time of the item's execution.
+
+        keywords:
+            time:    A timestamp or None to use the current time.
+
+        returns:
+            desc:    A timestamp.
+        """
+
+        if time is None:
+            time = self.clock.time()
+        self.experiment.var.set(u'time_stimulus_%s_%s' % (_type, self.name), time)
         return time
 
 
