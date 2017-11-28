@@ -24,9 +24,9 @@ controls:
     type: "line_edit"
     var: "delay"
 -
-    label: "Preload file to RAM?"
+    label: "Preload"
     name: "checkbox_ram_cache"
-    tooltip: "RAM Cache"
+    tooltip: "Preload file to RAM?"
     type: "checkbox"
     var: "ram_cache"
 -

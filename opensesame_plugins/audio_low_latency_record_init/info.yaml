@@ -28,7 +28,7 @@ controls:
 -
     label: "Choose device"
     name: "combobox_device_name"
-    tooltip: "Device name"
+    info: "hw: -> exclusive mode; plughw -> shared mode"
     type: "combobox"
     var: "device_name"
     options:
@@ -67,11 +67,11 @@ controls:
       - "1"
       - "2"
 -
-    label: "Buffer size (frames)"
+    label: "Period size (frames)"
     name: "line_edit_buffer"
-    tooltip: "Buffer size, value is number of samples (8 seems to be the bare minimum)"
+    info: "Period size, value is number of samples (16 seems to be the bare minimum, 65536 the maximum)"
     type: "line_edit"
-    var: "buffer"
+    var: "period_size"
 -
     type: text
     label: DUMMY

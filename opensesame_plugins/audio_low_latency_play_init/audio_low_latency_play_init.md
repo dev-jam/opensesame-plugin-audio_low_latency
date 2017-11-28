@@ -28,7 +28,7 @@ Audio Low Latency Play Init options:
 - *Bit depth* number of bits per sample.
 - *Sample Rate* number of samples/second.
 - *Channels* number of channels.
-- *Buffer size* is a positive integer and represents the number of frames.
+- *Period size* is a positive integer and represents the number of frames.
 
 
 

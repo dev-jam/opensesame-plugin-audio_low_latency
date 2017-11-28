@@ -26,7 +26,7 @@ Audio Low Latency Record options:
 - *Audio Filename* path to the audio file.
 - *Duration* in ms.
 - *Delay* in ms.
-- *Cache to RAM before saving?* file will be cached to RAM before saving.
+- *Cache to RAM* file will be cached to RAM before saving.
 
 
 

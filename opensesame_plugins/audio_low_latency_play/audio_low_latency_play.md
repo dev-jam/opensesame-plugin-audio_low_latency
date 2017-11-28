@@ -26,7 +26,7 @@ Audio Low Latency Play options:
 - *Audio Filename* path to the audio file.
 - *Duration* in ms or string 'sound'.
 - *Delay* in ms.
-- *Preload file to RAM* file will be preloaded to RAM in the prepare phase.
+- *Preload* file will be preloaded to RAM in the prepare phase.
 
 
 2. LICENSE

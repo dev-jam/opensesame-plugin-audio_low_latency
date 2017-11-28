@@ -56,7 +56,7 @@ class audio_low_latency_record_init(item):
         self.var.bitdepth = str(16)
         self.var.samplerate = str(44100)
         self.var.channels = str(1)
-        self.var.buffer = 1024
+        self.var.period_size = 1024
 
         self.experiment.audio_low_latency_record_module_list = list()
         self.experiment.audio_low_latency_record_device_dict = dict()
@@ -127,14 +127,14 @@ class audio_low_latency_record_init(item):
         self.samplerate = int(self.var.samplerate)
         self.channels = int(self.var.channels)
 
-        if isinstance(self.var.buffer,int):
-            self.buffer = int(self.var.buffer)
+        if isinstance(self.var.period_size,int):
+            self.period_size = int(self.var.period_size)
         else:
-            raise osexception(u'Buffer value should be a integer')
+            raise osexception(u'Period size value should be a integer')
 
 
         self.frame_size = self.bitdepth * self.channels
-        self.data_size = self.frame_size * self.buffer
+        self.data_size = self.frame_size * self.period_size
 
         self.experiment.audio_low_latency_record_dummy_mode = self.dummy_mode
         self.experiment.audio_low_latency_record_verbose = self.verbose
@@ -144,12 +144,12 @@ class audio_low_latency_record_init(item):
         self.experiment.audio_low_latency_record_samplewidth = self.samplewidth
         self.experiment.audio_low_latency_record_samplerate = self.samplerate
         self.experiment.audio_low_latency_record_channels = self.channels
-        self.experiment.audio_low_latency_record_buffer = self.buffer
+        self.experiment.audio_low_latency_record_period_size = self.period_size
         self.experiment.audio_low_latency_record_data_size = self.data_size
 
         self.experiment.var.audio_low_latency_record_module = self.module
         self.experiment.var.audio_low_latency_record_device_name = self.device_name
-        self.experiment.var.audio_low_latency_record_buffer = self.buffer
+        self.experiment.var.audio_low_latency_record_period_size = self.period_size
         self.experiment.var.audio_low_latency_record_bitdepth = self.bitdepth
         self.experiment.var.audio_low_latency_record_samplewidth = self.samplewidth
         self.experiment.var.audio_low_latency_record_samplerate = self.samplerate
@@ -174,12 +174,12 @@ class audio_low_latency_record_init(item):
         if self.dummy_mode == u'no':
 
 
-            self.buffer_time = round(float(self.buffer) / float(self.samplerate) * 1000, 1)
+            self.period_size_time = round(float(self.period_size) / float(self.samplerate) * 1000, 1)
 
             self.show_message(u'Bitdepth: ' +str(self.bitdepth)+'bit')
             self.show_message(u'Samplerate: ' + str(self.samplerate) + 'Hz')
             self.show_message(u'Channels: ' + str(self.channels))
-            self.show_message(u'Buffer: ' + str(self.buffer_time)+'ms')
+            self.show_message(u'Period size time: ' + str(self.period_size_time)+'ms')
 
             try:
                 # disable the internal audio device / mixer
@@ -196,7 +196,7 @@ class audio_low_latency_record_init(item):
                 self.device = alsaaudio.PCM(type=alsaaudio.PCM_CAPTURE, device=self.device_name)
                 self.device.setchannels(self.channels)
                 self.device.setrate(self.samplerate)
-                self.device.setperiodsize(self.buffer)
+                self.device.setperiodsize(self.period_size)
 
                 # 8bit is unsigned in wav files
                 if self.bitdepth == 8:
@@ -243,7 +243,7 @@ class audio_low_latency_record_init(item):
                                 channels=self.channels,
                                 rate=self.samplerate,
                                 input=True,
-                                frames_per_buffer=self.buffer,
+                                frames_per_buffer=self.period_size,
                                 output_device_index=self.device_index)
 
                     except Exception as e:

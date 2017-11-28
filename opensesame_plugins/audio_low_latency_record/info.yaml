@@ -24,9 +24,9 @@ controls:
     type: "line_edit"
     var: "delay"
 -
-    label: "Cache to RAM before saving?"
+    label: "Cache to RAM"
     name: "checkbox_ram_cache"
-    tooltip: "RAM Cache"
+    tooltip: "Cache to RAM before saving?"
     type: "checkbox"
     var: "ram_cache"
 -

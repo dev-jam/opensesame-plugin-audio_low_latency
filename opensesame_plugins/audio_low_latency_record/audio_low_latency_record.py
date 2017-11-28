@@ -72,7 +72,7 @@ class audio_low_latency_record(item):
             if self.dummy_mode == u'no':
                 self.module = self.experiment.audio_low_latency_record_module
                 self.device = self.experiment.audio_low_latency_record_device
-                self.buffer = self.experiment.audio_low_latency_record_buffer
+                self.period_size = self.experiment.audio_low_latency_record_period_size
                 self.data_size = self.experiment.audio_low_latency_record_data_size
                 self.bitdepth = self.experiment.audio_low_latency_record_bitdepth
                 self.samplerate = self.experiment.audio_low_latency_record_samplerate
@@ -158,7 +158,7 @@ class audio_low_latency_record(item):
 
             self.show_message(u'Starting recording audio')
 
-            self.record(self.device, self.wav_file, self.buffer, self.duration, delay)
+            self.record(self.device, self.wav_file, self.period_size, self.duration, delay)
 
         elif self.dummy_mode == u'yes':
             self.show_message(u'Dummy mode enabled, NOT recording audio')

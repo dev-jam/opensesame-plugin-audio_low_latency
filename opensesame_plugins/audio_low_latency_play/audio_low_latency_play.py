@@ -69,7 +69,7 @@ class audio_low_latency_play(item):
             if self.dummy_mode == u'no':
                 self.module = self.experiment.audio_low_latency_play_module
                 self.device = self.experiment.audio_low_latency_play_device
-                self.buffer = self.experiment.audio_low_latency_play_buffer
+                self.period_size = self.experiment.audio_low_latency_play_period_size
                 self.data_size = self.experiment.audio_low_latency_play_data_size
                 self.bitdepth = self.experiment.audio_low_latency_play_bitdepth
                 self.samplewidth = self.experiment.audio_low_latency_play_samplewidth
@@ -176,7 +176,7 @@ class audio_low_latency_play(item):
             self.show_message(u'Starting audio')
 
             if self.ram_cache == u'No':
-                self.play_file(self.device, self.wav_file, self.buffer, delay)
+                self.play_file(self.device, self.wav_file, self.period_size, delay)
             elif self.ram_cache == u'yes':
                 self.play_data(self.device, self.wav_file_data, self.data_size, delay)
 

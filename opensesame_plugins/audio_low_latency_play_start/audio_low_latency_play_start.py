@@ -70,7 +70,7 @@ class audio_low_latency_play_start(item):
             if self.dummy_mode == u'no':
                 self.module = self.experiment.audio_low_latency_play_module
                 self.device = self.experiment.audio_low_latency_play_device
-                self.audio_buffer = self.experiment.audio_low_latency_play_buffer
+                self.period_size = self.experiment.audio_low_latency_play_period_size
                 self.data_size = self.experiment.audio_low_latency_play_data_size
                 self.bitdepth = self.experiment.audio_low_latency_play_bitdepth
                 self.samplerate = self.experiment.audio_low_latency_play_samplerate
@@ -185,7 +185,7 @@ class audio_low_latency_play_start(item):
             self.experiment.audio_low_latency_play_locked = 1
 
             if self.ram_cache == u'no':
-                self.experiment.audio_low_latency_play_thread = threading.Thread(target=self.play_file, args=(self.device, self.wav_file, self.audio_buffer, delay))
+                self.experiment.audio_low_latency_play_thread = threading.Thread(target=self.play_file, args=(self.device, self.wav_file, self.period_size, delay))
             elif self.ram_cache == u'yes':
                 self.experiment.audio_low_latency_play_thread = threading.Thread(target=self.play_data, args=(self.device, self.wav_file_data, self.data_size, delay))
 
