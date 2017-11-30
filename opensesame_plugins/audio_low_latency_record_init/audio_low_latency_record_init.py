@@ -258,6 +258,9 @@ class audio_low_latency_record_init(item):
                     except Exception as e:
                         raise osexception(u'%dbit audio not supported\n' % (self.bitdepth), exception=e)
 
+                self.show_message(u'Estimated input latency: %fms ' % (self.device.get_input_latency()))
+                self.show_message(u'Buffer size: %d frames ' % (self.device.get_read_available()))
+
             self.experiment.audio_low_latency_record_device = self.device
             self.experiment.cleanup_functions.append(self.close)
             self.python_workspace[u'audio_low_latency_record'] = self.experiment.audio_low_latency_record_device

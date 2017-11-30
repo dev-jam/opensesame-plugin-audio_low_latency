@@ -259,6 +259,9 @@ class audio_low_latency_play_init(item):
                         raise osexception(
                             u'Could not start audio device', exception=e)
 
+                self.show_message(u'Estimated output latency: %fms ' % (self.device.get_output_latency()))
+                self.show_message(u'Buffer size: %d frames ' % (self.device.get_write_available()))
+
             self.experiment.audio_low_latency_play_device = self.device
             self.experiment.cleanup_functions.append(self.close)
             self.python_workspace[u'audio_low_latency_play'] = self.experiment.audio_low_latency_play_device
