@@ -62,8 +62,8 @@ class audio_low_latency_record_init(item):
         self.experiment.audio_low_latency_record_device_dict = dict()
         self.experiment.audio_low_latency_record_device_selected_dict = dict()
 
-        self.pyalsaaudio_module_name = u'ALSA (Low Latency, Linux Only)'
-        self.pyaudio_module_name = u'PortAudio (Compatibility, Cross-platform)'
+        self.pyalsaaudio_module_name = u'ALSA (Linux only)'
+        self.pyaudio_module_name = u'PortAudio'
 
 
         if os.name == 'posix':
