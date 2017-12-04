@@ -118,6 +118,9 @@ class audio_low_latency_record_start(item):
             self.wav_file.setframerate(self.samplerate)
             self.wav_file.setnchannels(self.channels)
 
+            self.show_message(u'Period size: %d frames' % (self.period_size))
+            self.show_message(u'Period duration: %s ms' % (str(self.period_size_time)))
+
 
     def run(self):
 

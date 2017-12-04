@@ -39,7 +39,6 @@ controls:
     tooltip: "Choose bitdepth"
     type: "line_edit"
     var: "bitdepth"
-    options:
 -
     label: "Sample Rate (Hz)"
     name: "line_edit_samplerate"
@@ -52,7 +51,6 @@ controls:
     tooltip: "Channels"
     type: "line_edit"
     var: "channels"
-    options:
 -
     label: "Period size (frames)"
     name: "line_edit_buffer"

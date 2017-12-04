@@ -115,8 +115,8 @@ class audio_low_latency_record_init(item):
         """Set en check variables."""
 
         if hasattr(self.experiment, u'audio_low_latency_record_device'):
-            raise osexception(
-                u'You should have only one instance of `Audio Low Latency Record Init` in your experiment')
+            if self.experiment.audio_low_latency_record_device:
+                self.experiment.audio_low_latency_play_record.close()
 
         self.dummy_mode = self.var.dummy_mode
         self.verbose = self.var.verbose
