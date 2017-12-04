@@ -35,37 +35,24 @@ controls:
       - 
 -
     label: "Bit Depth"
-    name: "combobox_bitdepth"
+    name: "line_edit_bitdepth"
     tooltip: "Choose bitdepth"
-    type: "combobox"
+    type: "line_edit"
     var: "bitdepth"
     options:
-      - "8"
-      - "16"
-      - "24"
-      - "32"
 -
     label: "Sample Rate (Hz)"
-    name: "combobox_samplerate"
+    name: "line_edit_samplerate"
     tooltip: "Choose sample Rate"
-    type: "combobox"
+    type: "line_edit"
     var: "samplerate"
-    options:
-      - "22050"
-      - "44100"
-      - "48000"
-      - "88200"
-      - "96000"
-      - "192000"
 -
     label: "Channels"
-    name: "combobox_channels"
+    name: "line_edit_channels"
     tooltip: "Channels"
-    type: "combobox"
+    type: "line_edit"
     var: "channels"
     options:
-      - "1"
-      - "2"
 -
     label: "Period size (frames)"
     name: "line_edit_buffer"

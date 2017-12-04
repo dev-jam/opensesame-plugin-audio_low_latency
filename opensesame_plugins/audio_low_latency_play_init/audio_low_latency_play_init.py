@@ -115,8 +115,8 @@ class audio_low_latency_play_init(item):
         """Set en check variables."""
 
         if hasattr(self.experiment, u'audio_low_latency_play_device'):
-            raise osexception(
-                u'You should have only one instance of `Audio Low Latency Play Init` in your experiment')
+            if self.experiment.audio_low_latency_play_device:
+                self.experiment.audio_low_latency_play_device.close()
 
         self.dummy_mode = self.var.dummy_mode
         self.verbose = self.var.verbose
@@ -263,7 +263,7 @@ class audio_low_latency_play_init(item):
                 self.show_message(u'Buffer size: %d frames ' % (self.device.get_write_available()))
 
             self.experiment.audio_low_latency_play_device = self.device
-            self.experiment.cleanup_functions.append(self.close)
+            #self.experiment.cleanup_functions.append(self.close)
             self.python_workspace[u'audio_low_latency_play'] = self.experiment.audio_low_latency_play_device
 
         elif self.dummy_mode == u'yes':

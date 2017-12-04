@@ -106,8 +106,9 @@ class audio_low_latency_play(item):
                 raise osexception(
                     u'Could not load audio file', exception=e)
 
-            self.wav_duration = round(float(self.wav_file.getnframes()) / float(self.wav_file.getframerate()) * 1000, 1)
-            self.show_message(u'Audio file duration: %d s' % (round(self.wav_duration/1000)))
+            self.wav_duration = int(round(float(self.wav_file.getnframes()) / float(self.wav_file.getframerate()) * 1000, 1))
+            self.show_message(u'Audio file duration: %d ms' % (self.wav_duration))
+            self.show_message(u'Period size: %d frames' % (self.period_size))
             self.show_message(u'Period duration: %s ms' % (str(self.period_size_time)))
 
             error_msg_list = []
