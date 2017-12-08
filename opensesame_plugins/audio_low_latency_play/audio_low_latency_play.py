@@ -202,7 +202,9 @@ class audio_low_latency_play(item):
             if delay >= 1:
                 self.clock.sleep(delay)
 
-        if self.module == self.experiment.pyaudio_module_name:
+        if self.module == self.experiment.sounddevice_module_name:
+            stream.start()
+        elif self.module == self.experiment.pyaudio_module_name:
             stream.start_stream()
 
         self.set_stimulus_onset()
@@ -217,7 +219,9 @@ class audio_low_latency_play(item):
                 if self.clock.time() - start_time >= self.duration:
                     break
 
-        if self.module == self.experiment.pyaudio_module_name:
+        if self.module == self.experiment.sounddevice_module_name:
+            stream.stop()
+        elif self.module == self.experiment.pyaudio_module_name:
             stream.stop_stream()
 
         self.set_stimulus_offset()
@@ -233,7 +237,9 @@ class audio_low_latency_play(item):
             if delay >= 1:
                 self.clock.sleep(delay)
 
-        if self.module == self.experiment.pyaudio_module_name:
+        if self.module == self.experiment.sounddevice_module_name:
+            stream.start()
+        elif self.module == self.experiment.pyaudio_module_name:
             stream.start_stream()
 
         self.set_stimulus_onset()
@@ -246,7 +252,9 @@ class audio_low_latency_play(item):
                 if self.clock.time() - start_time >= self.duration:
                     break
 
-        if self.module == self.experiment.pyaudio_module_name:
+        if self.module == self.experiment.sounddevice_module_name:
+            stream.stop()
+        elif self.module == self.experiment.pyaudio_module_name:
             stream.stop_stream()
 
         self.set_stimulus_offset()

@@ -53,7 +53,7 @@ controls:
     var: "channels"
 -
     label: "Period size (frames)"
-    name: "line_edit_buffer"
+    name: "line_edit_period_size"
     info: "Period size, value is number of samples (16 seems to be the bare minimum, 65536 the maximum)"
     type: "line_edit"
     var: "period_size"

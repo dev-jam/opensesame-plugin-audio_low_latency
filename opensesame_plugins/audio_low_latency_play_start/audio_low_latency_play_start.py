@@ -213,7 +213,9 @@ class audio_low_latency_play_start(item):
             if delay >= 1:
                 self.clock.sleep(delay)
 
-        if self.module == self.experiment.pyaudio_module_name:
+        if self.module == self.experiment.sounddevice_module_name:
+            stream.start()
+        elif self.module == self.experiment.pyaudio_module_name:
             stream.start_stream()
 
         self.set_stimulus_onset()
@@ -221,6 +223,7 @@ class audio_low_latency_play_start(item):
 
         while len(data) > 0:
             # Read data from stdin
+
             stream.write(data)
             data = wav_file.readframes(chunk)
 
@@ -230,7 +233,9 @@ class audio_low_latency_play_start(item):
                 if self.clock.time() - start_time >= self.duration:
                     break
 
-        if self.module == self.experiment.pyaudio_module_name:
+        if self.module == self.experiment.sounddevice_module_name:
+            stream.stop()
+        elif self.module == self.experiment.pyaudio_module_name:
             stream.stop_stream()
 
         self.set_stimulus_offset()
@@ -255,8 +260,10 @@ class audio_low_latency_play_start(item):
         self.set_stimulus_onset()
         start_time = self.clock.time()
 
-        if self.module == self.experiment.pyaudio_module_name:
-            stream.start_stream()  # stop stream
+        if self.module == self.experiment.sounddevice_module_name:
+            stream.start()
+        elif self.module == self.experiment.pyaudio_module_name:
+            stream.start_stream()
 
         for start in range(0,len(wav_data),chunk):
             stream.write(wav_data[start:start+chunk])
@@ -267,7 +274,9 @@ class audio_low_latency_play_start(item):
                 if self.clock.time() - start_time >= self.duration:
                     break
 
-        if self.module == self.experiment.pyaudio_module_name:
+        if self.module == self.experiment.sounddevice_module_name:
+            stream.stop()
+        elif self.module == self.experiment.pyaudio_module_name:
             stream.stop_stream()
 
         self.set_stimulus_offset()

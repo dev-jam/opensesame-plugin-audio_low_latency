@@ -48,7 +48,6 @@ class audio_low_latency_record(item):
         self.verbose = u'no'
         self.poll_time = 10
 
-
     def reset(self):
 
         """Resets plug-in to initial values."""
@@ -177,14 +176,16 @@ class audio_low_latency_record(item):
         self.set_stimulus_onset()
         start_time = self.clock.time()
 
-        if self.module == self.experiment.pyaudio_module_name:
+        if self.module == self.experiment.sounddevice_module_name:
+            stream.start()
+        elif self.module == self.experiment.pyaudio_module_name:
             stream.start_stream()
 
         while duration >= self.clock.time() - start_time:
             # Read data from stdin
             if self.module == self.experiment.pyalsaaudio_module_name:
                 l, data = stream.read()
-            elif  self.module == self.experiment.pyaudio_module_name:
+            else:
                 data = stream.read(chunk)
 
             if self.ram_cache == u'yes':
@@ -197,7 +198,9 @@ class audio_low_latency_record(item):
         if self.ram_cache == u'yes':
             wav_file.writeframes(b''.join(frames))
 
-        if self.module == self.experiment.pyaudio_module_name:
+        if self.module == self.experiment.sounddevice_module_name:
+            stream.stop()
+        elif self.module == self.experiment.pyaudio_module_name:
             stream.stop_stream()
 
         wav_file.close()

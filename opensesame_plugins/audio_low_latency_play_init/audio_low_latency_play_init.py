@@ -42,8 +42,10 @@ class audio_low_latency_play_init(item):
 
     def __init__(self, name, experiment, string=None):
 
-        item.__init__(self, name, experiment, string)
         self.verbose = u'no'
+        self.modules_enabled = [u'alsaaudio', u'sounddevice', u'pyaudio']
+
+        item.__init__(self, name, experiment, string)
 
 
     def reset(self):
@@ -62,47 +64,83 @@ class audio_low_latency_play_init(item):
         self.experiment.audio_low_latency_play_device_dict = dict()
         self.experiment.audio_low_latency_play_device_selected_dict = dict()
 
-        self.pyalsaaudio_module_name = u'ALSA (Linux only)'
-        self.pyaudio_module_name = u'PortAudio'
-
+        self.pyalsaaudio_module_name = u'PyAlsaAudio (Linux only)'
+        self.oss4_module_name = u'ossaudiodev (Linux only)'
+        self.pyaudio_module_name = u'PyAudio (PortAudio)'
+        self.sounddevice_module_name = u'SoundDevice (PortAudio)'
 
         if os.name == 'posix':
+            if u'alsaaudio' in self.modules_enabled:
+                try:
+                    import alsaaudio
+                    alsa_cards = alsaaudio.pcms(alsaaudio.PCM_PLAYBACK)
+                    self.experiment.pyalsaaudio_module_name = self.pyalsaaudio_module_name
+                    if alsa_cards:
+                        self.experiment.audio_low_latency_play_module_list.append(self.pyalsaaudio_module_name)
+                        self.experiment.audio_low_latency_play_device_dict[self.pyalsaaudio_module_name] = alsa_cards
+                        self.experiment.audio_low_latency_play_device_selected_dict[self.pyalsaaudio_module_name] = alsa_cards[0]
+                except:
+                    self.show_message(u'Could not import alsaaudio')
+
+            if u'ossaudiodev' in self.modules_enabled:
+                try:
+                    import ossaudiodev
+                    self.experiment.oss4_module_name = self.oss4_module_name
+                    self.experiment.audio_low_latency_play_module_list.append(self.oss4_module_name)
+                    self.experiment.audio_low_latency_play_device_dict[self.oss4_module_name] = [u'Exclusive Mode',u'Shared Mode']
+                    self.experiment.audio_low_latency_play_device_selected_dict[self.oss4_module_name] = u'Exclusive Mode'
+                except:
+                    self.show_message(u'Could not import ossaudiodev')
+
+        if u'sounddevice' in self.modules_enabled:
             try:
-                import alsaaudio
-                alsa_cards = alsaaudio.pcms(alsaaudio.PCM_PLAYBACK)
-                self.experiment.pyalsaaudio_module_name = self.pyalsaaudio_module_name
-                if alsa_cards:
-                    self.experiment.audio_low_latency_play_module_list.append(self.pyalsaaudio_module_name)
-                    self.experiment.audio_low_latency_play_device_dict[self.pyalsaaudio_module_name] = alsa_cards
-                    self.experiment.audio_low_latency_play_device_selected_dict[self.pyalsaaudio_module_name] = alsa_cards[0]
+                import sounddevice
+
+                sounddevice_cards = list()
+                cards = sounddevice.query_devices()
+                #sounddevice_device = pyaudio.PyAudio()
+                self.experiment.sounddevice_module_name = self.sounddevice_module_name
+                self.experiment.audio_low_latency_play_module_list.append(self.sounddevice_module_name)
+
+                for di in range(0, len(cards)):
+                    sounddevice_cards_dict = cards[di]
+                    sounddevice_cards.append(sounddevice_cards_dict['name'])
+                print(sounddevice_cards)
+                self.experiment.audio_low_latency_play_device_dict[self.sounddevice_module_name] = sounddevice_cards
+                self.experiment.audio_low_latency_play_device_selected_dict[self.sounddevice_module_name] = sounddevice_cards[0]
+
             except:
-                self.show_message(u'Could not import alsaaudio')
+                self.show_message(u'Could not import sounddevice')
 
-        try:
-            import pyaudio
+        if u'pyaudio' in self.modules_enabled:
+            try:
+                import pyaudio
 
-            pyaudio_cards = list()
-            pyaudio_device = pyaudio.PyAudio()
-            self.experiment.pyaudio_module_name = self.pyaudio_module_name
-            self.experiment.audio_low_latency_play_module_list.append(self.pyaudio_module_name)
+                pyaudio_cards = list()
+                pyaudio_device = pyaudio.PyAudio()
+                self.experiment.pyaudio_module_name = self.pyaudio_module_name
+                self.experiment.audio_low_latency_play_module_list.append(self.pyaudio_module_name)
 
-            for di in range(0, pyaudio_device.get_device_count()):
-                pyaudio_cards_dict = pyaudio_device.get_device_info_by_index(di)
-                pyaudio_cards.append(pyaudio_cards_dict['name'])
+                for di in range(0, pyaudio_device.get_device_count()):
+                    pyaudio_cards_dict = pyaudio_device.get_device_info_by_index(di)
+                    pyaudio_cards.append(pyaudio_cards_dict['name'])
 
-            self.experiment.audio_low_latency_play_device_dict[self.pyaudio_module_name] = pyaudio_cards
-            self.experiment.audio_low_latency_play_device_selected_dict[self.pyaudio_module_name] = pyaudio_cards[0]
+                self.experiment.audio_low_latency_play_device_dict[self.pyaudio_module_name] = pyaudio_cards
+                self.experiment.audio_low_latency_play_device_selected_dict[self.pyaudio_module_name] = pyaudio_cards[0]
 
-        except:
-            self.show_message(u'Could not import pyaudio')
+            except:
+                self.show_message(u'Could not import pyaudio')
 
         self.show_message(u'Audio Low Latency Play plug-in has been initialized!')
 
-
         if self.pyalsaaudio_module_name in self.experiment.audio_low_latency_play_module_list:
             self.var.module = self.pyalsaaudio_module_name
+        elif self.sounddevice_module_name in self.experiment.audio_low_latency_play_module_list:
+            self.var.module = self.sounddevice_module_name
         elif self.pyaudio_module_name in self.experiment.audio_low_latency_play_module_list:
             self.var.module = self.pyaudio_module_name
+        elif self.oss4_module_name in self.experiment.audio_low_latency_play_module_list:
+            self.var.module = self.oss4_module_name
 
         self.current_module = self.var.module
         device_list = self.experiment.audio_low_latency_play_device_dict[self.current_module]
@@ -204,29 +242,20 @@ class audio_low_latency_play_init(item):
                 error_msg_bitdepth = u'%dbit audio not supported\n' % (self.bitdepth)
 
                 if self.bitdepth == 8:
-                    try:
-                        self.device.setformat(alsaaudio.PCM_FORMAT_U8)
-                    except Exception as e:
-                        error_msg_list.append(error_msg_bitdepth)
+                    format_audio = alsaaudio.PCM_FORMAT_U8
                 elif self.bitdepth == 16:
-                    try:
-                        self.device.setformat(alsaaudio.PCM_FORMAT_S16_LE)
-                    except Exception as e:
-                        error_msg_list.append(error_msg_bitdepth)
+                    format_audio = alsaaudio.PCM_FORMAT_S16_LE
                 elif self.bitdepth == 24:
                     error_msg_list.append(error_msg_bitdepth)
-#                    try:
-#                        self.device.setformat(alsaaudio.PCM_FORMAT_S24_3LE)
-#                    except Exception as e:
-#                        raise osexception(
-#                            u'Device does not support ' + str(self.wav_file.getsampwidth()*8) + u'bit audio', exception=e)
                 elif self.bitdepth == 32:
-                    try:
-                        self.device.setformat(alsaaudio.PCM_FORMAT_S32_LE)
-                    except Exception as e:
-                        error_msg_list.append(error_msg_bitdepth)
+                    format_audio = alsaaudio.PCM_FORMAT_S32_LE
                 else:
                     raise ValueError('Unsupported format')
+
+                try:
+                    self.device.setformat(format_audio)
+                except Exception as e:
+                    error_msg_list.append(error_msg_bitdepth)
 
                 if channels_set != self.channels:
                     error_msg_list.append(u'%d channel(s) not supported\n' % (self.channels))
@@ -236,7 +265,6 @@ class audio_low_latency_play_init(item):
                     error_msg_list.append(u'Period size of %d frames not supported\n' % (self.period_size))
                 if error_msg_list:
                     raise osexception(u'Error with device: %s\n%s' % (self.device_name, ''.join(error_msg_list)))
-
 
 
             elif self.module == self.pyaudio_module_name and self.pyaudio_module_name in self.experiment.audio_low_latency_play_module_list:
@@ -262,9 +290,71 @@ class audio_low_latency_play_init(item):
                 self.show_message(u'Estimated output latency: %fms ' % (self.device.get_output_latency()))
                 self.show_message(u'Buffer size: %d frames ' % (self.device.get_write_available()))
 
+
+            elif self.module == self.sounddevice_module_name and self.sounddevice_module_name in self.experiment.audio_low_latency_play_module_list:
+                import sounddevice
+
+                self.device_index = self.experiment.audio_low_latency_play_device_dict[self.sounddevice_module_name].index(self.device_name)
+
+                if self.bitdepth == 8:
+                    format_audio = u'uint8'
+                elif self.bitdepth == 16:
+                    format_audio = u'int16'
+                elif self.bitdepth == 24:
+                    format_audio = u'int24'
+                elif self.bitdepth == 32:
+                    format_audio = u'int32'
+                else:
+                    raise ValueError('Unsupported format')
+
+                try:
+
+                    self.device = sounddevice.RawOutputStream(samplerate=float(self.samplerate),
+                                                              dtype=format_audio,
+                                                              blocksize=int(self.period_size),
+                                                              device=int(self.device_index),
+                                                              channels=int(self.channels))
+
+                except Exception as e:
+                    raise osexception(
+                        u'Could not start audio device', exception=e)
+
+                #self.show_message(u'Estimated output latency: %fms ' % (self.device.get_output_latency()))
+                #self.show_message(u'Buffer size: %d frames ' % (self.device.get_write_available()))
+
+            elif self.module == self.experiment.oss4_module_name:
+                import ossaudiodev
+                self.device = ossaudiodev.open('w')
+                self.device.channels(self.channels)
+                self.device.speed(self.samplerate)
+
+                if self.bitdepth == 8:
+                    format_audio = ossaudiodev.AFMT_U8
+                elif self.bitdepth == 16:
+                    format_audio = ossaudiodev.AFMT_S16_LE
+                else:
+                    raise ValueError('Unsupported format')
+
+                try:
+                    self.device.setfmt(format_audio)
+                except Exception as e:
+                    raise osexception(
+                        u'Device does not support ' + str(self.bitdepth) + u'bit audio', exception=e)
+
+                self.period_size = self.device.bufsize()
+                self.period_size_time = round(float(self.period_size) / float(self.samplerate) * 1000, 1)
+                self.data_size = self.frame_size * self.period_size
+
+                self.experiment.audio_low_latency_play_period_size = self.period_size
+                self.experiment.audio_low_latency_play_data_size = self.data_size
+                self.experiment.var.audio_low_latency_play_period_size = self.period_size
+
+                print('Overruling period size with hardware buffer for OSS4, using: ' + str(self.period_size) + ' frames or ' + str(self.period_size_time) + 'ms')
+
             self.experiment.audio_low_latency_play_device = self.device
             #self.experiment.cleanup_functions.append(self.close)
             self.python_workspace[u'audio_low_latency_play'] = self.experiment.audio_low_latency_play_device
+
 
         elif self.dummy_mode == u'yes':
             self.show_message(u'Dummy mode enabled, run phase')
@@ -393,3 +483,8 @@ class qtaudio_low_latency_play_init(audio_low_latency_play_init, qtautoplugin):
         elif self.var.dummy_mode == u'no':
             self.combobox_module.setEnabled(True)
             self.combobox_device_name.setEnabled(True)
+
+        if self.current_module == self.oss4_module_name:
+            self.line_edit_period_size.setDisabled(True)
+        else:
+            self.line_edit_period_size.setEnabled(True)
