@@ -142,10 +142,8 @@ class audio_low_latency_play_init(item):
         elif self.oss4_module_name in self.experiment.audio_low_latency_play_module_list:
             self.var.module = self.oss4_module_name
 
-        self.current_module = self.var.module
-        device_list = self.experiment.audio_low_latency_play_device_dict[self.current_module]
-        self.current_device = device_list[0]
-        self.var.device_name = self.current_device
+        device_list = self.experiment.audio_low_latency_play_device_dict[self.var.module]
+        self.var.device_name = device_list[0]
 
 
     def init_var(self):
@@ -168,7 +166,7 @@ class audio_low_latency_play_init(item):
         if isinstance(self.var.period_size,int):
             self.period_size = int(self.var.period_size)
         else:
-            raise osexception(u'period_size value should be a integer')
+            raise osexception(u'Period size value should be a integer')
 
         self.frame_size = self.bitdepth * self.channels
         self.data_size = self.frame_size * self.period_size
@@ -414,15 +412,28 @@ class qtaudio_low_latency_play_init(audio_low_latency_play_init, qtautoplugin):
         self.text_version.setText(
         u'<small>Audio Low Latency version %s</small>' % VERSION)
 
+        if self.var.module in self.experiment.audio_low_latency_play_module_list:
+            self.current_module = self.var.module
+        else:
+            self.current_module = self.experiment.audio_low_latency_play_module_list[0]
+            self.var.module = self.current_module
+
+        if self.var.device_name in self.experiment.audio_low_latency_play_device_dict[self.current_module]:
+            self.current_device_name = self.var.device_name
+        else:
+            device_list = self.experiment.audio_low_latency_play_device_dict[self.current_module]
+            self.current_device_name = device_list[0]
+            self.experiment.audio_low_latency_play_device_selected_dict[self.current_module] = self.current_device_name
+            self.var.device_name = self.current_device_name
+
+        device_index = self.experiment.audio_low_latency_play_device_dict[self.current_module].index(self.current_device_name)
+
         self.combobox_module.clear()
         self.combobox_module.addItems(self.experiment.audio_low_latency_play_module_list)
-        self.combobox_module.setCurrentIndex(self.experiment.audio_low_latency_play_module_list.index(self.var.module))
+        self.combobox_module.setCurrentIndex(self.experiment.audio_low_latency_play_module_list.index(self.current_module))
 
         self.combobox_device_name.clear()
         self.combobox_device_name.addItems(self.experiment.audio_low_latency_play_device_dict[self.current_module])
-
-        device_name = self.experiment.audio_low_latency_play_device_selected_dict[self.current_module]
-        device_index = self.experiment.audio_low_latency_play_device_dict[self.current_module].index(device_name)
         self.combobox_device_name.setCurrentIndex(device_index)
 
     def apply_edit_changes(self):
@@ -467,15 +478,16 @@ class qtaudio_low_latency_play_init(audio_low_latency_play_init, qtautoplugin):
             self.experiment.audio_low_latency_play_device_selected_dict[self.current_module] = old_device_name
 
             new_module_name = self.var.module
-            self.combobox_device_name.clear()
-            self.combobox_device_name.addItems(self.experiment.audio_low_latency_play_device_dict[new_module_name])
-
             new_device_name = self.experiment.audio_low_latency_play_device_selected_dict[new_module_name]
             new_device_index = self.experiment.audio_low_latency_play_device_dict[new_module_name].index(new_device_name)
+
+            self.combobox_device_name.clear()
+            self.combobox_device_name.addItems(self.experiment.audio_low_latency_play_device_dict[new_module_name])
             self.combobox_device_name.setCurrentIndex(new_device_index)
 
             self.current_module = new_module_name
-            self.var.device_name = new_device_name
+            self.current_device_name = new_device_name
+            self.var.device_name = self.current_device_name
 
         if self.var.dummy_mode == u'yes':
             self.combobox_module.setDisabled(True)

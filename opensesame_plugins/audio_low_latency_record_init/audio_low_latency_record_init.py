@@ -69,7 +69,6 @@ class audio_low_latency_record_init(item):
         self.pyaudio_module_name = u'PyAudio (PortAudio)'
         self.sounddevice_module_name = u'SoundDevice (PortAudio)'
 
-
         if os.name == 'posix':
             if u'alsaaudio' in self.modules_enabled:
                 try:
@@ -143,10 +142,8 @@ class audio_low_latency_record_init(item):
         elif self.oss4_module_name in self.experiment.audio_low_latency_record_module_list:
             self.var.module = self.oss4_module_name
 
-        self.current_module = self.var.module
-        device_list = self.experiment.audio_low_latency_record_device_dict[self.current_module]
-        self.current_device = device_list[0]
-        self.var.device_name = self.current_device
+        device_list = self.experiment.audio_low_latency_record_device_dict[self.var.module]
+        self.var.device_name = device_list[0]
 
 
     def init_var(self):
@@ -155,7 +152,7 @@ class audio_low_latency_record_init(item):
 
         if hasattr(self.experiment, u'audio_low_latency_record_device'):
             if self.experiment.audio_low_latency_record_device:
-                self.experiment.audio_low_latency_play_record.close()
+                self.experiment.audio_low_latency_record.close()
 
         self.dummy_mode = self.var.dummy_mode
         self.verbose = self.var.verbose
@@ -170,7 +167,6 @@ class audio_low_latency_record_init(item):
             self.period_size = int(self.var.period_size)
         else:
             raise osexception(u'Period size value should be a integer')
-
 
         self.frame_size = self.bitdepth * self.channels
         self.data_size = self.frame_size * self.period_size
@@ -348,9 +344,8 @@ class audio_low_latency_record_init(item):
 
                 print('Overruling period size with hardware buffer for OSS4, using: ' + str(self.period_size) + ' frames or ' + str(self.period_size_time) + 'ms')
 
-
             self.experiment.audio_low_latency_record_device = self.device
-            self.experiment.cleanup_functions.append(self.close)
+            #self.experiment.cleanup_functions.append(self.close)
             self.python_workspace[u'audio_low_latency_record'] = self.experiment.audio_low_latency_record_device
 
         elif self.dummy_mode == u'yes':
@@ -399,6 +394,7 @@ class audio_low_latency_record_init(item):
         except:
             self.show_message(u"failed to close Audio Device")
 
+
 class qtaudio_low_latency_record_init(audio_low_latency_record_init, qtautoplugin):
 
     def __init__(self, name, experiment, script=None):
@@ -410,15 +406,28 @@ class qtaudio_low_latency_record_init(audio_low_latency_record_init, qtautoplugi
         self.text_version.setText(
         u'<small>Audio Low Latency version %s</small>' % VERSION)
 
+        if self.var.module in self.experiment.audio_low_latency_record_module_list:
+            self.current_module = self.var.module
+        else:
+            self.current_module = self.experiment.audio_low_latency_record_module_list[0]
+            self.var.module = self.current_module
+
+        if self.var.device_name in self.experiment.audio_low_latency_record_device_dict[self.current_module]:
+            self.current_device_name = self.var.device_name
+        else:
+            device_list = self.experiment.audio_low_latency_record_device_dict[self.current_module]
+            self.current_device_name = device_list[0]
+            self.experiment.audio_low_latency_record_device_selected_dict[self.current_module] = self.current_device_name
+            self.var.device_name = self.current_device_name
+
+        device_index = self.experiment.audio_low_latency_record_device_dict[self.current_module].index(self.current_device_name)
+
         self.combobox_module.clear()
         self.combobox_module.addItems(self.experiment.audio_low_latency_record_module_list)
-        self.combobox_module.setCurrentIndex(self.experiment.audio_low_latency_record_module_list.index(self.var.module))
+        self.combobox_module.setCurrentIndex(self.experiment.audio_low_latency_record_module_list.index(self.current_module))
 
         self.combobox_device_name.clear()
         self.combobox_device_name.addItems(self.experiment.audio_low_latency_record_device_dict[self.current_module])
-
-        device_name = self.experiment.audio_low_latency_record_device_selected_dict[self.current_module]
-        device_index = self.experiment.audio_low_latency_record_device_dict[self.current_module].index(device_name)
         self.combobox_device_name.setCurrentIndex(device_index)
 
     def apply_edit_changes(self):
@@ -463,15 +472,16 @@ class qtaudio_low_latency_record_init(audio_low_latency_record_init, qtautoplugi
             self.experiment.audio_low_latency_record_device_selected_dict[self.current_module] = old_device_name
 
             new_module_name = self.var.module
-            self.combobox_device_name.clear()
-            self.combobox_device_name.addItems(self.experiment.audio_low_latency_record_device_dict[new_module_name])
-
             new_device_name = self.experiment.audio_low_latency_record_device_selected_dict[new_module_name]
             new_device_index = self.experiment.audio_low_latency_record_device_dict[new_module_name].index(new_device_name)
+
+            self.combobox_device_name.clear()
+            self.combobox_device_name.addItems(self.experiment.audio_low_latency_record_device_dict[new_module_name])
             self.combobox_device_name.setCurrentIndex(new_device_index)
 
             self.current_module = new_module_name
-            self.var.device_name = new_device_name
+            self.current_device_name = new_device_name
+            self.var.device_name = self.current_device_name
 
         if self.var.dummy_mode == u'yes':
             self.combobox_module.setDisabled(True)
