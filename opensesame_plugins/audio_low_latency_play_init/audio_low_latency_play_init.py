@@ -98,14 +98,12 @@ class audio_low_latency_play_init(item):
 
                 sounddevice_cards = list()
                 cards = sounddevice.query_devices()
-                #sounddevice_device = pyaudio.PyAudio()
                 self.experiment.sounddevice_module_name = self.sounddevice_module_name
                 self.experiment.audio_low_latency_play_module_list.append(self.sounddevice_module_name)
 
                 for di in range(0, len(cards)):
                     sounddevice_cards_dict = cards[di]
                     sounddevice_cards.append(sounddevice_cards_dict['name'])
-                print(sounddevice_cards)
                 self.experiment.audio_low_latency_play_device_dict[self.sounddevice_module_name] = sounddevice_cards
                 self.experiment.audio_low_latency_play_device_selected_dict[self.sounddevice_module_name] = sounddevice_cards[0]
 
