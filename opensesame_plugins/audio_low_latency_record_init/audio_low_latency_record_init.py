@@ -28,7 +28,7 @@ from libqtopensesame.items.qtautoplugin import qtautoplugin
 from libopensesame.exceptions import osexception
 import pygame
 
-VERSION = u'2017.11-1'
+VERSION = u'2018.03-1'
 
 class audio_low_latency_record_init(item):
 
@@ -69,12 +69,16 @@ class audio_low_latency_record_init(item):
         self.pyaudio_module_name = u'PyAudio (PortAudio)'
         self.sounddevice_module_name = u'SoundDevice (PortAudio)'
 
+        self.experiment.pyalsaaudio_module_name = self.pyalsaaudio_module_name
+        self.experiment.sounddevice_module_name = self.sounddevice_module_name
+        self.experiment.pyaudio_module_name = self.pyaudio_module_name
+        self.experiment.oss4_module_name = self.oss4_module_name
+                
         if os.name == 'posix':
             if u'alsaaudio' in self.modules_enabled:
                 try:
                     import alsaaudio
                     alsa_cards = alsaaudio.pcms(alsaaudio.PCM_CAPTURE)
-                    self.experiment.pyalsaaudio_module_name = self.pyalsaaudio_module_name
                     if alsa_cards:
                         self.experiment.audio_low_latency_record_module_list.append(self.pyalsaaudio_module_name)
                         self.experiment.audio_low_latency_record_device_dict[self.pyalsaaudio_module_name] = alsa_cards
@@ -85,7 +89,6 @@ class audio_low_latency_record_init(item):
             if u'ossaudiodev' in self.modules_enabled:
                 try:
                     import ossaudiodev
-                    self.experiment.oss4_module_name = self.oss4_module_name
                     self.experiment.audio_low_latency_record_module_list.append(self.oss4_module_name)
                     self.experiment.audio_low_latency_record_device_dict[self.oss4_module_name] = [u'Exclusive Mode',u'Shared Mode']
                     self.experiment.audio_low_latency_record_device_selected_dict[self.oss4_module_name] = u'Exclusive Mode'
@@ -95,11 +98,8 @@ class audio_low_latency_record_init(item):
         if u'sounddevice' in self.modules_enabled:
             try:
                 import sounddevice
-
                 sounddevice_cards = list()
                 cards = sounddevice.query_devices()
-                #sounddevice_device = pyaudio.PyAudio()
-                self.experiment.sounddevice_module_name = self.sounddevice_module_name
                 self.experiment.audio_low_latency_record_module_list.append(self.sounddevice_module_name)
 
                 for di in range(0, len(cards)):
@@ -115,10 +115,9 @@ class audio_low_latency_record_init(item):
         if u'pyaudio' in self.modules_enabled:
             try:
                 import pyaudio
-
                 pyaudio_cards = list()
                 pyaudio_device = pyaudio.PyAudio()
-                self.experiment.pyaudio_module_name = self.pyaudio_module_name
+
                 self.experiment.audio_low_latency_record_module_list.append(self.pyaudio_module_name)
 
                 for di in range(0, pyaudio_device.get_device_count()):
