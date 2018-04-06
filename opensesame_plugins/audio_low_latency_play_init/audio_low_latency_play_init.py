@@ -257,7 +257,7 @@ class audio_low_latency_play_init(item):
                 if samplerate_set != self.samplerate:
                     error_msg_list.append(u'Samplerate of %d Hz not supported\n' % (self.samplerate))
                 if period_size_set != self.period_size:
-                    error_msg_list.append(u'Period size of %d frames not supported\n' % (self.period_size))
+                    error_msg_list.append(u'Period size of %d frames not supported. %d frames is recommended.\n' % (self.period_size, period_size_set))
                 if error_msg_list:
                     raise osexception(u'Error with device: %s\n%s' % (self.device_name, ''.join(error_msg_list)))
 
@@ -279,12 +279,10 @@ class audio_low_latency_play_init(item):
                                 output_device_index=self.device_index)
 
                     except Exception as e:
-                        raise osexception(
-                            u'Could not start audio device', exception=e)
+                        raise osexception(u'%dbit audio not supported\n' % (self.bitdepth), exception=e)
 
                 self.show_message(u'Estimated output latency: %fms ' % (self.device.get_output_latency()))
                 self.show_message(u'Buffer size: %d frames ' % (self.device.get_write_available()))
-
 
             elif self.module == self.sounddevice_module_name and self.sounddevice_module_name in self.experiment.audio_low_latency_play_module_list:
                 import sounddevice

@@ -257,7 +257,7 @@ class audio_low_latency_record_init(item):
                 if samplerate_set != self.samplerate:
                     error_msg_list.append(u'Samplerate of %d Hz not supported\n' % (self.samplerate))
                 if period_size_set != self.period_size:
-                    error_msg_list.append(u'Period size of %d frames not supported\n' % (self.period_size))
+                    error_msg_list.append(u'Period size of %d frames not supported. %d frames is recommended.\n' % (self.period_size, period_size_set))
                 if error_msg_list:
                     raise osexception(u'Error with device: %s\n%s' % (self.device_name, ''.join(error_msg_list)))
 
@@ -268,8 +268,7 @@ class audio_low_latency_record_init(item):
                 self.device_init = pyaudio.PyAudio()
 
                 if self.bitdepth == 32:
-                    raise osexception(
-                        u'32bit not yet supported')
+                    raise osexception(u'%dbit audio not supported\n' % (self.bitdepth))
                 else:
                     try:
                         self.device = self.device_init.open(format=self.device_init.get_format_from_width(self.samplewidth),
