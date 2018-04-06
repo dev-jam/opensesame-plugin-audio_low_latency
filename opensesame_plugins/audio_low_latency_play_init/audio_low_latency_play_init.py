@@ -168,6 +168,7 @@ class audio_low_latency_play_init(item):
 
         self.frame_size = self.bitdepth * self.channels
         self.data_size = self.frame_size * self.period_size
+        self.period_size_time = round(float(self.period_size) / float(self.samplerate) * 1000, 1)
 
         self.experiment.audio_low_latency_play_dummy_mode = self.dummy_mode
         self.experiment.audio_low_latency_play_verbose = self.verbose
@@ -179,6 +180,7 @@ class audio_low_latency_play_init(item):
         self.experiment.audio_low_latency_play_channels = self.channels
         self.experiment.audio_low_latency_play_period_size = self.period_size
         self.experiment.audio_low_latency_play_data_size = self.data_size
+        self.experiment.audio_low_latency_play_period_size_time = self.period_size_time
 
         self.experiment.var.audio_low_latency_play_module = self.module
         self.experiment.var.audio_low_latency_play_device_name = self.device_name
@@ -205,9 +207,6 @@ class audio_low_latency_play_init(item):
         self.init_var()
 
         if self.dummy_mode == u'no':
-
-            self.period_size_time = round(float(self.period_size) / float(self.samplerate) * 1000, 1)
-            self.experiment.audio_low_latency_play_period_size_time = self.period_size_time
 
             self.show_message(u'Module: ' + self.module)
             self.show_message(u'Device: ' + self.device_name)

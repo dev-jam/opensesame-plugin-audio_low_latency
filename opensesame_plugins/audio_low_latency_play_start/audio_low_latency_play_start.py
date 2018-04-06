@@ -70,12 +70,12 @@ class audio_low_latency_play_start(item):
             if self.dummy_mode == u'no':
                 self.module = self.experiment.audio_low_latency_play_module
                 self.device = self.experiment.audio_low_latency_play_device
-                self.period_size = self.experiment.audio_low_latency_play_period_size
-                self.period_size_time = self.experiment.audio_low_latency_play_period_size_time
-                self.data_size = self.experiment.audio_low_latency_play_data_size
-                self.bitdepth = self.experiment.audio_low_latency_play_bitdepth
-                self.samplerate = self.experiment.audio_low_latency_play_samplerate
-                self.channels = self.experiment.audio_low_latency_play_channels
+            self.period_size = self.experiment.audio_low_latency_play_period_size
+            self.period_size_time = self.experiment.audio_low_latency_play_period_size_time
+            self.data_size = self.experiment.audio_low_latency_play_data_size
+            self.bitdepth = self.experiment.audio_low_latency_play_bitdepth
+            self.samplerate = self.experiment.audio_low_latency_play_samplerate
+            self.channels = self.experiment.audio_low_latency_play_channels
         else:
             raise osexception(
                     u'Audio Low Latency Play Init item is missing')

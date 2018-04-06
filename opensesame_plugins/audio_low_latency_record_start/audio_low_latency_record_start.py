@@ -73,13 +73,13 @@ class audio_low_latency_record_start(item):
             if self.dummy_mode == u'no':
                 self.module = self.experiment.audio_low_latency_record_module
                 self.device = self.experiment.audio_low_latency_record_device
-                self.period_size = self.experiment.audio_low_latency_record_period_size
-                self.period_size_time = self.experiment.audio_low_latency_record_period_size_time
-                self.data_size = self.experiment.audio_low_latency_record_data_size
-                self.bitdepth = self.experiment.audio_low_latency_record_bitdepth
-                self.samplewidth = self.experiment.audio_low_latency_record_samplewidth
-                self.samplerate = self.experiment.audio_low_latency_record_samplerate
-                self.channels = self.experiment.audio_low_latency_record_channels
+            self.period_size = self.experiment.audio_low_latency_record_period_size
+            self.period_size_time = self.experiment.audio_low_latency_record_period_size_time
+            self.data_size = self.experiment.audio_low_latency_record_data_size
+            self.bitdepth = self.experiment.audio_low_latency_record_bitdepth
+            self.samplewidth = self.experiment.audio_low_latency_record_samplewidth
+            self.samplerate = self.experiment.audio_low_latency_record_samplerate
+            self.channels = self.experiment.audio_low_latency_record_channels
 
         else:
             raise osexception(
@@ -134,10 +134,10 @@ class audio_low_latency_record_start(item):
 
         start_time = self.clock.time()
 
-        error_msg = u'Duration must be a string named infinity or a an integer greater than 1'
+        error_msg = u'Duration must be a string named infinite or a an integer greater than 1'
 
         if isinstance(self.var.duration,str):
-            if self.var.duration == u'infinity':
+            if self.var.duration == u'infinite':
                 self.duration_check = False
                 self.duration = self.var.duration
             else:

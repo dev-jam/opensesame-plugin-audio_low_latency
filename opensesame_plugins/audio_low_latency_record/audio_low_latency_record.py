@@ -71,12 +71,12 @@ class audio_low_latency_record(item):
             if self.dummy_mode == u'no':
                 self.module = self.experiment.audio_low_latency_record_module
                 self.device = self.experiment.audio_low_latency_record_device
-                self.period_size = self.experiment.audio_low_latency_record_period_size
-                self.period_size_time = self.experiment.audio_low_latency_record_period_size_time
-                self.data_size = self.experiment.audio_low_latency_record_data_size
-                self.bitdepth = self.experiment.audio_low_latency_record_bitdepth
-                self.samplerate = self.experiment.audio_low_latency_record_samplerate
-                self.channels = self.experiment.audio_low_latency_record_channels
+            self.period_size = self.experiment.audio_low_latency_record_period_size
+            self.period_size_time = self.experiment.audio_low_latency_record_period_size_time
+            self.data_size = self.experiment.audio_low_latency_record_data_size
+            self.bitdepth = self.experiment.audio_low_latency_record_bitdepth
+            self.samplerate = self.experiment.audio_low_latency_record_samplerate
+            self.channels = self.experiment.audio_low_latency_record_channels
         else:
             raise osexception(
                     u'Audio Low Latency Record Init item is missing')
