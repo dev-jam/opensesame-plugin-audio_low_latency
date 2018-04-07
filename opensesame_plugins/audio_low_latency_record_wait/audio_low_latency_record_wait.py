@@ -27,7 +27,7 @@ from libqtopensesame.items.qtautoplugin import qtautoplugin
 from libopensesame.exceptions import osexception
 from openexp.keyboard import keyboard
 
-VERSION = u'2017.11-1'
+VERSION = u'2018.04-2'
 
 class audio_low_latency_record_wait(item):
 

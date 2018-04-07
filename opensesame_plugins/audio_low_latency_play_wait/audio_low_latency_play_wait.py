@@ -28,7 +28,7 @@ from libopensesame.exceptions import osexception
 from openexp.keyboard import keyboard
 import time
 
-VERSION = u'2017.11-1'
+VERSION = u'2018.04-2'
 
 class audio_low_latency_play_wait(item):
 
