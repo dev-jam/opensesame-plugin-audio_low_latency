@@ -74,6 +74,7 @@ class audio_low_latency_play_start(item):
             self.period_size_time = self.experiment.audio_low_latency_play_period_size_time
             self.data_size = self.experiment.audio_low_latency_play_data_size
             self.bitdepth = self.experiment.audio_low_latency_play_bitdepth
+            self.samplewidth = self.experiment.audio_low_latency_play_samplewidth
             self.samplerate = self.experiment.audio_low_latency_play_samplerate
             self.channels = self.experiment.audio_low_latency_play_channels
         else:
