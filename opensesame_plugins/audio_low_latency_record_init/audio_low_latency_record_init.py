@@ -105,7 +105,7 @@ class audio_low_latency_record_init(item):
                 for di in range(0, len(cards)):
                     sounddevice_cards_dict = cards[di]
                     sounddevice_cards.append(sounddevice_cards_dict['name'])
-                print(sounddevice_cards)
+
                 self.experiment.audio_low_latency_record_device_dict[self.sounddevice_module_name] = sounddevice_cards
                 self.experiment.audio_low_latency_record_device_selected_dict[self.sounddevice_module_name] = sounddevice_cards[0]
 

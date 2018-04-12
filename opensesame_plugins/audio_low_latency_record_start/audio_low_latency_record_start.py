@@ -178,6 +178,7 @@ class audio_low_latency_record_start(item):
             self.experiment.audio_low_latency_record_thread = threading.Thread(target=self.record, args=(self.device, self.wav_file, self.period_size, delay))
             self.experiment.audio_low_latency_record_thread.start()
         elif self.dummy_mode == u'yes':
+            self.set_stimulus_onset()
             self.show_message(u'Dummy mode enabled, NOT recording audio')
         else:
             raise osexception(u'Error with dummy mode!')

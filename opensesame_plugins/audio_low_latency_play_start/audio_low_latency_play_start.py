@@ -198,6 +198,7 @@ class audio_low_latency_play_start(item):
             self.experiment.audio_low_latency_play_thread.start()
 
         elif self.dummy_mode == u'yes':
+            self.set_stimulus_onset()
             self.show_message(u'Dummy mode enabled, NOT playing audio')
         else:
             raise osexception(u'Error with dummy mode!')
