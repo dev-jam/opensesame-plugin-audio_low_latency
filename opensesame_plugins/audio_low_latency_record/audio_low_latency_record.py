@@ -27,10 +27,8 @@ from libqtopensesame.items.qtautoplugin import qtautoplugin
 from libopensesame.exceptions import osexception
 from openexp.keyboard import keyboard
 import wave
-import pygame
 
-
-VERSION = u'2018.04-2'
+VERSION = u'1.4.0'
 
 class audio_low_latency_record(item):
 
@@ -82,7 +80,7 @@ class audio_low_latency_record(item):
             raise osexception(
                     u'Audio Low Latency Record Init item is missing')
 
-        self.filename = self.var.filename
+        self.filename = self.experiment.pool[self.var.filename]
         self.ram_cache = self.var.ram_cache
 
 
@@ -144,7 +142,6 @@ class audio_low_latency_record(item):
                 raise osexception(u'Delay can not be negative')
         else:
             raise osexception(u'Delay should be a integer')
-
 
         if self.dummy_mode == u'no':
             while self.experiment.audio_low_latency_record_locked:

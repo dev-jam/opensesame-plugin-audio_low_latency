@@ -29,7 +29,7 @@ from openexp.keyboard import keyboard
 import threading
 import wave
 
-VERSION = u'2018.04-2'
+VERSION = u'1.4.0'
 
 class audio_low_latency_record_start(item):
 
@@ -84,7 +84,7 @@ class audio_low_latency_record_start(item):
             raise osexception(
                     u'Audio Low Latency Record Init item is missing')
 
-        self.filename = self.var.filename
+        self.filename = self.experiment.pool[self.var.filename]
         self.ram_cache = self.var.ram_cache
 
         self.experiment.audio_low_latency_record_continue = 1
@@ -125,12 +125,11 @@ class audio_low_latency_record_start(item):
 
         """Run phase"""
 
-        self.set_item_onset()
-
         if not (hasattr(self.experiment, "audio_low_latency_record_stop") or hasattr(self.experiment, "audio_low_latency_record_wait")):
             raise osexception(
                     u'Audio Low Latency Record Stop or Audio Low Latency Record Wait item is missing')
 
+        self.set_item_onset()
         start_time = self.clock.time()
 
         error_msg = u'Duration must be a string named infinite or a an integer greater than 1'

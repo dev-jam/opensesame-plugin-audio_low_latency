@@ -29,8 +29,7 @@ from openexp.keyboard import keyboard
 import threading
 import wave
 
-
-VERSION = u'2018.04-2'
+VERSION = u'1.4.0'
 
 class audio_low_latency_play_start(item):
 
@@ -141,12 +140,12 @@ class audio_low_latency_play_start(item):
 
         """Run phase"""
 
-        self.set_item_onset()
-        start_time = self.clock.time()
-
         if not (hasattr(self.experiment, "audio_low_latency_play_stop") or hasattr(self.experiment, "audio_low_latency_play_wait")):
             raise osexception(
                     u'Audio Low Latency Play Stop or Audio Low Latency Play Wait item is missing')
+
+        self.set_item_onset()
+        start_time = self.clock.time()
 
         error_msg = u'Duration must be a string named sound or a an integer greater than 1'
 
@@ -364,3 +363,4 @@ class qtaudio_low_latency_play_start(audio_low_latency_play_start, qtautoplugin)
         qtautoplugin.__init__(self, __file__)
         self.text_version.setText(
         u'<small>Audio Low Latency version %s</small>' % VERSION)
+
