@@ -1,9 +1,9 @@
 description: Low Latency Audio - starts audio playback in the background.
-version: 2017.11-1
+version: 2020.1-1
 author: "Bob Rosbag"
 url: "http://osdoc.cogsci.nl/"
 category: "Audio Low Latency Playback"
-date: "2017"
+date: "2020"
 controls:
 -
     label: "Audio Filename"
@@ -31,14 +31,14 @@ controls:
     var: "ram_cache"
 -
     label: |
-      <b>IMPORTANT:</b> this is a multithreaded background item, it will immediately advance to the next item, it will NOT wait for the playback to finish.
+      <b>IMPORTANT:</b> this is a multi-threaded background item, it will immediately advance to the next item, it will NOT wait for the playback to finish.
     type: "text"
 -
     label: |
-      <small><b>Note:</b> Audio Low Latency Play Init item at the begin of the experiment is needed for initialisation of the audio device</small>
+      <small><b>Note:</b> Audio Low Latency Play Init item at the begin of the experiment is needed for initialization of the audio device</small>
     type: text
 -
+    label:  |
+      <small>Audio Low Latency version 2020.1-1</small>
     type: text
-    label: DUMMY
-    name: text_version
 

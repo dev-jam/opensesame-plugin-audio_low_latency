@@ -29,7 +29,7 @@ from openexp.keyboard import keyboard
 import threading
 import wave
 
-VERSION = u'1.4.0'
+VERSION = u'2020.1-1'
 
 class audio_low_latency_play_start(item):
 
@@ -362,6 +362,3 @@ class qtaudio_low_latency_play_start(audio_low_latency_play_start, qtautoplugin)
 
         audio_low_latency_play_start.__init__(self, name, experiment, script)
         qtautoplugin.__init__(self, __file__)
-        self.text_version.setText(
-        u'<small>Audio Low Latency version %s</small>' % VERSION)
-

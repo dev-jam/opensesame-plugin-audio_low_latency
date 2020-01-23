@@ -27,7 +27,7 @@ from libqtopensesame.items.qtautoplugin import qtautoplugin
 from libopensesame.exceptions import osexception
 from openexp.keyboard import keyboard
 
-VERSION = u'1.4.0'
+VERSION = u'2020.1-1'
 
 class audio_low_latency_play_wait(item):
 
@@ -124,5 +124,3 @@ class qtaudio_low_latency_play_wait(audio_low_latency_play_wait, qtautoplugin):
 
         audio_low_latency_play_wait.__init__(self, name, experiment, script)
         qtautoplugin.__init__(self, __file__)
-        self.text_version.setText(
-        u'<small>Audio Low Latency version %s</small>' % VERSION)

@@ -28,7 +28,7 @@ from libqtopensesame.items.qtautoplugin import qtautoplugin
 from libopensesame.exceptions import osexception
 import pygame
 
-VERSION = u'1.4.0'
+VERSION = u'2020.1-1'
 
 class audio_low_latency_record_init(item):
 
@@ -39,6 +39,7 @@ class audio_low_latency_record_init(item):
 
     # Provide an informative description for your plug-in.
     description = u'Low Latency Audio: initializes the recording audio device.'
+    lazy_init = False
 
     def __init__(self, name, experiment, string=None):
 
@@ -400,8 +401,6 @@ class qtaudio_low_latency_record_init(audio_low_latency_record_init, qtautoplugi
 
         audio_low_latency_record_init.__init__(self, name, experiment, script)
         qtautoplugin.__init__(self, __file__)
-        self.text_version.setText(
-        u'<small>Audio Low Latency version %s</small>' % VERSION)
 
         if self.var.module in self.experiment.audio_low_latency_record_module_list:
             self.current_module = self.var.module
@@ -437,7 +436,7 @@ class qtaudio_low_latency_record_init(audio_low_latency_record_init, qtautoplugi
         if not qtautoplugin.apply_edit_changes(self) or self.lock:
             return False
         self.custom_interactions()
-
+        return True
 
     def edit_widget(self):
 

@@ -28,7 +28,7 @@ from libopensesame.exceptions import osexception
 from openexp.keyboard import keyboard
 import wave
 
-VERSION = u'1.4.0'
+VERSION = u'2020.1-1'
 
 class audio_low_latency_record(item):
 
@@ -284,6 +284,3 @@ class qtaudio_low_latency_record(audio_low_latency_record, qtautoplugin):
 
         audio_low_latency_record.__init__(self, name, experiment, script)
         qtautoplugin.__init__(self, __file__)
-        self.text_version.setText(
-        u'<small>Audio Low Latency version %s</small>' % VERSION)
-

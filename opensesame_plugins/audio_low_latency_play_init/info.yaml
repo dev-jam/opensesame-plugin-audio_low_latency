@@ -1,9 +1,9 @@
 description: Low Latency Audio - initializes the playback audio device.
-version: 2017.11-1
+version: 2020.1-1
 author: "Bob Rosbag"
 url: "http://osdoc.cogsci.nl/"
 category: "Audio Low Latency Playback"
-date: "2017"
+date: "2020"
 controls:
 -
     label: "Dummy Mode"
@@ -58,10 +58,10 @@ controls:
     type: "line_edit"
     var: "period_size"
 -
-    type: text
-    label: DUMMY
-    name: text_version
--
     label: |
-      <small><b>Note:</b> Audio Low Latency Play Init item at the begin of the experiment is needed for initialisation of the audio device</small>
+      <small><b>Note:</b> Audio Low Latency Play Init item at the begin of the experiment is needed for initialization of the audio device</small>
+    type: text
+-
+    label:  |
+      <small>Audio Low Latency version 2020.1-1</small>
     type: text
