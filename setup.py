@@ -3,7 +3,7 @@
 
 """
 Author: Bob Rosbag
-2017
+2020
 
 This plug-in is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@ setup(
     # Some general metadata. By convention, a plugin is named:
     # opensesame-plugin-[plugin name]
     name='opensesame_plugin_-_audio_low_latency',
-    version='2.0.0',
+    version='3.0.0',
     description='An OpenSesame Plug-in for playing and recording audio files with low latency on Linux.',
     author='Bob Rosbag',
     author_email='b.rosbag@let.ru.nl',

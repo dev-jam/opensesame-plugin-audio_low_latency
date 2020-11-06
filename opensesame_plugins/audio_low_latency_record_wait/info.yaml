@@ -1,5 +1,5 @@
 description: Low Latency Audio - waits until the background audio recording has finished.
-version: 2020.1-1
+version: 2020.11-1
 author: "Bob Rosbag"
 url: "http://osdoc.cogsci.nl/"
 category: "Audio Low Latency Recording"
@@ -11,6 +11,6 @@ controls:
     type: text
 -
     label:  |
-      <small>Audio Low Latency version 2020.1-1</small>
+      <small>Audio Low Latency version 2020.11-1</small>
     type: text
 

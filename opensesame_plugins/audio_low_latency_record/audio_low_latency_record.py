@@ -2,7 +2,7 @@
 
 """
 Author: Bob Rosbag
-2017
+2020
 
 This plug-in is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@ from libopensesame.exceptions import osexception
 from openexp.keyboard import keyboard
 import wave
 
-VERSION = u'2020.1-1'
+VERSION = u'2020.11-1'
 
 class audio_low_latency_record(item):
 
@@ -57,6 +57,7 @@ class audio_low_latency_record(item):
         self.var.bitdepth = str(16)
         self.var.samplerate = str(44100)
         self.var.channels = str(1)
+        self.var.pause_resume = u''
         self.var.ram_cache = u'yes'
 
     def init_var(self):
@@ -81,6 +82,7 @@ class audio_low_latency_record(item):
                     u'Audio Low Latency Record Init item is missing')
 
         self.filename = self.experiment.pool[self.var.filename]
+        self.pause_resume = self.var.pause_resume
         self.ram_cache = self.var.ram_cache
 
 
@@ -95,6 +97,16 @@ class audio_low_latency_record(item):
         self.kb = keyboard(self.experiment,timeout=1)
 
         self.init_var()
+
+        if self.pause_resume != u'':
+            # Prepare the pause resume responses
+            self._allowed_responses = []
+            for r in safe_decode(self.pause_resume).split(u';'):
+                if r.strip() != u'':
+                    self._allowed_responses.append(r)
+            if not self._allowed_responses:
+                self._allowed_responses = None
+            self.show_message(u"allowed pause/resume keys set to %s" % self._allowed_responses)
 
         if self.dummy_mode == u'no':
             try:
@@ -127,7 +139,7 @@ class audio_low_latency_record(item):
                 if self.duration < self.period_size_time:
                     raise osexception(u'Duration should be larger than period duration')
             else:
-                raise osexception(u'Duration can not be negative')
+                raise osexception(u'Duration cannot be negative')
         else:
             raise osexception(u'Duration should be a integer')
 
@@ -153,7 +165,11 @@ class audio_low_latency_record(item):
             else:
                 delay = self.delay
 
-            self.show_message(u'Starting recording audio')
+            self.show_message(u'Starting audio recording')
+
+            if self.pause_resume != u'':
+                self.kb.keylist = self._allowed_responses
+                self.kb.flush()
 
             self.record(self.device, self.wav_file, self.period_size, self.duration, delay)
 
@@ -192,6 +208,17 @@ class audio_low_latency_record(item):
             elif self.ram_cache == u'no':
                 wav_file.writeframes(data)
 
+            if self.pause_resume != u'':
+                key1, time1 = self.kb.get_key()
+                if key1 in self._allowed_responses:
+                    self.kb.flush()
+                    self.show_message(u'Paused audio recording')
+                    while True:
+                        key2, time2 = self.kb.get_key()
+                        if key2 in self._allowed_responses:
+                            self.show_message(u'Resumed audio recording')
+                            break
+
         self.set_stimulus_offset()
 
         if self.ram_cache == u'yes':
@@ -204,7 +231,7 @@ class audio_low_latency_record(item):
 
         wav_file.close()
 
-        self.show_message(u'Stopped recording audio')
+        self.show_message(u'Stopped audio recording')
         self.experiment.audio_low_latency_record_locked = 0
 
 

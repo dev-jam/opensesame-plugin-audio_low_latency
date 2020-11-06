@@ -1,5 +1,5 @@
 description: Low Latency Audio - starts audio recording on the foreground.
-version: 2020.1-1
+version: 2020.11-1
 author: "Bob Rosbag"
 url: "http://osdoc.cogsci.nl/"
 category: "Audio Low Latency Recording"
@@ -24,6 +24,12 @@ controls:
     type: "line_edit"
     var: "delay"
 -
+    label: Pause/Resume
+    info: Expecting a semicolon-separated list of button characters, e.g., a;b;c
+    name: "line_edit_pause_resume"
+    type: line_edit
+    var: pause_resume
+-
     label: "Cache to RAM"
     name: "checkbox_ram_cache"
     tooltip: "Cache to RAM before saving?"
@@ -39,5 +45,5 @@ controls:
     type: text
 -
     label:  |
-      <small>Audio Low Latency version 2020.1-1</small>
+      <small>Audio Low Latency version 2020.11-1</small>
     type: text

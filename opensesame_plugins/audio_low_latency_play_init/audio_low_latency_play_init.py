@@ -2,7 +2,7 @@
 
 """
 Author: Bob Rosbag
-2017
+2020
 
 This plug-in is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@ from libqtopensesame.items.qtautoplugin import qtautoplugin
 from libopensesame.exceptions import osexception
 import pygame
 
-VERSION = u'2020.1-1'
+VERSION = u'2020.11-1'
 
 class audio_low_latency_play_init(item):
 
