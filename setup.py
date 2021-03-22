@@ -25,7 +25,7 @@ setup(
     # Some general metadata. By convention, a plugin is named:
     # opensesame-plugin-[plugin name]
     name='opensesame_plugin_-_audio_low_latency',
-    version='3.0.0',
+    version='4.0.0',
     description='An OpenSesame Plug-in for playing and recording audio files with low latency on Linux.',
     author='Bob Rosbag',
     author_email='b.rosbag@let.ru.nl',
@@ -99,6 +99,28 @@ setup(
             'opensesame_plugins/audio_low_latency_play_wait/audio_low_latency_play_wait.png',
             'opensesame_plugins/audio_low_latency_play_wait/audio_low_latency_play_wait_large.png',
             'opensesame_plugins/audio_low_latency_play_wait/audio_low_latency_play_wait.py',
+            'opensesame_plugins/audio_low_latency_play_wait/info.yaml',
+            ]
+        ),
+        ('share/opensesame_plugins/audio_low_latency_play_pause',
+        # Then a list of files that are copied into the target folder. Make sure
+        # that these files are also included by MANIFEST.in!
+        [
+            'opensesame_plugins/audio_low_latency_play_wait/audio_low_latency_play_pause.md',
+            'opensesame_plugins/audio_low_latency_play_wait/audio_low_latency_play_pause.png',
+            'opensesame_plugins/audio_low_latency_play_wait/audio_low_latency_play_pause_large.png',
+            'opensesame_plugins/audio_low_latency_play_wait/audio_low_latency_play_pause.py',
+            'opensesame_plugins/audio_low_latency_play_wait/info.yaml',
+            ]
+        ),
+        ('share/opensesame_plugins/audio_low_latency_play_resume',
+        # Then a list of files that are copied into the target folder. Make sure
+        # that these files are also included by MANIFEST.in!
+        [
+            'opensesame_plugins/audio_low_latency_play_wait/audio_low_latency_play_resume.md',
+            'opensesame_plugins/audio_low_latency_play_wait/audio_low_latency_play_resume.png',
+            'opensesame_plugins/audio_low_latency_play_wait/audio_low_latency_play_resume_large.png',
+            'opensesame_plugins/audio_low_latency_play_wait/audio_low_latency_play_resume.py',
             'opensesame_plugins/audio_low_latency_play_wait/info.yaml',
             ]
         ),

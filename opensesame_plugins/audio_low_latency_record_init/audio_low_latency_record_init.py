@@ -28,7 +28,7 @@ from libqtopensesame.items.qtautoplugin import qtautoplugin
 from libopensesame.exceptions import osexception
 import pygame
 
-VERSION = u'2020.11-1'
+VERSION = u'2021.03-1'
 
 class audio_low_latency_record_init(item):
 

@@ -3,7 +3,7 @@ OpenSesame Plug-in: Audio Low Latency
 
 *An OpenSesame Plug-in for playing and recording audio files with low latency on Linux.*  
 
-Copyright, 2020, Bob Rosbag
+Copyright, 2021, Bob Rosbag
 
 
 ## 1. About

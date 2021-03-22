@@ -1,5 +1,5 @@
 description: Low Latency Audio - starts audio playback on the foreground.
-version: 2020.11-1
+version: 2021.03-1
 author: "Bob Rosbag"
 url: "http://osdoc.cogsci.nl/"
 category: "Audio Low Latency Playback"
@@ -52,5 +52,5 @@ controls:
     type: text
 -
     label:  |
-      <small>Audio Low Latency version 2020.11-1</small>
+      <small>Audio Low Latency version 2021.03-1</small>
     type: text
