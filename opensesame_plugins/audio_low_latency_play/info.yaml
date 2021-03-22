@@ -13,6 +13,7 @@ controls:
     var: "filename"
 -
     label: "Duration (ms)"
+    info: "Expecting a value in ms or a string 'sound'"
     name: "line_edit_duration"
     tooltip: "Value in ms"
     type: "line_edit"
@@ -24,11 +25,17 @@ controls:
     type: "line_edit"
     var: "delay"
 -
-    label: Pause/Resume
-    info: Expecting a semicolon-separated list of button characters, e.g., a;b;c
+    label: "Pause/Resume"
+    info: "Expecting a semicolon-separated list of button characters, e.g., a;b;c"
     name: "line_edit_pause_resume"
     type: line_edit
-    var: pause_resume
+    var: "pause_resume"
+-
+    label: "Stop"
+    info: "Expecting a semicolon-separated list of button characters, e.g., a;b;c"
+    name: "line_edit_stop"
+    type: "line_edit"
+    var: "stop"
 -
     label: "Preload"
     name: "checkbox_ram_cache"
