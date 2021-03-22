@@ -57,7 +57,7 @@ class audio_low_latency_record(item):
         self.var.bitdepth = str(16)
         self.var.samplerate = str(44100)
         self.var.channels = str(1)
-        self.var.pause_resume = u''
+        self.var.stop = u''
         self.var.ram_cache = u'yes'
 
     def init_var(self):
@@ -82,7 +82,7 @@ class audio_low_latency_record(item):
                     u'Audio Low Latency Record Init item is missing')
 
         self.filename = self.experiment.pool[self.var.filename]
-        self.pause_resume = self.var.pause_resume
+        self.stop = self.var.stop
         self.ram_cache = self.var.ram_cache
 
 
@@ -98,15 +98,15 @@ class audio_low_latency_record(item):
 
         self.init_var()
 
-        if self.pause_resume != u'':
+        if self.stop != u'':
             # Prepare the pause resume responses
-            self._allowed_responses = []
-            for r in safe_decode(self.pause_resume).split(u';'):
+            self._allowed_responses_stop = []
+            for r in safe_decode(self.stop).split(u';'):
                 if r.strip() != u'':
-                    self._allowed_responses.append(r)
-            if not self._allowed_responses:
-                self._allowed_responses = None
-            self.show_message(u"allowed pause/resume keys set to %s" % self._allowed_responses)
+                    self._allowed_responses_stop.append(r)
+            if not self._allowed_responses_stop:
+                self._allowed_responses_stop = None
+            self.show_message(u"allowed stop keys set to %s" % self._allowed_responses_stop)
 
         if self.dummy_mode == u'no':
             try:
@@ -167,8 +167,9 @@ class audio_low_latency_record(item):
 
             self.show_message(u'Starting audio recording')
 
-            if self.pause_resume != u'':
-                self.kb.keylist = self._allowed_responses
+            if self.stop != u'':
+                _keylist = self._allowed_responses_stop
+                self.kb.keylist = _keylist
                 self.kb.flush()
 
             self.record(self.device, self.wav_file, self.period_size, self.duration, delay)
@@ -208,16 +209,12 @@ class audio_low_latency_record(item):
             elif self.ram_cache == u'no':
                 wav_file.writeframes(data)
 
-            if self.pause_resume != u'':
+            if self.stop != u'':
                 key1, time1 = self.kb.get_key()
-                if key1 in self._allowed_responses:
+                if key1 in self._allowed_responses_stop:
                     self.kb.flush()
-                    self.show_message(u'Paused audio recording')
-                    while True:
-                        key2, time2 = self.kb.get_key()
-                        if key2 in self._allowed_responses:
-                            self.show_message(u'Resumed audio recording')
-                            break
+                    self.show_message(u'Stopped audio recording')
+                    break
 
         self.set_stimulus_offset()
 

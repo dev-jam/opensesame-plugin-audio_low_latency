@@ -24,11 +24,11 @@ controls:
     type: "line_edit"
     var: "delay"
 -
-    label: Pause/Resume
-    info: Expecting a semicolon-separated list of button characters, e.g., a;b;c
-    name: "line_edit_pause_resume"
-    type: line_edit
-    var: pause_resume
+    label: "Stop"
+    info: "Expecting a semicolon-separated list of button characters, e.g., a;b;c"
+    name: "line_edit_stop"
+    type: "line_edit"
+    var: "stop"
 -
     label: "Cache to RAM"
     name: "checkbox_ram_cache"
