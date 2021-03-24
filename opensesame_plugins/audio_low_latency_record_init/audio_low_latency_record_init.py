@@ -59,7 +59,7 @@ class audio_low_latency_record_init(item):
         self.var.bitdepth = str(16)
         self.var.samplerate = str(44100)
         self.var.channels = str(1)
-        self.var.period_size = 1024
+        self.var.period_size = 128
 
         self.experiment.audio_low_latency_record_module_list = list()
         self.experiment.audio_low_latency_record_device_dict = dict()

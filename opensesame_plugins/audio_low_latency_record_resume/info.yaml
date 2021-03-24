@@ -1,4 +1,4 @@
-description: Low Latency Audio - waits until the background audio recording has finished.
+description: Low Latency Audio - resumes the background audio recording.
 version: 2021.03-1
 author: "Bob Rosbag"
 url: "http://osdoc.cogsci.nl/"

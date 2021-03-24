@@ -3,7 +3,7 @@ version: 2021.03-1
 author: "Bob Rosbag"
 url: "http://osdoc.cogsci.nl/"
 category: "Audio Low Latency Recording"
-date: "2020"
+date: "2021"
 controls:
 -
     label: "Audio Filename"
@@ -13,6 +13,7 @@ controls:
     var: "filename"
 -
     label: "Duration (ms)"
+    info: "Expecting a value in ms or a string 'infinite'"
     name: "line_edit_duration"
     tooltip: "Value in ms"
     type: "line_edit"
@@ -23,6 +24,12 @@ controls:
     tooltip: "Value in ms"
     type: "line_edit"
     var: "delay"
+-
+    label: "Pause/Resume"
+    info: "Expecting a semicolon-separated list of button characters, e.g., a;b;c"
+    name: "line_edit_pause_resume"
+    type: line_edit
+    var: "pause_resume"
 -
     label: "Stop"
     info: "Expecting a semicolon-separated list of button characters, e.g., a;b;c"
@@ -45,5 +52,5 @@ controls:
     type: text
 -
     label:  |
-      <small>Audio Low Latency version 2020.11-1</small>
+      <small>Audio Low Latency version 2021.03-1</small>
     type: text

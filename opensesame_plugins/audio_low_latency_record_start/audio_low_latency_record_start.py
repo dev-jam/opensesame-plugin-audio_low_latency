@@ -56,10 +56,11 @@ class audio_low_latency_record_start(item):
         self.var.filename = u''
         self.var.duration = u'infinite'
         self.var.delay = 0
+        self.var.pause_resume = u''
         self.var.stop = u''
         self.var.bitdepth = str(16)
         self.var.samplerate = str(44100)
-        self.var.channels = str(1)
+        self.var.channels = str(2)
         self.var.ram_cache = u'yes'
 
 
@@ -86,6 +87,7 @@ class audio_low_latency_record_start(item):
                     u'Audio Low Latency Record Init item is missing')
 
         self.filename = self.experiment.pool[self.var.filename]
+        self.pause_resume = self.var.pause_resume
         self.stop = self.var.stop
         self.ram_cache = self.var.ram_cache
 
@@ -105,6 +107,16 @@ class audio_low_latency_record_start(item):
         self.kb = keyboard(self.experiment,timeout=1)
 
         self.init_var()
+
+        if self.pause_resume != u'':
+            # Prepare the pause resume responses
+            self._allowed_responses_pause_resume = []
+            for r in safe_decode(self.pause_resume).split(u';'):
+                if r.strip() != u'':
+                    self._allowed_responses_pause_resume.append(r)
+            if not self._allowed_responses_pause_resume:
+                self._allowed_responses_pause_resume = None
+            self.show_message(u"allowed pause/resume keys set to %s" % self._allowed_responses_pause_resume)
 
         if self.stop != u'':
             # Prepare the pause resume responses
@@ -188,8 +200,12 @@ class audio_low_latency_record_start(item):
 
             self.show_message(u'Starting audio recording')
 
-            if self.stop != u'':
-                _keylist = self._allowed_responses_stop
+            if self.pause_resume != u'' or self.stop != u'':
+                _keylist = list()
+                if self.pause_resume != u'':
+                    _keylist.extend(self._allowed_responses_pause_resume)
+                if self.stop != u'':
+                    _keylist.extend(self._allowed_responses_stop)
 
                 self.kb.keylist = _keylist
                 self.kb.flush()
@@ -224,6 +240,35 @@ class audio_low_latency_record_start(item):
 
         while True:
 
+            # check for stop/pause/resume key
+            if self.pause_resume != u'' or self.stop != u'':
+                key1, time1 = self.kb.get_key()
+                if key1 in self._allowed_responses_stop:
+                    self.kb.flush()
+                    self.show_message(u'Stopped audio playback')
+                    break
+                elif key1 in self._allowed_responses_pause_resume:
+                    self.kb.flush()
+                    self.show_message(u'Paused audio playback')
+                    while True:
+                        key2, time2 = self.kb.get_key()
+                        if key2 in self._allowed_responses_pause_resume:
+                            self.kb.flush()
+                            self.show_message(u'Resumed audio playback')
+                            break
+
+            if self.experiment.audio_low_latency_record_execute_pause == 1:
+                self.show_message(u'Paused audio playback')
+                while self.experiment.audio_low_latency_record_pause == 1:
+                    pass
+
+            # check for stop item
+            if self.experiment.audio_low_latency_record_continue == 0:
+                break
+            elif self.duration_check:
+                if self.clock.time() - start_time >= self.duration:
+                    break
+
             # Read data from device
             if self.module == self.experiment.pyalsaaudio_module_name:
                 l, data = stream.read()
@@ -236,19 +281,6 @@ class audio_low_latency_record_start(item):
             elif self.ram_cache == u'no':
                 wav_file.writeframes(data)
 
-            if self.stop != u'':
-                key1, time1 = self.kb.get_key()
-                if key1 in self._allowed_responses_stop:
-                    self.kb.flush()
-                    self.show_message(u'Stopped audio recording')
-                    break
-  
-            # check for stop
-            if self.experiment.audio_low_latency_record_continue == 0:
-                break
-            elif self.duration_check:
-                if self.clock.time() - start_time >= self.duration:
-                    break
 
         self.set_stimulus_offset()
 

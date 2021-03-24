@@ -27,9 +27,9 @@ from libqtopensesame.items.qtautoplugin import qtautoplugin
 from libopensesame.exceptions import osexception
 from openexp.keyboard import keyboard
 
-VERSION = u'2021.03-1'
+VERSION = u'2020.11-1'
 
-class audio_low_latency_play_pause(item):
+class audio_low_latency_record_pause(item):
 
     """
     Class handles the basic functionality of the item.
@@ -37,7 +37,7 @@ class audio_low_latency_play_pause(item):
     """
 
     # Provide an informative description for your plug-in.
-    description = u'Low Latency Audio: stops the background audio playback.'
+    description = u'Low Latency Audio: pauses the background audio recording.'
 
     def __init__(self, name, experiment, string=None):
 
@@ -56,14 +56,14 @@ class audio_low_latency_play_pause(item):
 
         """Set en check variables."""
 
-        if hasattr(self.experiment, "audio_low_latency_play_dummy_mode"):
-            self.dummy_mode = self.experiment.audio_low_latency_play_dummy_mode
-            self.verbose = self.experiment.audio_low_latency_play_verbose
+        if hasattr(self.experiment, "audio_low_latency_record_dummy_mode"):
+            self.dummy_mode = self.experiment.audio_low_latency_record_dummy_mode
+            self.verbose = self.experiment.audio_low_latency_record_verbose
         else:
             raise osexception(
-                    u'Audio Low Latency Play Init item is missing')
+                    u'Audio Low Latency Record Init item is missing')
 
-        self.experiment.audio_low_latency_play_pause = 1
+        self.experiment.audio_low_latency_record_pause = 1
 
 
     def prepare(self):
@@ -83,24 +83,24 @@ class audio_low_latency_play_pause(item):
 
         """Run phase"""
 
-        if not hasattr(self.experiment, "audio_low_latency_play_start"):
+        if not hasattr(self.experiment, "audio_low_latency_record_start"):
             raise osexception(
-                    u'Audio Low Latency Play Start item is missing')
+                    u'Audio Low Latency Record Start item is missing')
 
         self.set_item_onset()
 
         if self.dummy_mode == u'no':
 
             ## wait if thread has not started yet
-            while not self.experiment.audio_low_latency_play_thread_running:
+            while not self.experiment.audio_low_latency_record_thread_running:
                 self.clock.sleep(self.poll_time)
 
             ## send stop signal to thread
             self.show_message(u'Sending pause signal')
-            self.experiment.audio_low_latency_play_execute_pause = 1
+            self.experiment.audio_low_latency_record_execute_pause = 1
 
         elif self.dummy_mode == u'yes':
-            self.show_message(u'Dummy mode enabled, NOT playing audio')
+            self.show_message(u'Dummy mode enabled, NOT recording audio')
         else:
             self.show_message(u'Error with dummy mode!')
 
@@ -116,11 +116,11 @@ class audio_low_latency_play_pause(item):
             print(message)
 
 
-class qtaudio_low_latency_play_pause(audio_low_latency_play_pause, qtautoplugin):
+class qtaudio_low_latency_record_pause(audio_low_latency_record_pause, qtautoplugin):
 
     def __init__(self, name, experiment, script=None):
 
-        """Plug-in GUI"""
+        """plug-in GUI"""
 
-        audio_low_latency_play_pause.__init__(self, name, experiment, script)
+        audio_low_latency_record_pause.__init__(self, name, experiment, script)
         qtautoplugin.__init__(self, __file__)

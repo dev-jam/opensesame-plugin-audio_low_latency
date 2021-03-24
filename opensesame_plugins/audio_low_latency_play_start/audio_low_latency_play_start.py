@@ -243,6 +243,7 @@ class audio_low_latency_play_start(item):
 
         self.experiment.audio_low_latency_play_thread_running = 1
 
+        # Read data from wave
         data = wav_file.readframes(chunk)
 
         if self.delay_check:
@@ -258,8 +259,11 @@ class audio_low_latency_play_start(item):
         start_time = self.clock.time()
 
         while len(data) > 0:
-            # Read data from stdin
+
+            # write data to device
             stream.write(data)
+
+            # Read data from wave
             data = wav_file.readframes(chunk)
 
             if self.experiment.audio_low_latency_play_continue == 0:

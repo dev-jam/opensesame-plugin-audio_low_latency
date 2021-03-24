@@ -56,7 +56,8 @@ class audio_low_latency_record(item):
         self.var.delay = 0
         self.var.bitdepth = str(16)
         self.var.samplerate = str(44100)
-        self.var.channels = str(1)
+        self.var.channels = str(2)
+        self.var.pause_resume = u''
         self.var.stop = u''
         self.var.ram_cache = u'yes'
 
@@ -82,6 +83,7 @@ class audio_low_latency_record(item):
                     u'Audio Low Latency Record Init item is missing')
 
         self.filename = self.experiment.pool[self.var.filename]
+        self.pause_resume = self.var.pause_resume
         self.stop = self.var.stop
         self.ram_cache = self.var.ram_cache
 
@@ -97,6 +99,16 @@ class audio_low_latency_record(item):
         self.kb = keyboard(self.experiment,timeout=1)
 
         self.init_var()
+
+        if self.pause_resume != u'':
+            # Prepare the pause resume responses
+            self._allowed_responses_pause_resume = []
+            for r in safe_decode(self.pause_resume).split(u';'):
+                if r.strip() != u'':
+                    self._allowed_responses_pause_resume.append(r)
+            if not self._allowed_responses_pause_resume:
+                self._allowed_responses_pause_resume = None
+            self.show_message(u"allowed pause/resume keys set to %s" % self._allowed_responses_pause_resume)
 
         if self.stop != u'':
             # Prepare the pause resume responses
@@ -167,8 +179,13 @@ class audio_low_latency_record(item):
 
             self.show_message(u'Starting audio recording')
 
-            if self.stop != u'':
-                _keylist = self._allowed_responses_stop
+            if self.pause_resume != u'' or self.stop != u'':
+                _keylist = list()
+                if self.pause_resume != u'':
+                    _keylist.extend(self._allowed_responses_pause_resume)
+                if self.stop != u'':
+                    _keylist.extend(self._allowed_responses_stop)
+
                 self.kb.keylist = _keylist
                 self.kb.flush()
 
@@ -183,7 +200,7 @@ class audio_low_latency_record(item):
 
     def record(self, stream, wav_file, chunk, duration, delay):
 
-        frames = []
+        frames = list()
 
         if self.delay_check:
             if delay >= 1:
@@ -198,23 +215,35 @@ class audio_low_latency_record(item):
             stream.start_stream()
 
         while duration >= self.clock.time() - start_time:
-            # Read data from stdin
+
+            # check for stop/pause/resume key
+            if self.pause_resume != u'' or self.stop != u'':
+                key1, time1 = self.kb.get_key()
+                if key1 in self._allowed_responses_stop:
+                    self.kb.flush()
+                    self.show_message(u'Stopped audio playback')
+                    break
+                elif key1 in self._allowed_responses_pause_resume:
+                    self.kb.flush()
+                    self.show_message(u'Paused audio playback')
+                    while True:
+                        key2, time2 = self.kb.get_key()
+                        if key2 in self._allowed_responses_pause_resume:
+                            self.kb.flush()
+                            self.show_message(u'Resumed audio playback')
+                            break
+
+            # Read data from device
             if self.module == self.experiment.pyalsaaudio_module_name:
                 l, data = stream.read()
             else:
                 data = stream.read(chunk)
 
+            # save data to file/ram
             if self.ram_cache == u'yes':
                 frames.append(data)
             elif self.ram_cache == u'no':
                 wav_file.writeframes(data)
-
-            if self.stop != u'':
-                key1, time1 = self.kb.get_key()
-                if key1 in self._allowed_responses_stop:
-                    self.kb.flush()
-                    self.show_message(u'Stopped audio recording')
-                    break
 
         self.set_stimulus_offset()
 

@@ -49,7 +49,6 @@ class audio_low_latency_play_resume(item):
     def reset(self):
 
         """Resets plug-in to initial values."""
-
         pass
 
 
@@ -84,12 +83,10 @@ class audio_low_latency_play_resume(item):
 
         """Run phase"""
 
-
         if not hasattr(self.experiment, "audio_low_latency_play_start"):
             raise osexception(
                     u'Audio Low Latency Play Start item is missing')
 
-        from time import sleep
         self.set_item_onset()
 
         if self.dummy_mode == u'no':
@@ -101,8 +98,6 @@ class audio_low_latency_play_resume(item):
             ## send stop signal to thread
             self.show_message(u'Sending resume signal')
             self.experiment.audio_low_latency_play_execute_pause = 0
-
-
 
         elif self.dummy_mode == u'yes':
             self.show_message(u'Dummy mode enabled, NOT playing audio')

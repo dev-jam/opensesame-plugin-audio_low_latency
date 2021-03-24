@@ -204,7 +204,6 @@ class audio_low_latency_play(item):
 
             self.show_message(u'Starting audio playback')
 
-
             if self.pause_resume != u'' or self.stop != u'':
                 _keylist = list()
                 if self.pause_resume != u'':
@@ -230,6 +229,7 @@ class audio_low_latency_play(item):
 
     def play_file(self, stream, wav_file, chunk, delay):
 
+        # Read data from wave
         data = wav_file.readframes(chunk)
 
         if self.delay_check:
@@ -245,13 +245,13 @@ class audio_low_latency_play(item):
         start_time = self.clock.time()
 
         while len(data) > 0:
-            # Read data from stdin
-            stream.write(data)
-            data = wav_file.readframes(chunk)
 
+            # check duration
             if self.duration_check:
                 if self.clock.time() - start_time >= self.duration:
                     break
+
+            # check for stop/pause/resume key
             if self.pause_resume != u'' or self.stop != u'':
                 key1, time1 = self.kb.get_key()
                 if key1 in self._allowed_responses_stop:
@@ -268,6 +268,11 @@ class audio_low_latency_play(item):
                             self.show_message(u'Resumed audio playback')
                             break
 
+            # write data to device
+            stream.write(data)
+
+            # Read data from wave
+            data = wav_file.readframes(chunk)
 
         if self.module == self.experiment.sounddevice_module_name:
             stream.stop()
