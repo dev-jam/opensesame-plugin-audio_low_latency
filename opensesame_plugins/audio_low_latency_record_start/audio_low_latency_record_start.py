@@ -245,21 +245,21 @@ class audio_low_latency_record_start(item):
                 key1, time1 = self.kb.get_key()
                 if key1 in self._allowed_responses_stop:
                     self.kb.flush()
-                    self.show_message(u'Stopped audio playback')
+                    self.show_message(u'Stopped audio recording')
                     break
                 elif key1 in self._allowed_responses_pause_resume:
                     self.kb.flush()
-                    self.show_message(u'Paused audio playback')
+                    self.show_message(u'Paused audio recording')
                     while True:
                         key2, time2 = self.kb.get_key()
                         if key2 in self._allowed_responses_pause_resume:
                             self.kb.flush()
-                            self.show_message(u'Resumed audio playback')
+                            self.show_message(u'Resumed audio recording')
                             break
 
             if self.experiment.audio_low_latency_record_execute_pause == 1:
-                self.show_message(u'Paused audio playback')
-                while self.experiment.audio_low_latency_record_pause == 1:
+                self.show_message(u'Paused audio recording')
+                while self.experiment.audio_low_latency_record_execute_pause == 1:
                     pass
 
             # check for stop item
