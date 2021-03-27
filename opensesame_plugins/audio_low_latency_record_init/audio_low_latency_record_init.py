@@ -159,7 +159,7 @@ class audio_low_latency_record_init(item):
         self.module = self.var.module
         self.device_name = self.var.device_name
         self.bitdepth = int(self.var.bitdepth)
-        self.samplewidth = self.bitdepth / 8
+        self.samplewidth = self.bitdepth // 8
         self.samplerate = int(self.var.samplerate)
         self.channels = int(self.var.channels)
 
@@ -196,6 +196,8 @@ class audio_low_latency_record_init(item):
         self.experiment.audio_low_latency_record_wait = None
         self.experiment.audio_low_latency_record_stop = None
         self.experiment.audio_low_latency_record_start = None
+        self.experiment.audio_low_latency_record_pause = None
+        self.experiment.audio_low_latency_record_resume = None
 
         self.experiment.audio_low_latency_record_thread_running = 0
 
