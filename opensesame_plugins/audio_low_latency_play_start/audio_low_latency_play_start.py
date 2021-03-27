@@ -266,31 +266,19 @@ class audio_low_latency_play_start(item):
             # Read data from wave
             data = wav_file.readframes(chunk)
 
+            # check for stop/pause/resume key
+            if self.pause_resume != u'' or self.stop != u'':
+                self.check_keys()
+
+            while self.experiment.audio_low_latency_play_execute_pause == 1 and self.experiment.audio_low_latency_play_continue == 1:
+                if self.pause_resume != u'' or self.stop != u'':
+                    self.check_keys()
+
             if self.experiment.audio_low_latency_play_continue == 0:
                 break
             elif self.duration_check:
                 if self.clock.time() - start_time >= self.duration:
                     break
-            if self.experiment.audio_low_latency_play_execute_pause == 1:
-                self.show_message(u'Paused audio playback')
-                while self.experiment.audio_low_latency_play_execute_pause == 1:
-                    pass
-                self.show_message(u'Resumed audio playback')
-            if self.pause_resume != u'' or self.stop != u'':
-                key1, time1 = self.kb.get_key()
-                if key1 in self._allowed_responses_stop:
-                    self.kb.flush()
-                    self.show_message(u'Stopped audio playback')
-                    break
-                elif key1 in self._allowed_responses_pause_resume:
-                    self.kb.flush()
-                    self.show_message(u'Paused audio playback')
-                    while True:
-                        key2, time2 = self.kb.get_key()
-                        if key2 in self._allowed_responses_pause_resume:
-                            self.kb.flush()
-                            self.show_message(u'Resumed audio playback')
-                            break
 
         if self.module == self.experiment.sounddevice_module_name:
             stream.stop()
@@ -325,33 +313,23 @@ class audio_low_latency_play_start(item):
             stream.start_stream()
 
         for start in range(0,len(wav_data),chunk):
+
+            # write data to device
             stream.write(wav_data[start:start+chunk])
+
+            # check for stop/pause/resume key
+            if self.pause_resume != u'' or self.stop != u'':
+                self.check_keys()
+
+            while self.experiment.audio_low_latency_play_execute_pause == 1 and self.experiment.audio_low_latency_play_continue == 1:
+                if self.pause_resume != u'' or self.stop != u'':
+                    self.check_keys()
 
             if self.experiment.audio_low_latency_play_continue == 0:
                 break
             elif self.duration_check:
                 if self.clock.time() - start_time >= self.duration:
                     break
-            if self.experiment.audio_low_latency_play_execute_pause == 1:
-                self.show_message(u'Paused audio playback')
-                while self.experiment.audio_low_latency_play_execute_pause == 1:
-                    pass
-                self.show_message(u'Resumed audio playback')
-            if self.pause_resume != u'' or self.stop != u'':
-                key1, time1 = self.kb.get_key()
-                if key1 in self._allowed_responses_stop:
-                    self.kb.flush()
-                    self.show_message(u'Stopped audio playback')
-                    break
-                elif key1 in self._allowed_responses_pause_resume:
-                    self.kb.flush()
-                    self.show_message(u'Paused audio playback')
-                    while True:
-                        key2, time2 = self.kb.get_key()
-                        if key2 in self._allowed_responses_pause_resume:
-                            self.kb.flush()
-                            self.show_message(u'Resumed audio playback')
-                            break
 
         if self.module == self.experiment.sounddevice_module_name:
             stream.stop()
@@ -363,6 +341,27 @@ class audio_low_latency_play_start(item):
         self.show_message(u'Stopped audio')
         self.experiment.audio_low_latency_play_locked = 0
 
+
+    def check_keys(self):
+        """
+        desc:
+            Show message.
+        """
+
+        key1, time1 = self.kb.get_key()
+        self.kb.flush()
+        if self.stop != u'':
+            if key1 in self._allowed_responses_stop:
+                self.show_message(u'Stopped audio playback')
+                self.experiment.audio_low_latency_play_continue = 0
+        if self.pause_resume != u'':
+            if key1 in self._allowed_responses_pause_resume:
+                if self.experiment.audio_low_latency_play_execute_pause == 0:
+                    self.show_message(u'Paused audio playback')
+                    self.experiment.audio_low_latency_play_execute_pause = 1
+                elif self.experiment.audio_low_latency_play_execute_pause == 1:
+                    self.show_message(u'Resumed audio playback')
+                    self.experiment.audio_low_latency_play_execute_pause = 0
 
     def show_message(self, message):
         """
