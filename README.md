@@ -39,6 +39,9 @@ Background:
 - **Play Wait** waits until the thread from 'Play Start' is finished (end of audio or surpassing the duration) before advancing to the next item in the experiment.
 - **Play Stop** sends a stop signal to the 'Play Start' thread to stop immediately and checks if the thread has finished.
 
+- **Play Pause** pauses playback of audio.
+- **Play Resume** resumes playback of audio.
+
 
 Five items for recording:
 
@@ -52,13 +55,15 @@ Background:
 - **Record Wait** waits until the thread from 'Record Start' is finished (surpassing the duration) before advancing to the next item in the experiment.
 - **Record Stop** sends a stop signal to the 'Record Start' thread to stop immediately and checks if the thread has finished.
 
+- **Record Pause** pauses recording of audio.
+- **Record Resume** resumes recording of audio.
+
 
 Timestamps can be found in the log file by the name: time_stimulus_onset_[item_name]
 
 
 Known bugs:
 
-- When a sketchpad or item with the keyboard timeout is placed between the multi threaded background items, playback (and probably recording) will be choppy
 - Recording with the PyAudio module does not seem to work at the moment
 
 

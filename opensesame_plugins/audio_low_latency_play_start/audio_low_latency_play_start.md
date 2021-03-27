@@ -26,6 +26,8 @@ Audio Low Latency Play Start options:
 - *Audio Filename* path to the audio file.
 - *Duration* in ms or string 'sound'.
 - *Delay* in ms.
+- *Pause/Resume* list of buttons separated by ';'
+- *Stop* list of buttons separated by ';'
 - *Preload* file will be preloaded to RAM in the prepare phase.
 
 
