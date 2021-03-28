@@ -25,7 +25,7 @@ setup(
     # Some general metadata. By convention, a plugin is named:
     # opensesame-plugin-[plugin name]
     name='opensesame_plugin_-_audio_low_latency',
-    version='5.0.0',
+    version='5.0.1',
     description='An OpenSesame Plug-in for playing and recording audio files with low latency on Linux.',
     author='Bob Rosbag',
     author_email='b.rosbag@let.ru.nl',
@@ -177,6 +177,28 @@ setup(
             'opensesame_plugins/audio_low_latency_record_wait/audio_low_latency_record_wait_large.png',
             'opensesame_plugins/audio_low_latency_record_wait/audio_low_latency_record_wait.py',
             'opensesame_plugins/audio_low_latency_record_wait/info.yaml',
+            ]
+        ),
+        ('share/opensesame_plugins/audio_low_latency_record_pause',
+        # Then a list of files that are copied into the target folder. Make sure
+        # that these files are also included by MANIFEST.in!
+        [
+            'opensesame_plugins/audio_low_latency_record_pause/audio_low_latency_record_pause.md',
+            'opensesame_plugins/audio_low_latency_record_pause/audio_low_latency_record_pause.png',
+            'opensesame_plugins/audio_low_latency_record_pause/audio_low_latency_record_pause_large.png',
+            'opensesame_plugins/audio_low_latency_record_pause/audio_low_latency_record_pause.py',
+            'opensesame_plugins/audio_low_latency_record_pause/info.yaml',
+            ]
+        ),
+        ('share/opensesame_plugins/audio_low_latency_record_resume',
+        # Then a list of files that are copied into the target folder. Make sure
+        # that these files are also included by MANIFEST.in!
+        [
+            'opensesame_plugins/audio_low_latency_record_resume/audio_low_latency_record_resume.md',
+            'opensesame_plugins/audio_low_latency_record_resume/audio_low_latency_record_resume.png',
+            'opensesame_plugins/audio_low_latency_record_resume/audio_low_latency_record_resume_large.png',
+            'opensesame_plugins/audio_low_latency_record_resume/audio_low_latency_record_resume.py',
+            'opensesame_plugins/audio_low_latency_record_resume/info.yaml',
             ]
         )]
     )
