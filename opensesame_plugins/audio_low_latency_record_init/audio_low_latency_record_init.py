@@ -58,7 +58,7 @@ class audio_low_latency_record_init(item):
         self.var.verbose = u'no'
         self.var.bitdepth = str(16)
         self.var.samplerate = str(44100)
-        self.var.channels = str(1)
+        self.var.channels = str(2)
         self.var.period_size = 128
 
         self.experiment.audio_low_latency_record_module_list = list()
@@ -230,6 +230,12 @@ class audio_low_latency_record_init(item):
             if self.module == self.pyalsaaudio_module_name and self.pyalsaaudio_module_name in self.experiment.audio_low_latency_record_module_list:
                 import alsaaudio
                 self.device_index = self.experiment.audio_low_latency_record_device_dict[self.pyalsaaudio_module_name].index(self.device_name)
+
+                # self.device = alsaaudio.PCM(type=alsaaudio.PCM_CAPTURE,
+                #                             device=self.device_name,
+                #                             channels=self.channels,
+                #                             rate=self.samplerate,
+                #                             periodsize=self.period_size)
 
                 self.device = alsaaudio.PCM(type=alsaaudio.PCM_CAPTURE, device=self.device_name)
                 channels_set = self.device.setchannels(self.channels)

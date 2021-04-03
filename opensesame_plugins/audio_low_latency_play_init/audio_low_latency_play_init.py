@@ -59,7 +59,7 @@ class audio_low_latency_play_init(item):
         self.var.bitdepth = str(16)
         self.var.samplerate = str(44100)
         self.var.channels = str(2)
-        self.var.period_size = 1024
+        self.var.period_size = 128
 
         self.experiment.audio_low_latency_play_module_list = list()
         self.experiment.audio_low_latency_play_device_dict = dict()
@@ -230,6 +230,12 @@ class audio_low_latency_play_init(item):
                 import alsaaudio
                 self.device_index = self.experiment.audio_low_latency_play_device_dict[self.pyalsaaudio_module_name].index(self.device_name)
 
+                # self.device = alsaaudio.PCM(type=alsaaudio.PCM_PLAYBACK,
+                #                             device=self.device_name,
+                #                             channels=self.channels,
+                #                             rate=self.samplerate,
+                #                             periodsize=self.period_size)
+
                 self.device = alsaaudio.PCM(type=alsaaudio.PCM_PLAYBACK, device=self.device_name)
 
                 channels_set = self.device.setchannels(self.channels)
@@ -314,9 +320,6 @@ class audio_low_latency_play_init(item):
                 except Exception as e:
                     raise osexception(
                         u'Could not start audio device', exception=e)
-
-                #self.show_message(u'Estimated output latency: %fms ' % (self.device.get_output_latency()))
-                #self.show_message(u'Buffer size: %d frames ' % (self.device.get_write_available()))
 
             elif self.module == self.experiment.oss4_module_name:
                 import ossaudiodev

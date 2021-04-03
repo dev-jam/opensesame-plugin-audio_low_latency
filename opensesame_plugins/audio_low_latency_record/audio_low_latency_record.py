@@ -54,11 +54,11 @@ class audio_low_latency_record(item):
         self.var.filename = u''
         self.var.duration = 1000
         self.var.delay = 0
+        self.var.pause_resume = u''
+        self.var.stop = u''
         self.var.bitdepth = str(16)
         self.var.samplerate = str(44100)
         self.var.channels = str(2)
-        self.var.pause_resume = u''
-        self.var.stop = u''
         self.var.ram_cache = u'yes'
 
     def init_var(self):
@@ -143,9 +143,7 @@ class audio_low_latency_record(item):
 
         """Run phase"""
 
-        self.set_item_onset()
-
-        start_time = self.clock.time()
+        start_time = self.set_item_onset()
 
         if isinstance(self.var.duration,int):
             if self.var.duration >= 1:
@@ -179,8 +177,6 @@ class audio_low_latency_record(item):
             else:
                 delay = self.delay
 
-            self.show_message(u'Starting audio recording')
-
             if self.pause_resume != u'' or self.stop != u'':
                 _keylist = list()
                 if self.pause_resume != u'':
@@ -190,6 +186,8 @@ class audio_low_latency_record(item):
 
                 self.kb.keylist = _keylist
                 self.kb.flush()
+
+            self.show_message(u'Starting audio recording')
 
             self.record(self.device, self.wav_file, self.period_size, self.duration, delay)
 
@@ -208,13 +206,12 @@ class audio_low_latency_record(item):
             if delay >= 1:
                 self.clock.sleep(delay)
 
-        self.set_stimulus_onset()
-        start_time = self.clock.time()
-
         if self.module == self.experiment.sounddevice_module_name:
             stream.start()
         elif self.module == self.experiment.pyaudio_module_name:
             stream.start_stream()
+
+        start_time = self.set_stimulus_onset()
 
         while duration >= self.clock.time() - start_time:
 
@@ -253,7 +250,7 @@ class audio_low_latency_record(item):
 
         wav_file.close()
 
-        self.show_message(u'Stopped audio recording')
+        self.show_message(u'Finished audio recording')
         self.experiment.audio_low_latency_record_locked = 0
 
     def check_keys(self):
@@ -354,3 +351,4 @@ class qtaudio_low_latency_record(audio_low_latency_record, qtautoplugin):
 
         audio_low_latency_record.__init__(self, name, experiment, script)
         qtautoplugin.__init__(self, __file__)
+

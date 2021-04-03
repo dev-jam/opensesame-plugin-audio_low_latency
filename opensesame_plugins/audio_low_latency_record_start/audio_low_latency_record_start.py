@@ -47,7 +47,6 @@ class audio_low_latency_record_start(item):
         self.verbose = u'no'
         self.poll_time = 10
 
-
     def reset(self):
 
         """Resets plug-in to initial values."""
@@ -62,7 +61,6 @@ class audio_low_latency_record_start(item):
         self.var.samplerate = str(44100)
         self.var.channels = str(2)
         self.var.ram_cache = u'yes'
-
 
     def init_var(self):
 
@@ -81,7 +79,6 @@ class audio_low_latency_record_start(item):
             self.samplewidth = self.experiment.audio_low_latency_record_samplewidth
             self.samplerate = self.experiment.audio_low_latency_record_samplerate
             self.channels = self.experiment.audio_low_latency_record_channels
-
         else:
             raise osexception(
                     u'Audio Low Latency Record Init item is missing')
@@ -145,7 +142,6 @@ class audio_low_latency_record_start(item):
             self.show_message(u'Period size: %d frames' % (self.period_size))
             self.show_message(u'Period duration: %s ms' % (str(self.period_size_time)))
 
-
     def run(self):
 
         """Run phase"""
@@ -154,8 +150,7 @@ class audio_low_latency_record_start(item):
             raise osexception(
                     u'Audio Low Latency Record Stop or Audio Low Latency Record Wait item is missing')
 
-        self.set_item_onset()
-        start_time = self.clock.time()
+        start_time = self.set_item_onset()
 
         error_msg = u'Duration must be a string named infinite or a an integer greater than 1'
 
@@ -198,8 +193,6 @@ class audio_low_latency_record_start(item):
             else:
                 delay = self.delay
 
-            self.show_message(u'Starting audio recording')
-
             if self.pause_resume != u'' or self.stop != u'':
                 _keylist = list()
                 if self.pause_resume != u'':
@@ -209,6 +202,8 @@ class audio_low_latency_record_start(item):
 
                 self.kb.keylist = _keylist
                 self.kb.flush()
+
+            self.show_message(u'Starting audio recording')
 
             self.experiment.audio_low_latency_record_locked = 1
             self.experiment.audio_low_latency_record_thread = threading.Thread(target=self.record, args=(self.device, self.wav_file, self.period_size, delay))
@@ -224,19 +219,18 @@ class audio_low_latency_record_start(item):
 
         self.experiment.audio_low_latency_record_thread_running = 1
 
-        frames = []
+        frames = list()
 
         if self.delay_check:
             if delay >= 1:
                 self.clock.sleep(delay)
 
-        self.set_stimulus_onset()
-        start_time = self.clock.time()
-
         if self.module == self.experiment.sounddevice_module_name:
             stream.start()
         elif self.module == self.experiment.pyaudio_module_name:
             stream.start_stream()
+
+        start_time = self.set_stimulus_onset()
 
         while True:
 
@@ -253,6 +247,7 @@ class audio_low_latency_record_start(item):
                 break
             elif self.duration_check:
                 if self.clock.time() - start_time >= self.duration:
+                    self.show_message(u'Audio recording stopped, duration exceeded')
                     break
 
             # Read data from device
@@ -280,9 +275,8 @@ class audio_low_latency_record_start(item):
 
         wav_file.close()
 
-        self.show_message(u'Stopped audio recording')
+        self.show_message(u'Finished audio recording')
         self.experiment.audio_low_latency_record_locked = 0
-
 
     def check_keys(self):
         """

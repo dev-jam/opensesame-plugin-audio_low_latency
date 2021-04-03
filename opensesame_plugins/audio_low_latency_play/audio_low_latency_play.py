@@ -162,15 +162,14 @@ class audio_low_latency_play(item):
 
         """Run phase"""
 
-        self.set_item_onset()
-        start_time = self.clock.time()
+        start_time = self.set_item_onset()
 
         error_msg = u'Duration must be a string named sound or a an integer greater than 1'
 
         if isinstance(self.var.duration,str):
             if self.var.duration == u'sound':
                 self.duration_check = False
-                self.duration = self.var.duration
+                self.duration = self.wav_duration
             else:
                 raise osexception(error_msg)
         elif isinstance(self.var.duration,int):
@@ -204,8 +203,6 @@ class audio_low_latency_play(item):
             else:
                 delay = self.delay
 
-            self.show_message(u'Starting audio playback')
-
             if self.pause_resume != u'' or self.stop != u'':
                 _keylist = list()
                 if self.pause_resume != u'':
@@ -215,6 +212,8 @@ class audio_low_latency_play(item):
 
                 self.kb.keylist = _keylist
                 self.kb.flush()
+
+            self.show_message(u'Starting audio playback')
 
             if self.ram_cache == u'No':
                 self.play_file(self.device, self.wav_file, self.period_size, delay)
@@ -243,8 +242,7 @@ class audio_low_latency_play(item):
         elif self.module == self.experiment.pyaudio_module_name:
             stream.start_stream()
 
-        self.set_stimulus_onset()
-        start_time = self.clock.time()
+        start_time = self.set_stimulus_onset()
 
         while len(data) > 0:
 
@@ -272,6 +270,7 @@ class audio_low_latency_play(item):
                 break
             elif self.duration_check:
                 if self.clock.time() - start_time >= self.duration:
+                    self.show_message(u'Audio stopped, duration exceeded')
                     break
 
         if self.module == self.experiment.sounddevice_module_name:
@@ -283,7 +282,7 @@ class audio_low_latency_play(item):
 
         wav_file.close()
 
-        self.show_message(u'Stopped audio')
+        self.show_message(u'Finished audio playback')
 
 
     def play_data(self, stream, wav_data, chunk, delay):
@@ -297,8 +296,7 @@ class audio_low_latency_play(item):
         elif self.module == self.experiment.pyaudio_module_name:
             stream.start_stream()
 
-        self.set_stimulus_onset()
-        start_time = self.clock.time()
+        start_time = self.set_stimulus_onset()
 
         for start in range(0,len(wav_data),chunk):
 
@@ -323,6 +321,7 @@ class audio_low_latency_play(item):
                 break
             elif self.duration_check:
                 if self.clock.time() - start_time >= self.duration:
+                    self.show_message(u'Audio stopped, duration exceeded')
                     break
 
         if self.module == self.experiment.sounddevice_module_name:
@@ -332,7 +331,7 @@ class audio_low_latency_play(item):
 
         self.set_stimulus_offset()
 
-        self.show_message(u'Stopped audio')
+        self.show_message(u'Finished audio playback')
 
 
     def check_keys(self):
