@@ -152,38 +152,39 @@ class audio_low_latency_record_start(item):
 
         start_time = self.set_item_onset()
 
-        error_msg = u'Duration must be a string named infinite or a an integer greater than 1'
-
-        if isinstance(self.var.duration,str):
-            if self.var.duration == u'infinite':
-                self.duration_check = False
-                self.duration = self.var.duration
-            else:
-                raise osexception(error_msg)
-        elif isinstance(self.var.duration,int):
-            if self.var.duration >= 1:
-                self.duration_check = True
-                self.duration = int(self.var.duration)
-                if self.duration < self.period_size_time:
-                    raise osexception(u'Duration should be larger than period duration')
-            else:
-                raise osexception(error_msg)
-        else:
-            raise osexception(error_msg)
-
-        if isinstance(self.var.delay,int):
-            if self.var.delay >= 0:
-                self.delay = int(self.var.delay)
-                if self.delay > 0:
-                    self.delay_check = True
-                else:
-                    self.delay_check = False
-            else:
-                raise osexception(u'Delay can not be negative')
-        else:
-            raise osexception(u'Delay should be a integer')
-
         if self.dummy_mode == u'no':
+
+            error_msg = u'Duration must be a string named infinite or a an integer greater than 1'
+
+            if isinstance(self.var.duration,str):
+                if self.var.duration == u'infinite':
+                    self.duration_check = False
+                    self.duration = self.var.duration
+                else:
+                    raise osexception(error_msg)
+            elif isinstance(self.var.duration,int):
+                if self.var.duration >= 1:
+                    self.duration_check = True
+                    self.duration = int(self.var.duration)
+                    if self.duration < self.period_size_time:
+                        raise osexception(u'Duration should be larger than period duration')
+                else:
+                    raise osexception(error_msg)
+            else:
+                raise osexception(error_msg)
+
+            if isinstance(self.var.delay,int):
+                if self.var.delay >= 0:
+                    self.delay = int(self.var.delay)
+                    if self.delay > 0:
+                        self.delay_check = True
+                    else:
+                        self.delay_check = False
+                else:
+                    raise osexception(u'Delay can not be negative')
+            else:
+                raise osexception(u'Delay should be a integer')
+
             while self.experiment.audio_low_latency_record_locked:
                 self.clock.sleep(self.poll_time)
 

@@ -145,29 +145,30 @@ class audio_low_latency_record(item):
 
         start_time = self.set_item_onset()
 
-        if isinstance(self.var.duration,int):
-            if self.var.duration >= 1:
-                self.duration = int(self.var.duration)
-                if self.duration < self.period_size_time:
-                    raise osexception(u'Duration should be larger than period duration')
-            else:
-                raise osexception(u'Duration cannot be negative')
-        else:
-            raise osexception(u'Duration should be a integer')
-
-        if isinstance(self.var.delay,int):
-            if self.var.delay >= 0:
-                self.delay = int(self.var.delay)
-                if self.delay > 0:
-                    self.delay_check = True
-                else:
-                    self.delay_check = False
-            else:
-                raise osexception(u'Delay can not be negative')
-        else:
-            raise osexception(u'Delay should be a integer')
-
         if self.dummy_mode == u'no':
+            if isinstance(self.var.duration,int):
+                if self.var.duration >= 1:
+                    self.duration = int(self.var.duration)
+                    if self.duration < self.period_size_time:
+                        raise osexception(u'Duration should be larger than period duration')
+                else:
+                    raise osexception(u'Duration cannot be negative')
+            else:
+                raise osexception(u'Duration should be a integer')
+
+            if isinstance(self.var.delay,int):
+                if self.var.delay >= 0:
+                    self.delay = int(self.var.delay)
+                    if self.delay > 0:
+                        self.delay_check = True
+                    else:
+                        self.delay_check = False
+                else:
+                    raise osexception(u'Delay can not be negative')
+            else:
+                raise osexception(u'Delay should be a integer')
+
+
             while self.experiment.audio_low_latency_record_locked:
                 self.clock.sleep(self.poll_time)
 
