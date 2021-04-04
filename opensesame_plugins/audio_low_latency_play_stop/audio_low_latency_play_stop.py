@@ -89,7 +89,6 @@ class audio_low_latency_play_stop(item):
             raise osexception(
                     u'Audio Low Latency Play Start item is missing')
 
-        from time import sleep
         self.set_item_onset()
 
         if self.dummy_mode == u'no':
