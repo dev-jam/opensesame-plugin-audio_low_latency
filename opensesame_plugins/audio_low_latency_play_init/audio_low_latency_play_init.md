@@ -3,16 +3,15 @@ OpenSesame Plug-in: Audio Low Latency
 
 *An OpenSesame Plug-in for playing and recording audio files with low latency on Linux.*  
 
-Copyright, 2020, Bob Rosbag  
+Copyright, 2021, Bob Rosbag  
 
 
 1. About
 --------
 
-The main goal of this plug-in is to play and record audio files with as low and stable latencies as possible. The 'PyAlsaAudio' package which uses the Linux ALSA audio system provided the best results within Python. 
-For compatibility reasons the 'PortAudio' option was added so experiments can be created and fully executed on Windows systems. 'PortAudio' is cross-platform and works on both Windows as Linux but gives higher and more variable latencies than the 'alsaaudio' option.
-To fully utilize this plug-in you need a Linux system with ALSA and the 'alsasound' package (version 0.8.4 or higher). The 'PyAlsaAudio' package (named python-alsasound) in the Debian and Ubuntu repositories is outdated, therefore I added packages for the Debian testing/unstable and stretch distribution.
-Python2 packages are for the normal version of OpenSesame and the Python3 packages are for the future/experimental version of OpenSesame. These packages are built for Debian and not tested in Ubuntu. The Python package is also available on pypi and the source on github:
+The main goal of this plug-in is to play and record audio with minimal and predictable latencies to achieve a high accuracy and precision. The 'PyAlsaAudio' package which uses the Linux ALSA audio system provided the best results within Python. 
+For compatibility reasons the 'PortAudio' and 'sounddevice' options were added so experiments can be created and fully executed on Windows systems. 'PortAudio' and 'sounddevice' are cross-platform and work on both Windows as Linux but these give a higher and more variable latency than the 'alsaaudio' option.
+To fully utilize this plug-in you need a Linux system with ALSA and the 'PyAlsaAudio' package (version 0.8.4 or higher). In Debian and Ubuntu this package is named python3-pyalsaaudio. The Python package is also available on pypi and the source on github:
 
 https://github.com/larsimmisch/pyalsaaudio
 
@@ -40,8 +39,7 @@ The full license should be included in the file COPYING, or can be obtained from
 
 - <http://www.gnu.org/licenses/gpl.txt>
 
-This plug-in contains works of others. For the full license information, please
-refer to `debian/copyright`.
+This plug-in contains works of others. 
 
 
 3. Documentation
