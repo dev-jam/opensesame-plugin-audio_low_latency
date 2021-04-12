@@ -18,7 +18,7 @@ https://github.com/larsimmisch/pyalsaaudio
 
 This *init* item should be placed at the beginning of an experiment.
 
-Audio Low Latency Play Init options:
+Audio Low Latency Play Init parameters:
 
 - *Dummy Mode* for testing experiments.
 - *Verbose Mode* for testing experiments.

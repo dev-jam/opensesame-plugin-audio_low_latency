@@ -20,7 +20,7 @@ The plug-in has an *init* item which should be placed at the beginning of an exp
 
 **Note:** this is a foreground item, it will wait for the recording to finish before advancing to the next item.
 
-Audio Low Latency Record options:
+Audio Low Latency Record parameters:
 
 - *Audio Filename* path to the audio file.
 - *Duration* in ms.

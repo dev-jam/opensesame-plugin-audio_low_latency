@@ -20,7 +20,7 @@ The plug-in has an *init* item which should be placed at the beginning of an exp
 
 **Note:** this is a foreground item, it will wait for the playback to finish before advancing to the next item.
 
-Audio Low Latency Play options:
+Audio Low Latency Play parameters:
 
 - *Audio Filename* path to the audio file.
 - *Duration* in ms or string 'sound'.

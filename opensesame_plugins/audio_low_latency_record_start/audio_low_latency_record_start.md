@@ -20,7 +20,7 @@ The plug-in has an *init* item which should be placed at the beginning of an exp
 
 **Note:** this is a multi-threaded background item, it will immediately advance to the next item, it will **NOT** wait for the recording to finish.
 
-Audio Low Latency Record Start options:
+Audio Low Latency Record Start parameters:
 
 - *Audio Filename* path to the audio file.
 - *Duration* in ms, or string 'infinite'.

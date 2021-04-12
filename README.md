@@ -26,7 +26,7 @@ Difference between foreground and background:
 - **Background** items consist of a 'start', 'wait' and 'stop' item. These are fully multi-threaded. After the start of the playback/recording, the item will immediately advance to the next item. When it reaches the 'stop' or 'wait' item, it will stop the audio or wait until the file ends or duration has passed.
 
 
-Five items for playback:
+Seven items for playback:
 
 - **Play Init** initialization of the playback audio device, this should be placed at the beginning of an experiment.
 
@@ -42,7 +42,7 @@ Background:
 - **Play Resume** resumes playback of audio.
 
 
-Five items for recording:
+Seven items for recording:
 
 - **Record Init** initialization of the playback audio device, this should be placed at the beginning of an experiment.
 
