@@ -75,7 +75,7 @@ The full license should be included in the file COPYING, or can be obtained from
 
 - <http://www.gnu.org/licenses/gpl.txt>
 
-This plug-in contains works of others. 
+This plug-in contains works of others. Icons are derivatives of the Faience icon theme, Faenza icon theme and Papirus icon theme.
 
 
 ## 3. Documentation
