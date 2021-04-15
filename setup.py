@@ -24,12 +24,12 @@ from setuptools import setup
 setup(
     # Some general metadata. By convention, a plugin is named:
     # opensesame-plugin-[plugin name]
-    name='opensesame_plugin_-_audio_low_latency',
+    name='opensesame-plugin-audio_low_latency',
     version='5.3.0',
     description='An OpenSesame Plug-in for playing and recording audio files with low latency on Linux.',
     author='Bob Rosbag',
     author_email='b.rosbag@let.ru.nl',
-    url='https://github.com/dev-jam/opensesame_plugin_-_audio_low_latency',
+    url='https://github.com/dev-jam/opensesame-plugin-audio_low_latency',
     # Classifiers used by PyPi if you upload the plugin there
     classifiers=[
         'Intended Audience :: Science/Research',
