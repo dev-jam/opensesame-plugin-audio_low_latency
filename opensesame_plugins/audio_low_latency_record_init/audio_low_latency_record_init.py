@@ -393,7 +393,8 @@ class audio_low_latency_record_init(item):
             self.show_message(u"Closing audio device")
             self.device.close()
             if  self.module == self.pyaudio_module_name:
-                self.device.terminate()
+                self.device.close()
+                self.device_init.terminate()
             self.device = None
             self.experiment.audio_low_latency_record_device = None
             self.show_message(u"Audio device closed")
