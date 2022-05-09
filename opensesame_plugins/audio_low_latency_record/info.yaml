@@ -1,9 +1,9 @@
 description: Low Latency Audio - starts audio recording on the foreground.
-version: 2021.03-1
+version: 2022.04-1
 author: "Bob Rosbag"
 url: "http://osdoc.cogsci.nl/"
 category: "Audio Low Latency Recording"
-date: "2021"
+date: "2022"
 controls:
 -
     label: "Audio Filename"
@@ -52,5 +52,5 @@ controls:
     type: text
 -
     label:  |
-      <small>Audio Low Latency version 2021.03-1</small>
+      <small>Audio Low Latency version 2022.04-1</small>
     type: text

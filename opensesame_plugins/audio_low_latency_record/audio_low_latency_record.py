@@ -28,7 +28,7 @@ from libopensesame.exceptions import osexception
 from openexp.keyboard import keyboard
 import wave
 
-VERSION = u'2021.03-1'
+VERSION = u'2022.04-1'
 
 class audio_low_latency_record(item):
 
@@ -52,7 +52,7 @@ class audio_low_latency_record(item):
 
         # Set default experimental variables and values
         self.var.filename = u''
-        self.var.duration = 1000
+        self.var.duration = u'infinite'
         self.var.delay = 0
         self.var.pause_resume = u''
         self.var.stop = u''
@@ -122,6 +122,39 @@ class audio_low_latency_record(item):
                 self._allowed_responses_stop = None
             self.show_message(u"allowed stop keys set to %s" % self._allowed_responses_stop)
 
+        error_msg = u'Duration must be a string named infinite or a an integer greater than 1'
+
+        if isinstance(self.var.duration,str):
+            if self.var.duration == u'infinite':
+                if self.stop == u'':
+                    raise osexception(u'If duration is set to infinite then setting a stop key is mandatory')
+                self.duration_check = False
+                self.duration = self.var.duration
+            else:
+                raise osexception(error_msg)
+        elif isinstance(self.var.duration,int):
+            if self.var.duration >= 1:
+                self.duration_check = True
+                self.duration = int(self.var.duration)
+                if self.duration < self.period_size_time:
+                    raise osexception(u'Duration should be larger than period duration')
+            else:
+                raise osexception(error_msg)
+        else:
+            raise osexception(error_msg)
+
+        if isinstance(self.var.delay,int):
+            if self.var.delay >= 0:
+                self.delay = int(self.var.delay)
+                if self.delay > 0:
+                    self.delay_check = True
+                else:
+                    self.delay_check = False
+            else:
+                raise osexception(u'Delay can not be negative')
+        else:
+            raise osexception(u'Delay should be a integer')          
+
         if self.dummy_mode == u'no':
             try:
                 self.show_message(u'\n')
@@ -146,28 +179,6 @@ class audio_low_latency_record(item):
         start_time = self.set_item_onset()
 
         if self.dummy_mode == u'no':
-            if isinstance(self.var.duration,int):
-                if self.var.duration >= 1:
-                    self.duration = int(self.var.duration)
-                    if self.duration < self.period_size_time:
-                        raise osexception(u'Duration should be larger than period duration')
-                else:
-                    raise osexception(u'Duration cannot be negative')
-            else:
-                raise osexception(u'Duration should be a integer')
-
-            if isinstance(self.var.delay,int):
-                if self.var.delay >= 0:
-                    self.delay = int(self.var.delay)
-                    if self.delay > 0:
-                        self.delay_check = True
-                    else:
-                        self.delay_check = False
-                else:
-                    raise osexception(u'Delay can not be negative')
-            else:
-                raise osexception(u'Delay should be a integer')
-
 
             while self.experiment.audio_low_latency_record_locked:
                 self.clock.sleep(self.poll_time)
@@ -190,7 +201,7 @@ class audio_low_latency_record(item):
 
             self.show_message(u'Starting audio recording')
 
-            self.record(self.device, self.wav_file, self.period_size, self.duration, delay)
+            self.record(self.device, self.wav_file, self.period_size, delay)
 
         elif self.dummy_mode == u'yes':
             self.set_stimulus_onset()
@@ -199,7 +210,7 @@ class audio_low_latency_record(item):
             raise osexception(u'Error with dummy mode!')
 
 
-    def record(self, stream, wav_file, chunk, duration, delay):
+    def record(self, stream, wav_file, chunk, delay):
 
         frames = list()
 
@@ -214,7 +225,23 @@ class audio_low_latency_record(item):
 
         start_time = self.set_stimulus_onset()
 
-        while duration >= self.clock.time() - start_time:
+        while True:
+
+            # check for stop/pause/resume key
+            if self.pause_resume != u'' or self.stop != u'':
+                self.check_keys()
+
+            while self.record_execute_pause == 1 and self.record_continue == 1:
+                if self.pause_resume != u'' or self.stop != u'':
+                    self.check_keys()
+
+            # check for stop item
+            if self.record_continue == 0:
+                break
+            elif self.duration_check:
+                if self.clock.time() - start_time >= self.duration:
+                    self.show_message(u'Audio recording stopped, duration exceeded')
+                    break
 
             # Read data from device
             if self.module == self.experiment.pyalsaaudio_module_name:
@@ -228,16 +255,6 @@ class audio_low_latency_record(item):
             elif self.ram_cache == u'no':
                 wav_file.writeframes(data)
 
-            # check for stop/pause/resume key
-            if self.pause_resume != u'' or self.stop != u'':
-                self.check_keys()
-
-            while self.record_execute_pause == 1 and self.record_continue == 1:
-                if self.pause_resume != u'' or self.stop != u'':
-                    self.check_keys()
-
-            if self.record_continue == 0:
-                break
 
         self.set_stimulus_offset()
 
