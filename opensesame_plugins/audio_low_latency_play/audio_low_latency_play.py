@@ -123,6 +123,41 @@ class audio_low_latency_play(item):
 
         error_msg = u'Duration must be a string named sound or a an integer greater than 1'
 
+        try:
+            self.show_message(u'\n')
+            self.show_message(u'Loading sound file: '+self.filename+' ...')
+            self.wav_file = wave.open(self.filename, 'rb')
+            self.show_message(u'Succesfully loaded sound file...')
+        except Exception as e:
+            raise osexception(
+                u'Could not load audio file', exception=e)
+
+        self.wav_duration = int(round(float(self.wav_file.getnframes()) / float(self.wav_file.getframerate()) * 1000, 1))
+        self.show_message(u'Audio file duration: %d ms' % (self.wav_duration))
+        self.show_message(u'Period size: %d frames' % (self.period_size))
+        self.show_message(u'Period duration: %s ms' % (str(self.period_size_time)))
+
+        error_msg_list = []
+
+        if self.wav_file.getsampwidth() * 8 != self.bitdepth:
+            error_msg_list.append(u'- bitdepth incorrect, file is %dbit but experiment is set to %dbit\n' % (self.wav_file.getsampwidth()*8,self.bitdepth))
+            #raise osexception(u'wave file has incorrect bitdepth')
+        if self.wav_file.getframerate() != self.samplerate:
+            error_msg_list.append(u'- samplerate incorrect, file is %dHz but experiment is set to %dHz\n' % (self.wav_file.getframerate(),self.samplerate))
+            #raise osexception(u'wave file has incorrect samplerate')
+        if self.wav_file.getnchannels() != self.channels:
+            error_msg_list.append(u'- number of channels incorrect, file has %d channel(s) but experiment is set to %d channel(s)\n' % (self.wav_file.getnchannels(), self.channels))
+            #raise osexception(u'wave file has incorrect number of channels')
+        if self.wav_file.getnframes() < self.period_size:
+            error_msg_list.append(u'- Period size is larger than total number of frames in wave file, use a period size smaller than %d frames\n' % (self.wav_file.getnframes()))
+        if error_msg_list:
+            raise osexception(u'Error with audio file %s\n%s' % (self.filename, ''.join(error_msg_list)))
+
+        if self.ram_cache == u'yes':
+            wav_file_nframes = self.wav_file.getnframes()
+            self.wav_file_data = self.wav_file.readframes(wav_file_nframes)
+            self.wav_file.close()
+
         if isinstance(self.var.duration,str):
             if self.var.duration == u'sound':
                 self.duration_check = False
@@ -149,43 +184,6 @@ class audio_low_latency_play(item):
                 raise osexception(u'Delay can not be negative')
         else:
             raise osexception(u'Delay should be a integer')
-
-
-        if self.dummy_mode == u'no':
-            try:
-                self.show_message(u'\n')
-                self.show_message(u'Loading sound file: '+self.filename+' ...')
-                self.wav_file = wave.open(self.filename, 'rb')
-                self.show_message(u'Succesfully loaded sound file...')
-            except Exception as e:
-                raise osexception(
-                    u'Could not load audio file', exception=e)
-
-            self.wav_duration = int(round(float(self.wav_file.getnframes()) / float(self.wav_file.getframerate()) * 1000, 1))
-            self.show_message(u'Audio file duration: %d ms' % (self.wav_duration))
-            self.show_message(u'Period size: %d frames' % (self.period_size))
-            self.show_message(u'Period duration: %s ms' % (str(self.period_size_time)))
-
-            error_msg_list = []
-
-            if self.wav_file.getsampwidth() * 8 != self.bitdepth:
-                error_msg_list.append(u'- bitdepth incorrect, file is %dbit but experiment is set to %dbit\n' % (self.wav_file.getsampwidth()*8,self.bitdepth))
-                #raise osexception(u'wave file has incorrect bitdepth')
-            if self.wav_file.getframerate() != self.samplerate:
-                error_msg_list.append(u'- samplerate incorrect, file is %dHz but experiment is set to %dHz\n' % (self.wav_file.getframerate(),self.samplerate))
-                #raise osexception(u'wave file has incorrect samplerate')
-            if self.wav_file.getnchannels() != self.channels:
-                error_msg_list.append(u'- number of channels incorrect, file has %d channel(s) but experiment is set to %d channel(s)\n' % (self.wav_file.getnchannels(), self.channels))
-                #raise osexception(u'wave file has incorrect number of channels')
-            if self.wav_file.getnframes() < self.period_size:
-                error_msg_list.append(u'- Period size is larger than total number of frames in wave file, use a period size smaller than %d frames\n' % (self.wav_file.getnframes()))
-            if error_msg_list:
-                raise osexception(u'Error with audio file %s\n%s' % (self.filename, ''.join(error_msg_list)))
-
-            if self.ram_cache == u'yes':
-                wav_file_nframes = self.wav_file.getnframes()
-                self.wav_file_data = self.wav_file.readframes(wav_file_nframes)
-                self.wav_file.close()
 
 
     def run(self):
