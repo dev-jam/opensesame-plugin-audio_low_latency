@@ -20,12 +20,14 @@ controls:
     var: "duration"
 -
     label: "Start delay (ms)"
+    info: "Insert a delay before recording starts"
     name: "line_edit_delay_start"
     tooltip: "Value in ms"
     type: "line_edit"
     var: "delay_start"
 -
     label: "Stop delay (ms)"
+    info: "Insert a delay before recording stops"
     name: "line_edit_delay_stop"
     tooltip: "Value in ms"
     type: "line_edit"
