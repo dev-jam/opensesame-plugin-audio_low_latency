@@ -210,7 +210,7 @@ class audio_low_latency_record(item):
                 self.kb.keylist = _keylist
                 self.kb.flush()
 
-            self.show_message(u'Starting audio recording')
+            self.show_message(u'Initializing audio recording')
 
             self.record(self.device, self.wav_file, self.period_size, delay_start, delay_stop)
 
@@ -227,7 +227,9 @@ class audio_low_latency_record(item):
 
         if self.delay_start_check:
             if delay_start >= 1:
+                self.show_message(u'Delaying audio recording for %d ms' % (delay_start))
                 self.clock.sleep(delay_start)
+                self.show_message(u'Delay done')
 
         if self.module == self.experiment.sounddevice_module_name:
             stream.start()
@@ -250,8 +252,10 @@ class audio_low_latency_record(item):
             if self.record_continue == 0:
                 if delay_stop >= 1:
                     stop_time = self.clock.time()
+                    self.show_message(u'Initializing stopping audio recording with delay for %d ms' % (delay_stop))
                     while self.clock.time() - stop_time <= delay_stop:
                         self.process_data(stream, wav_file, chunk, frames)
+                    self.show_message(u'Delay done')
                 break
             elif self.duration_check:
                 if self.clock.time() - start_time >= self.duration:

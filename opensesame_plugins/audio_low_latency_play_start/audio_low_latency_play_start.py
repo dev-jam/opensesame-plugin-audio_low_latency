@@ -221,7 +221,7 @@ class audio_low_latency_play_start(item):
                 self.kb.keylist = _keylist
                 self.kb.flush()
 
-            self.show_message(u'Starting audio playback')
+            self.show_message(u'Initializing audio playback')
             self.experiment.audio_low_latency_play_locked = 1
 
             if self.ram_cache == u'no':
@@ -247,7 +247,9 @@ class audio_low_latency_play_start(item):
 
         if self.delay_check:
             if delay >= 1:
+                self.show_message(u'Delaying audio playback for %d ms' % (delay))
                 self.clock.sleep(delay)
+                self.show_message(u'Delay done')
 
         if self.module == self.experiment.sounddevice_module_name:
             stream.start()
@@ -255,6 +257,8 @@ class audio_low_latency_play_start(item):
             stream.start_stream()
 
         start_time = self.set_stimulus_onset()
+
+        self.show_message(u'Starting audio playback')
 
         while len(data) > 0:
 
@@ -298,7 +302,9 @@ class audio_low_latency_play_start(item):
 
         if self.delay_check:
             if delay >= 1:
+                self.show_message(u'Delaying audio playback for %d ms' % (delay))
                 self.clock.sleep(delay)
+                self.show_message(u'Delay done')
 
         if self.module == self.experiment.sounddevice_module_name:
             stream.start()
@@ -306,6 +312,8 @@ class audio_low_latency_play_start(item):
             stream.start_stream()
 
         start_time = self.set_stimulus_onset()
+
+        self.show_message(u'Starting audio playback')
 
         for start in range(0,len(wav_data),chunk):
 
