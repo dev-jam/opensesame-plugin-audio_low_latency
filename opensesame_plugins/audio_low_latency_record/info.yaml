@@ -19,11 +19,17 @@ controls:
     type: "line_edit"
     var: "duration"
 -
-    label: "Delay (ms)"
-    name: "line_edit_delay"
+    label: "Start delay (ms)"
+    name: "line_edit_delay_start"
     tooltip: "Value in ms"
     type: "line_edit"
-    var: "delay"
+    var: "delay_start"
+-
+    label: "Stop delay (ms)"
+    name: "line_edit_delay_stop"
+    tooltip: "Value in ms"
+    type: "line_edit"
+    var: "delay_stop"
 -
     label: "Pause/Resume"
     info: "Expecting a semicolon-separated list of button characters, e.g., a;b;c"
