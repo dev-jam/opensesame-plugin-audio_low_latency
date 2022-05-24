@@ -28,7 +28,7 @@ setup(
     version='8.0.1',
     description='An OpenSesame Plug-in for playing and recording audio files with low latency on Linux.',
     author='Bob Rosbag',
-    author_email='b.rosbag@let.ru.nl',
+    author_email='debian@bobrosbag.nl',
     url='https://github.com/dev-jam/opensesame-plugin-audio_low_latency',
     # Classifiers used by PyPi if you upload the plugin there
     classifiers=[
