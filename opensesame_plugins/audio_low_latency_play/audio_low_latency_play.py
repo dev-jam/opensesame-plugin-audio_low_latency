@@ -239,9 +239,6 @@ class audio_low_latency_play(item):
                 self.clock.sleep(delay)
                 self.show_message(u'Delay done')
 
-        if self.module == self.experiment.sounddevice_module_name:
-            stream.start()
-
         start_time = self.set_stimulus_onset()
 
         self.show_message(u'Starting audio playback')
@@ -275,9 +272,6 @@ class audio_low_latency_play(item):
                     self.show_message(u'Audio stopped, duration exceeded')
                     break
 
-        if self.module == self.experiment.sounddevice_module_name:
-            stream.stop()
-
         self.set_stimulus_offset()
 
         wav_file.close()
@@ -292,9 +286,6 @@ class audio_low_latency_play(item):
                 self.show_message(u'Delaying audio playback for %d ms' % (delay))
                 self.clock.sleep(delay)
                 self.show_message(u'Delay done')
-
-        if self.module == self.experiment.sounddevice_module_name:
-            stream.start()
 
         start_time = self.set_stimulus_onset()
 
@@ -325,9 +316,6 @@ class audio_low_latency_play(item):
                 if self.clock.time() - start_time >= self.duration:
                     self.show_message(u'Audio stopped, duration exceeded')
                     break
-
-        if self.module == self.experiment.sounddevice_module_name:
-            stream.stop()
 
         self.set_stimulus_offset()
 

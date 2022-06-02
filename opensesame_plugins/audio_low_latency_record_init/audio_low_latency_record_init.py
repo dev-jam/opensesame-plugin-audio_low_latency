@@ -321,6 +321,8 @@ class audio_low_latency_record_init(item):
                     raise osexception(
                         u'Could not start audio device', exception=e)
 
+                self.device.start()
+
             elif self.module == self.experiment.oss4_module_name:
                 import ossaudiodev
                 self.device = ossaudiodev.open('r')

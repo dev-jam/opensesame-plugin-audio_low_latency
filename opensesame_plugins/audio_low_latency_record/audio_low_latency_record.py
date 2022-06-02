@@ -231,9 +231,6 @@ class audio_low_latency_record(item):
                 self.clock.sleep(delay_start)
                 self.show_message(u'Delay done')
 
-        if self.module == self.experiment.sounddevice_module_name:
-            stream.start()
-
         start_time = self.set_stimulus_onset()
 
         while True:
@@ -266,9 +263,6 @@ class audio_low_latency_record(item):
 
         if self.ram_cache == u'yes':
             wav_file.writeframes(b''.join(frames))
-
-        if self.module == self.experiment.sounddevice_module_name:
-            stream.stop()
 
         wav_file.close()
 
