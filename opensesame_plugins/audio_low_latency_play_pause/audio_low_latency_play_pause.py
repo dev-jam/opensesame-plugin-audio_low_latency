@@ -27,7 +27,7 @@ from libqtopensesame.items.qtautoplugin import qtautoplugin
 from libopensesame.exceptions import osexception
 from openexp.keyboard import keyboard
 
-VERSION = u'2022.05-1'
+VERSION = u'8.2.0'
 
 class audio_low_latency_play_pause(item):
 
