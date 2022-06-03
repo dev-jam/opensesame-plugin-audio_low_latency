@@ -28,6 +28,7 @@ from libopensesame.exceptions import osexception
 from openexp.keyboard import keyboard
 import threading
 import wave
+import numpy
 
 VERSION = u'8.2.0'
 
@@ -288,6 +289,7 @@ class audio_low_latency_record_start(item):
             l, data = stream.read()
         else:
             data = stream.read(chunk)
+            data = numpy.frombuffer(data[0])
 
         # save data to file/ram
         if self.ram_cache == u'yes':
