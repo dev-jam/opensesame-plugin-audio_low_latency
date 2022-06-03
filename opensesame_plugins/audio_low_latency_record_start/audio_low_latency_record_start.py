@@ -28,6 +28,7 @@ from libopensesame.exceptions import osexception
 from openexp.keyboard import keyboard
 import threading
 import wave
+import numpy
 
 VERSION = u'8.2.0'
 
@@ -270,6 +271,7 @@ class audio_low_latency_record_start(item):
         self.set_stimulus_offset()
 
         if self.ram_cache == u'yes':
+            self.show_message(u'Writing data to wav file')
             wav_file.writeframes(b''.join(frames))
 
         wav_file.close()
@@ -288,6 +290,8 @@ class audio_low_latency_record_start(item):
             l, data = stream.read()
         else:
             data = stream.read(chunk)
+            if self.module == self.experiment.sounddevice_module_name:
+                data = numpy.frombuffer(data[0])
 
         # save data to file/ram
         if self.ram_cache == u'yes':
