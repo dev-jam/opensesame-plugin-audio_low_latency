@@ -1,5 +1,5 @@
 description: Low Latency Audio - stops the background audio recording.
-version: 8.2.0
+version: 8.3.0
 author: "Bob Rosbag"
 url: "http://osdoc.cogsci.nl/"
 category: "Audio Low Latency Recording"
@@ -11,5 +11,5 @@ controls:
     type: text
 -
     label:  |
-      <small>Audio Low Latency version 8.2.0</small>
+      <small>Audio Low Latency version 8.3.0</small>
     type: text

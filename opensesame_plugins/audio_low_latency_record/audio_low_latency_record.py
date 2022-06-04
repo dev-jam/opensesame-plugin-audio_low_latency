@@ -29,7 +29,7 @@ from openexp.keyboard import keyboard
 import wave
 import numpy
 
-VERSION = u'8.2.0'
+VERSION = u'8.3.0'
 
 class audio_low_latency_record(item):
 
