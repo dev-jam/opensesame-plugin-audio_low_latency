@@ -30,7 +30,7 @@ import threading
 import wave
 import numpy
 
-VERSION = u'8.3.0'
+VERSION = u'8.4.0'
 
 class audio_low_latency_record_start(item):
 

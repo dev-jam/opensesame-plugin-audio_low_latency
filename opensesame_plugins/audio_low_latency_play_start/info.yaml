@@ -1,5 +1,5 @@
 description: Low Latency Audio - starts audio playback in the background.
-version: 8.3.0
+version: 8.4.0
 author: "Bob Rosbag"
 url: "http://osdoc.cogsci.nl/"
 category: "Audio Low Latency Playback"
@@ -52,6 +52,6 @@ controls:
     type: text
 -
     label:  |
-      <small>Audio Low Latency version 8.3.0</small>
+      <small>Audio Low Latency version 8.4.0</small>
     type: text
 
