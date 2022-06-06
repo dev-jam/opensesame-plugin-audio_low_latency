@@ -59,7 +59,7 @@ class audio_low_latency_record_init(item):
         self.var.bitdepth = str(16)
         self.var.samplerate = str(44100)
         self.var.channels = str(2)
-        self.var.period_size = 128
+        self.var.period_size = 1024
 
         self.experiment.audio_low_latency_record_module_list = list()
         self.experiment.audio_low_latency_record_device_dict = dict()
@@ -169,7 +169,7 @@ class audio_low_latency_record_init(item):
             raise osexception(u'Period size value should be a integer')
 
         self.frame_size = self.bitdepth * self.channels
-        self.data_size = self.frame_size * self.period_size
+        self.data_size = self.frame_size * self.period_size // 8
         self.period_size_time = round(float(self.period_size) / float(self.samplerate) * 1000, 1)
 
         self.experiment.audio_low_latency_record_dummy_mode = self.dummy_mode
@@ -344,7 +344,7 @@ class audio_low_latency_record_init(item):
 
                 self.period_size = self.device.bufsize()
                 self.period_size_time = round(float(self.period_size) / float(self.samplerate) * 1000, 1)
-                self.data_size = self.frame_size * self.period_size
+                self.data_size = self.frame_size * self.period_size // 8
 
                 self.experiment.audio_low_latency_record_period_size = self.period_size
                 self.experiment.audio_low_latency_record_data_size = self.data_size
@@ -353,7 +353,7 @@ class audio_low_latency_record_init(item):
                 print('Overruling period size with hardware buffer for OSS4, using: ' + str(self.period_size) + ' frames or ' + str(self.period_size_time) + 'ms')
 
             self.experiment.audio_low_latency_record_device = self.device
-            #self.experiment.cleanup_functions.append(self.close)
+            self.experiment.cleanup_functions.append(self.close)
             self.python_workspace[u'audio_low_latency_record'] = self.experiment.audio_low_latency_record_device
 
         elif self.dummy_mode == u'yes':

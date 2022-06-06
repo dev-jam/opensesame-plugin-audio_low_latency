@@ -284,7 +284,7 @@ class audio_low_latency_record_start(item):
         desc:
             Process data.
         """
-        
+
         # Read data from device
         if self.module == self.experiment.pyalsaaudio_module_name:
             l, data = stream.read()
