@@ -155,8 +155,13 @@ class audio_low_latency_play(item):
 
         if self.ram_cache == u'yes':
             wav_file_nframes = self.wav_file.getnframes()
+            self.show_message(u'Loading wave file into cache...')
             self.wav_file_data = self.wav_file.readframes(wav_file_nframes)
+            self.show_message(u'Done! Closing wave file...')
             self.wav_file.close()
+        elif self.ram_cache == u'no':
+            self.show_message(u'Reading directly from wave file, no cache')
+
 
         if isinstance(self.var.duration,str):
             if self.var.duration == u'sound':
