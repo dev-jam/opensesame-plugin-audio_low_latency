@@ -62,7 +62,7 @@ class audio_low_latency_record_start(item):
         self.var.bitdepth = str(16)
         self.var.samplerate = str(44100)
         self.var.channels = str(2)
-        self.var.ram_cache = u'yes'
+        self.var.ram_cache = u'no'
 
     def init_var(self):
 
