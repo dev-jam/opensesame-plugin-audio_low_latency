@@ -29,6 +29,7 @@ from openexp.keyboard import keyboard
 import threading
 import wave
 import numpy
+import os, re, os.path
 
 VERSION = u'8.4.0'
 
@@ -54,6 +55,7 @@ class audio_low_latency_record_start(item):
 
         # Set default experimental variables and values
         self.var.filename = u''
+        self.var.file_exists_action == u'no'
         self.var.duration = u'infinite'
         self.var.delay_start = 0
         self.var.delay_stop = 0
@@ -63,6 +65,49 @@ class audio_low_latency_record_start(item):
         self.var.samplerate = str(44100)
         self.var.channels = str(2)
         self.var.ram_cache = u'yes'
+
+    def _generate_suffix(self, path_to_file):
+        pattern = "_[0-9]+$"
+        (filename, ext) = os.path.splitext(path_to_file)
+
+        # Keep increasing suffix number if file with the current suffix already exists
+        filename_exists = True
+        while filename_exists:
+            match = re.search(pattern, filename)
+            if match:
+                no = int(filename[match.start() + 1:]) + 1
+                filename = re.sub(pattern, "_" + str(no), filename)
+            else:
+                filename = filename + "_1"
+
+            new_filename = filename + ext
+            if not os.path.exists(new_filename):
+                filename_exists = False
+
+        return new_filename
+
+    def _build_output_file(self):
+        extension = 'wav'
+        # Make output location relative to location of experiment
+        rel_loc = os.path.normpath(self.get("output_file"))
+        if re.findall(r'[^A-Za-z0-9_\-\\]',rel_loc):
+           raise osexception("filename not valid. Use only [A-Za-z0-9] and _-")
+        if self.experiment.experiment_path is None:
+            raise osexception("Path to experiment not found. Please save the experiment to a file first")
+
+        output_file = os.path.normpath(os.path.join(self.experiment.experiment_path, rel_loc))
+        # Check for a subfolder (when it is specified) that it exists and if not, create it
+        if os.path.exists(os.path.dirname(output_file)):
+            if self.file_exists_action == u'yes':
+                # Search for underscore/number suffixes
+                output_file = self._generate_suffix(output_file)
+        else:
+            if os.path.dirname(rel_loc) != "":
+                try:
+                    os.makedirs(os.path.dirname(output_file))
+                except Exception as e:
+                    raise osexception("Error creating sound file: " + str(e))
+        return output_file + '.wav'
 
     def init_var(self):
 
@@ -85,7 +130,8 @@ class audio_low_latency_record_start(item):
             raise osexception(
                     u'Audio Low Latency Record Init item is missing')
 
-        self.filename = self.experiment.pool[self.var.filename]
+        self.file_exists_action == self.var.file_exists_action
+        self.filename = self._build_output_file()
         self.pause_resume = self.var.pause_resume
         self.stop = self.var.stop
         self.ram_cache = self.var.ram_cache
