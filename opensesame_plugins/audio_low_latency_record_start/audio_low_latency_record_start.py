@@ -30,7 +30,7 @@ import threading
 import wave
 import numpy
 
-VERSION = u'8.2.0'
+VERSION = u'8.4.0'
 
 class audio_low_latency_record_start(item):
 
@@ -271,6 +271,7 @@ class audio_low_latency_record_start(item):
         self.set_stimulus_offset()
 
         if self.ram_cache == u'yes':
+            self.show_message(u'Writing data to wav file')
             wav_file.writeframes(b''.join(frames))
 
         wav_file.close()
@@ -283,13 +284,14 @@ class audio_low_latency_record_start(item):
         desc:
             Process data.
         """
-        
+
         # Read data from device
         if self.module == self.experiment.pyalsaaudio_module_name:
             l, data = stream.read()
         else:
             data = stream.read(chunk)
-            data = numpy.frombuffer(data[0])
+            if self.module == self.experiment.sounddevice_module_name:
+                data = numpy.frombuffer(data[0])
 
         # save data to file/ram
         if self.ram_cache == u'yes':

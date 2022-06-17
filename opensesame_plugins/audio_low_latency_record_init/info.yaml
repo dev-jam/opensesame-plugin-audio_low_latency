@@ -1,5 +1,5 @@
 description: Low Latency Audio - initializes the recording audio device.
-version: 8.2.0
+version: 8.4.0
 author: "Bob Rosbag"
 url: "http://osdoc.cogsci.nl/"
 category: "Audio Low Latency Recording"
@@ -54,7 +54,7 @@ controls:
 -
     label: "Period size (frames)"
     name: "line_edit_period_size"
-    info: "Period size, value is number of samples (16 seems to be the bare minimum, 65536 the maximum)"
+    info: "Period size, value is number of samples (64 seems to be the bare minimum, 65536 the maximum)"
     type: "line_edit"
     var: "period_size"
 -
@@ -63,5 +63,5 @@ controls:
     type: text
 -
     label:  |
-      <small>Audio Low Latency version 8.2.0</small>
+      <small>Audio Low Latency version 8.4.0</small>
     type: text

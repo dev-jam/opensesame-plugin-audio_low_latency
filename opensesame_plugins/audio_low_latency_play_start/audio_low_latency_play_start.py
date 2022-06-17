@@ -29,7 +29,7 @@ from openexp.keyboard import keyboard
 import threading
 import wave
 
-VERSION = u'8.2.0'
+VERSION = u'8.4.0'
 
 class audio_low_latency_play_start(item):
 
@@ -126,7 +126,6 @@ class audio_low_latency_play_start(item):
 
         error_msg = u'Duration must be a string named sound or a an integer greater than 1'
 
-
         try:
             self.show_message(u'\n')
             self.show_message(u'Loading sound file: '+self.filename+' ...')
@@ -222,12 +221,13 @@ class audio_low_latency_play_start(item):
                 self.kb.flush()
 
             self.show_message(u'Initializing audio playback')
+
             self.experiment.audio_low_latency_play_locked = 1
 
             if self.ram_cache == u'no':
-                self.experiment.audio_low_latency_play_thread = threading.Thread(target=self.play_file, args=(self.device, self.wav_file, self.period_size, delay))
+                self.experiment.audio_low_latency_play_thread = threading.Thread(target=self.play, args=(self.device, self.wav_file, self.period_size, delay))
             elif self.ram_cache == u'yes':
-                self.experiment.audio_low_latency_play_thread = threading.Thread(target=self.play_data, args=(self.device, self.wav_file_data, self.data_size, delay))
+                self.experiment.audio_low_latency_play_thread = threading.Thread(target=self.play, args=(self.device, self.wav_file, self.data_size, delay, self.wav_file_data))
 
             self.experiment.audio_low_latency_play_thread.start()
 
@@ -238,12 +238,19 @@ class audio_low_latency_play_start(item):
             raise osexception(u'Error with dummy mode!')
 
 
-    def play_file(self, stream, wav_file, chunk, delay):
+    def play(self, stream, wav_file, chunk, delay, wav_data=None):
 
         self.experiment.audio_low_latency_play_thread_running = 1
 
-        # Read data from wave
-        data = wav_file.readframes(chunk)
+        start = 0
+
+        if self.ram_cache == u'no':
+            # Read data from wave
+            data = wav_file.readframes(chunk)
+        elif self.ram_cache == u'yes':
+            data = wav_data[start:start+chunk]
+
+        self.show_message(u'Chunk size: %d bytes' % (len(data)))
 
         if self.delay_check:
             if delay >= 1:
@@ -260,8 +267,16 @@ class audio_low_latency_play_start(item):
             # write data to device
             stream.write(data)
 
-            # Read data from wave
-            data = wav_file.readframes(chunk)
+            if self.ram_cache == u'no':
+                # Read data from wave
+                data = wav_file.readframes(chunk)
+            elif self.ram_cache == u'yes':
+                if len(wav_data) >= start+chunk:
+                    data = wav_data[start:start+chunk]
+                elif len(wav_data) < start+chunk:
+                    data = wav_data[start:len(wav_data)]
+
+                start += chunk
 
             # check for stop/pause/resume key
             if self.pause_resume != u'' or self.stop != u'':
@@ -280,47 +295,8 @@ class audio_low_latency_play_start(item):
 
         self.set_stimulus_offset()
 
-        wav_file.close()
-
-        self.show_message(u'Finished audio playback')
-        self.experiment.audio_low_latency_play_locked = 0
-
-
-    def play_data(self, stream, wav_data, chunk, delay):
-
-        self.experiment.audio_low_latency_play_thread_running = 1
-
-        if self.delay_check:
-            if delay >= 1:
-                self.show_message(u'Delaying audio playback for %d ms' % (delay))
-                self.clock.sleep(delay)
-                self.show_message(u'Delay done')
-
-        start_time = self.set_stimulus_onset()
-
-        self.show_message(u'Starting audio playback')
-
-        for start in range(0,len(wav_data),chunk):
-
-            # write data to device
-            stream.write(wav_data[start:start+chunk])
-
-            # check for stop/pause/resume key
-            if self.pause_resume != u'' or self.stop != u'':
-                self.check_keys()
-
-            while self.experiment.audio_low_latency_play_execute_pause == 1 and self.experiment.audio_low_latency_play_continue == 1:
-                if self.pause_resume != u'' or self.stop != u'':
-                    self.check_keys()
-
-            if self.experiment.audio_low_latency_play_continue == 0:
-                break
-            elif self.duration_check:
-                if self.clock.time() - start_time >= self.duration:
-                    self.show_message(u'Audio stopped, duration exceeded')
-                    break
-
-        self.set_stimulus_offset()
+        if self.ram_cache == u'no':
+            wav_file.close()
 
         self.show_message(u'Finished audio playback')
         self.experiment.audio_low_latency_play_locked = 0
