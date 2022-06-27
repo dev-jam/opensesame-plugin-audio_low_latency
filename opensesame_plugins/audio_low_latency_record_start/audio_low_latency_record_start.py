@@ -90,8 +90,6 @@ class audio_low_latency_record_start(item):
         extension = 'wav'
         # Make output location relative to location of experiment
         rel_loc = os.path.normpath(self.get("filename"))
-        if re.findall(r'[^A-Za-z0-9_\-\\\[\]]',rel_loc):
-           raise osexception("filename not valid. Use only [A-Za-z0-9] and _-")
         if self.experiment.experiment_path is None:
             raise osexception("Path to experiment not found. Please save the experiment to a file first")
 
