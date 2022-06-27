@@ -55,7 +55,7 @@ class audio_low_latency_record_start(item):
 
         # Set default experimental variables and values
         self.var.filename = u''
-        self.var.file_exists_action == u'no'
+        self.var.file_exists_action = u'no'
         self.var.duration = u'infinite'
         self.var.delay_start = 0
         self.var.delay_stop = 0
@@ -98,7 +98,7 @@ class audio_low_latency_record_start(item):
         output_file = os.path.normpath(os.path.join(self.experiment.experiment_path, rel_loc))
         # Check for a subfolder (when it is specified) that it exists and if not, create it
         if os.path.exists(os.path.dirname(output_file)):
-            if self.var.file_exists_action == u'yes':
+            if self.file_exists_action == u'yes':
                 # Search for underscore/number suffixes
                 output_file = self._generate_suffix(output_file)
         else:
