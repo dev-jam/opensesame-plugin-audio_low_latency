@@ -98,7 +98,7 @@ class audio_low_latency_record_start(item):
         output_file = os.path.normpath(os.path.join(self.experiment.experiment_path, rel_loc))
         # Check for a subfolder (when it is specified) that it exists and if not, create it
         if os.path.exists(os.path.dirname(output_file)):
-            if self.file_exists_action == u'yes':
+            if self.var.file_exists_action == u'yes':
                 # Search for underscore/number suffixes
                 output_file = self._generate_suffix(output_file)
         else:
