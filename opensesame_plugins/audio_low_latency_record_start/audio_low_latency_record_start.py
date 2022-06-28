@@ -92,8 +92,7 @@ class audio_low_latency_record_start(item):
         rel_loc = os.path.normpath(self.get("filename"))
         if self.experiment.experiment_path is None:
             raise osexception("Path to experiment not found. Please save the experiment to a file first")
-
-        output_file = os.path.normpath(os.path.join(self.experiment.experiment_path, rel_loc))
+        output_file = os.path.normpath(os.path.join(self.experiment.experiment_path, rel_loc)) + '.wav'
         # Check for a subfolder (when it is specified) that it exists and if not, create it
         if os.path.exists(os.path.dirname(output_file)):
             if self.file_exists_action == u'yes':
@@ -105,7 +104,7 @@ class audio_low_latency_record_start(item):
                     os.makedirs(os.path.dirname(output_file))
                 except Exception as e:
                     raise osexception("Error creating sound file: " + str(e))
-        return output_file + '.wav'
+        return output_file
 
     def init_var(self):
 
