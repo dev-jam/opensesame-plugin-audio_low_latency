@@ -12,7 +12,7 @@ controls:
     type: "line_edit"
     var: "filename"
 -
-    label: "Append suffix"
+    label: "Do not overwrite existing files, automatically append suffix"
     name: "checkbox_file_exists_action"
     tooltip: "If file exists append suffix to filename?"
     type: "checkbox"
