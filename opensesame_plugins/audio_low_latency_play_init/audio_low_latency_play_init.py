@@ -244,7 +244,7 @@ class audio_low_latency_play_init(item):
                 elif self.bitdepth == 16:
                     format_audio = alsaaudio.PCM_FORMAT_S16_LE
                 elif self.bitdepth == 24:
-                    error_msg_list.append(error_msg_bitdepth)
+                    format_audio = alsaaudio.PCM_FORMAT_S24_LE
                 elif self.bitdepth == 32:
                     format_audio = alsaaudio.PCM_FORMAT_S32_LE
                 else:
