@@ -55,7 +55,7 @@ class audio_low_latency_record_start(item):
 
         # Set default experimental variables and values
         self.var.filename = u''
-        self.var.file_exists_action = u'no'
+        self.var.file_exists_action = u'yes'
         self.var.duration = u'infinite'
         self.var.delay_start = 0
         self.var.delay_stop = 0

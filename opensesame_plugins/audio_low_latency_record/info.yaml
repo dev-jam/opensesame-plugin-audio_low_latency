@@ -7,10 +7,16 @@ date: "2022"
 controls:
 -
     label: "Audio Filename"
-    name: "filepool_filename"
-    tooltip: "Give filename"
-    type: "filepool"
+    name: "line_edit_filename"
+    tooltip: "Give output filename without extension"
+    type: "line_edit"
     var: "filename"
+-
+    label: "Do not overwrite existing files, automatically append suffix"
+    name: "checkbox_file_exists_action"
+    tooltip: "If file exists append suffix to filename?"
+    type: "checkbox"
+    var: "file_exists_action"
 -
     label: "Duration (ms)"
     info: "Expecting a value in ms or a string 'infinite'"
