@@ -27,6 +27,8 @@ from libopensesame.item import item
 from libqtopensesame.items.qtautoplugin import qtautoplugin
 from libopensesame.exceptions import osexception
 import pygame
+import subprocess
+import re
 
 VERSION = u'8.5.0'
 
@@ -70,10 +72,10 @@ class audio_low_latency_play_init(item):
         self.pyaudio_module_name = u'PyAudio (PortAudio)'
         self.sounddevice_module_name = u'SoundDevice (PortAudio)'
 
-        self.experiment.oss4_module_name = self.oss4_module_name
         self.experiment.pyalsaaudio_module_name = self.pyalsaaudio_module_name
         self.experiment.sounddevice_module_name = self.sounddevice_module_name
         self.experiment.pyaudio_module_name = self.pyaudio_module_name
+        self.experiment.oss4_module_name = self.oss4_module_name
 
         if os.name == 'posix':
             if u'alsaaudio' in self.modules_enabled:
@@ -167,8 +169,8 @@ class audio_low_latency_play_init(item):
         else:
             raise osexception(u'Period size value should be a integer')
 
-        self.frame_size = self.bitdepth * self.channels // 8
-        self.data_size = self.frame_size * self.period_size
+        self.frame_size = self.bitdepth * self.channels
+        self.data_size = self.frame_size * self.period_size // 8
         self.period_size_time = round(float(self.period_size) / float(self.samplerate) * 1000, 1)
 
         self.experiment.audio_low_latency_play_dummy_mode = self.dummy_mode
@@ -230,14 +232,7 @@ class audio_low_latency_play_init(item):
                 import alsaaudio
                 self.device_index = self.experiment.audio_low_latency_play_device_dict[self.pyalsaaudio_module_name].index(self.device_name)
 
-                self.device = alsaaudio.PCM(type=alsaaudio.PCM_PLAYBACK, device=self.device_name)
-
-                channels_set = self.device.setchannels(self.channels)
-                samplerate_set = self.device.setrate(self.samplerate)
-                period_size_set = self.device.setperiodsize(self.period_size)
-
                 error_msg_list = []
-                error_msg_bitdepth = u'%dbit audio not supported\n' % (self.bitdepth)
 
                 if self.bitdepth == 8:
                     format_audio = alsaaudio.PCM_FORMAT_U8
@@ -250,28 +245,62 @@ class audio_low_latency_play_init(item):
                 else:
                     raise ValueError('Unsupported format')
 
-                try:
-                    self.device.setformat(format_audio)
-                except Exception as e:
-                    error_msg_list.append(error_msg_bitdepth)
+                self.device = alsaaudio.PCM(type=alsaaudio.PCM_PLAYBACK,
+                                            format=format_audio,
+                                            device=self.device_name,
+                                            channels=self.channels,
+                                            rate=self.samplerate,
+                                            periodsize=self.period_size)
 
-                # self.device = alsaaudio.PCM(type=alsaaudio.PCM_PLAYBACK,
-                #                             format=format_audio,
-                #                             device=self.device_name,
-                #                             channels=self.channels,
-                #                             rate=self.samplerate,
-                #                             periodsize=self.period_size)
+                self.show_message(u"Audio device opened")
 
+                pattern = "CARD=(.*?),"
+                device_string = re.search(pattern, self.device_name)
 
-                if channels_set != self.channels:
-                    error_msg_list.append(u'%d channel(s) not supported\n' % (self.channels))
-                if samplerate_set != self.samplerate:
-                    error_msg_list.append(u'Samplerate of %d Hz not supported\n' % (self.samplerate))
-                if period_size_set != self.period_size:
-                    error_msg_list.append(u'Period size of %d frames not supported. %d frames is recommended.\n' % (self.period_size, period_size_set))
+                if device_string:
+                    filename_alsa = u'/proc/asound/'+device_string.group(1)+'/pcm0p/sub0/hw_params'
+
+                    try:
+                        real_buffer_size_string = subprocess.check_output(['grep', '-w', 'buffer_size', filename_alsa], text=True)
+                        real_period_size_string = subprocess.check_output(['grep', '-w', 'period_size', filename_alsa], text=True)
+                        real_channel_size_string = subprocess.check_output(['grep', '-w', 'channels', filename_alsa], text=True)
+                        real_format_size_string = subprocess.check_output(['grep', '-w', 'format', filename_alsa], text=True)
+                        real_samplerate_string = subprocess.check_output(['grep', '-w', 'rate', filename_alsa], text=True)
+
+                        real_buffer_size_string = real_buffer_size_string.replace('\n','')
+                        real_period_size_string = real_period_size_string.replace('\n','')
+                        real_channel_size_string = real_channel_size_string.replace('\n','')
+                        real_format_size_string = real_format_size_string.replace('\n','')
+                        real_samplerate_string = real_samplerate_string.replace('\n','')
+
+                        real_buffer_size = int(real_buffer_size_string.replace('buffer_size: ',''))
+                        real_period_size = int(real_period_size_string.replace('period_size: ',''))
+                        real_channel_size = int(real_channel_size_string.replace('channels: ',''))
+                        real_format = real_format_size_string.replace('format: ','')
+
+                        pattern_samplerate = "rate: (.*?) "
+                        real_samplerate_string = re.search(pattern_samplerate, real_samplerate_string)
+                        real_samplerate = int(real_samplerate_string.group(1))
+
+                        period_size_set = real_period_size
+
+                        if period_size_set != self.period_size:
+                            error_msg_list.append(u'Period size of %d frames not supported. %d frames is recommended.\n' % (self.period_size, period_size_set))
+                        else:
+                            self.show_message(u'Chosen period size is supported and verified')
+                        if real_channel_size != self.channels:
+                            error_msg_list.append(u'%d channel(s) not supported\n' % (self.channels))
+                        if real_samplerate != self.samplerate:
+                            error_msg_list.append(u'Samplerate of %d Hz not supported\n' % (self.samplerate))
+                    except:
+                        self.show_message(u'Could not verify period size')
+                        period_size_set = None
+                else:
+                    self.show_message(u'Could not verify period size')
+                    period_size_set = None
+
                 if error_msg_list:
                     raise osexception(u'Error with device: %s\n%s' % (self.device_name, ''.join(error_msg_list)))
-
 
             elif self.module == self.pyaudio_module_name and self.pyaudio_module_name in self.experiment.audio_low_latency_play_module_list:
                 import pyaudio
@@ -288,6 +317,8 @@ class audio_low_latency_play_init(item):
                                 output=True,
                                 frames_per_buffer=self.period_size,
                                 output_device_index=self.device_index)
+
+                        self.show_message(u"Audio device opened")
 
                     except Exception as e:
                         raise osexception(u'%dbit audio not supported\n' % (self.bitdepth), exception=e)
@@ -312,13 +343,12 @@ class audio_low_latency_play_init(item):
                     raise ValueError('Unsupported format')
 
                 try:
-
                     self.device = sounddevice.RawOutputStream(samplerate=float(self.samplerate),
                                                               dtype=format_audio,
                                                               blocksize=int(self.period_size),
                                                               device=int(self.device_index),
                                                               channels=int(self.channels))
-
+                    self.show_message(u"Audio device opened")
                 except Exception as e:
                     raise osexception(
                         u'Could not start audio device', exception=e)
@@ -328,6 +358,9 @@ class audio_low_latency_play_init(item):
             elif self.module == self.experiment.oss4_module_name:
                 import ossaudiodev
                 self.device = ossaudiodev.open('w')
+
+                self.show_message(u"Audio device opened")
+
                 self.device.channels(self.channels)
                 self.device.speed(self.samplerate)
 
@@ -347,7 +380,6 @@ class audio_low_latency_play_init(item):
                 self.period_size = self.device.bufsize()
                 self.period_size_time = round(float(self.period_size) / float(self.samplerate) * 1000, 1)
                 self.data_size = self.frame_size * self.period_size // 8
-                #self.data_size = self.frame_size * self.period_size
 
                 self.experiment.audio_low_latency_play_period_size = self.period_size
                 self.experiment.audio_low_latency_play_data_size = self.data_size
