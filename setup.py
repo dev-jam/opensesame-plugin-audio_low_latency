@@ -25,7 +25,7 @@ setup(
     # Some general metadata. By convention, a plugin is named:
     # opensesame-plugin-[plugin name]
     name='opensesame-plugin-audio_low_latency',
-    version='8.5.0',
+    version='8.6.0',
     description='An OpenSesame Plug-in for playing and recording audio files with low latency on Linux.',
     author='Bob Rosbag',
     author_email='debian@bobrosbag.nl',
