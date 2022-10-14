@@ -242,7 +242,7 @@ class audio_low_latency_play(item):
         elif self.ram_cache == u'yes':
             data = wav_data[start:start+chunk]
 
-        self.show_message(u'Chunk size: %d bytes' % (len(data)))
+        self.show_message(u'Chunk size: %d bytes' % (self.experiment.audio_low_latency_play_data_size))
 
         if self.delay_check:
             if delay >= 1:
@@ -254,7 +254,7 @@ class audio_low_latency_play(item):
 
         self.show_message(u'Starting audio playback')
 
-        while len(data) > 0:
+        while len(data) == self.experiment.audio_low_latency_play_data_size:
 
             # write data to device
             stream.write(data)
