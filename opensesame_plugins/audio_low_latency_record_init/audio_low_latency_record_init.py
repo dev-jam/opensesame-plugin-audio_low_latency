@@ -255,6 +255,27 @@ class audio_low_latency_record_init(item):
 
                 self.show_message(u"Audio device opened")
 
+                device_info = self.device.info()
+
+                reported_channels = device_info['channels']
+                reported_rate = device_info['rate']
+                reported_format_name = device_info['format_name']
+                reported_period_size = device_info['period_size']
+                reported_period_time = device_info['period_time']
+
+                if reported_period_size != self.period_size:
+                    error_msg_list.append(u'Period size of %d frames not supported. %d frames is recommended.\n' % (self.period_size, reported_period_size))
+                if reported_channels != self.channels:
+                    error_msg_list.append(u'%d channel(s) not supported. %d channel(s) is recommended.\n' % (self.channels, reported_channels))
+                if reported_rate != self.samplerate:
+                    error_msg_list.append(u'Samplerate of %d Hz not supported. %d Hz is recommended.\n\n' % (self.samplerate, reported_rate))
+                # if reported_format_name != format_audio:
+                #     error_msg_list.append(u'Audio format %s not supported. %s Hz is recommended.\n\n' % (format_audio, reported_format_name))
+                if error_msg_list:
+                    raise osexception(u'Error with device: %s\n%s' % (self.device_name, ''.join(error_msg_list)))
+
+                error_msg_list = []
+
                 pattern = "CARD=(.*?),"
                 device_string = re.search(pattern, self.device_name)
 
@@ -294,10 +315,10 @@ class audio_low_latency_record_init(item):
                         if real_samplerate != self.samplerate:
                             error_msg_list.append(u'Samplerate of %d Hz not supported\n' % (self.samplerate))
                     except:
-                        self.show_message(u'Could not verify period size')
+                        self.show_message(u'Could not verify parameters within Linux')
                         period_size_set = None
                 else:
-                    self.show_message(u'Could not verify period size')
+                    self.show_message(u'Could not verify parameters within Linux')
                     period_size_set = None
 
                 if error_msg_list:
