@@ -1,0 +1,14 @@
+Source: opensesame_plugin_-_audio_low_latency
+Section: science
+Priority: extra
+Maintainer: Bob Rosbag <debian@bobrosbag.nl>
+Homepage: https://github.com/dev-jam/opensesame_plugin_-_audio_low_latency
+Build-Depends: debhelper (>= 9), python3
+X-Python3-Version: >= 3.4
+Standards-Version: 3.9.5
+
+Package: opensesame_plugin_-_audio_low_latency
+Architecture: all
+Depends: ${misc:Depends}, ${python:Depends}, python3 (>= 3.2),
+   python3-numpy, python3-pygame, python3-opensesame
+Description: An OpenSesame Plug-in for playing and recording audio files with low latency on Linux.

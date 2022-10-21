@@ -1,0 +1,56 @@
+opensesame-plugin-audio-low-latency (8.7.0-1) bullseye; urgency=medium
+
+  * implemented undocumented info method for checking parameters
+
+ -- Bob Rosbag <debian@bobrosbag.nl>  Fri, 21 Oct 2022 10:29:27 +0200
+
+opensesame-plugin-audio-low-latency (8.6.0-1) bullseye; urgency=medium
+
+  * Removed deprecated methods from pyalsaaudio and use linux cli to check parameters
+  * Small corrections
+
+ -- Bob Rosbag <debian@bobrosbag.nl>  Fri, 14 Oct 2022 21:00:00 +0200
+
+opensesame-plugin-audio-low-latency (8.5.0-1) bullseye; urgency=medium
+
+  * audio recordings are saved in the experiment folder by default (thanks to Flavier Sebastien)
+  * option added to prevent overwriting recordings, suffix is added when needed (thanks to Flavier Sebastien)
+  * wav extension is added automatically (thanks to Flavier Sebastien)
+  * audio recording is not cached by default (to prevent losing the entire recording when crashing)
+
+ -- Bob Rosbag <debian@bobrosbag.nl>  Thu, 7 Jul May 2022 21:00:00 +0200
+ 
+opensesame-plugin-audio-low-latency (8.4.0-1) bullseye; urgency=medium
+
+  * corrected period size for play item when using cache
+  * merged play_file and play_data into play
+
+ -- Bob Rosbag <debian@bobrosbag.nl>  Mon, 6 Jun 2022 21:00:00 +0200
+
+opensesame-plugin-audio-low-latency (8.3.0-1) bullseye; urgency=medium
+
+  * fix for numpy data conversion for sounddevice by Flavier Sebastien
+
+ -- Bob Rosbag <debian@bobrosbag.nl>  Sat, 4 Jun 2022 21:00:00 +0200
+
+opensesame-plugin-audio-low-latency (8.2.0-1) bullseye; urgency=medium
+
+  * Fixed PyAudio
+  * Fixed Sounddevice
+
+ -- Bob Rosbag <debian@bobrosbag.nl>  Thu, 2 Jun 2022 21:00:00 +0200
+
+opensesame-plugin-audio-low-latency (8.0.2-1) bullseye; urgency=medium
+
+  * fixed new parameters not Initializing
+  * increased verbosity
+
+ -- Bob Rosbag <debian@bobrosbag.nl>  Tue, 24 May 2022 21:00:00 +0200
+
+opensesame-plugin-audio-low-latency (8.0.0-1) bullseye; urgency=medium
+
+  * moved several checks to prepare phase
+  * fixed wav duration bug
+  * implemented delay for stopping the audio recording
+
+ -- Bob Rosbag <debian@bobrosbag.nl>  Fri, 20 May 2022 21:00:00 +0200
