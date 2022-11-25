@@ -35,6 +35,7 @@ setup(
     version='8.9.0',
     description='An OpenSesame Plug-in for playing and recording audio files with low latency on Linux.',
     long_description=get_readme(),
+    long_description_content_type='text/markdown',
     author='Bob Rosbag',
     author_email='debian@bobrosbag.nl',
     url='https://github.com/dev-jam/opensesame-plugin-audio_low_latency',
