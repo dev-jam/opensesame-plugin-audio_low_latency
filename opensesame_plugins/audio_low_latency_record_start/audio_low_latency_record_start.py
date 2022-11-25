@@ -2,7 +2,7 @@
 
 """
 Author: Bob Rosbag
-2020
+2022
 
 This plug-in is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -31,16 +31,10 @@ import wave
 import numpy
 import os, re, os.path
 
-VERSION = u'8.7.0'
+VERSION = u'8.9.0'
 
 class audio_low_latency_record_start(item):
 
-    """
-    Class handles the basic functionality of the item.
-    It does not deal with GUI stuff.
-    """
-
-    # Provide an informative description for your plug-in.
     description = u'Low Latency Audio: starts audio recording in the background.'
 
     def __init__(self, name, experiment, string=None):
@@ -51,9 +45,6 @@ class audio_low_latency_record_start(item):
 
     def reset(self):
 
-        """Resets plug-in to initial values."""
-
-        # Set default experimental variables and values
         self.var.filename = u''
         self.var.file_exists_action = u'yes'
         self.var.duration = u'infinite'
@@ -108,8 +99,6 @@ class audio_low_latency_record_start(item):
 
     def init_var(self):
 
-        """Set en check variables."""
-
         if hasattr(self.experiment, "audio_low_latency_record_dummy_mode"):
             self.dummy_mode = self.experiment.audio_low_latency_record_dummy_mode
             self.verbose = self.experiment.audio_low_latency_record_verbose
@@ -137,12 +126,8 @@ class audio_low_latency_record_start(item):
         self.experiment.audio_low_latency_record_start = 1
         self.experiment.audio_low_latency_record_execute_pause = 0
 
-
     def prepare(self):
 
-        """Preparation phase"""
-
-        # Call the parent constructor.
         item.prepare(self)
 
         # create keyboard object
@@ -228,8 +213,6 @@ class audio_low_latency_record_start(item):
 
     def run(self):
 
-        """Run phase"""
-
         if not (hasattr(self.experiment, "audio_low_latency_record_stop") or hasattr(self.experiment, "audio_low_latency_record_wait")):
             raise osexception(
                     u'Audio Low Latency Record Stop or Audio Low Latency Record Wait item is missing')
@@ -269,7 +252,6 @@ class audio_low_latency_record_start(item):
             self.show_message(u'Dummy mode enabled, NOT recording audio')
         else:
             raise osexception(u'Error with dummy mode!')
-
 
     def record(self, stream, wav_file, chunk, delay_start, delay_stop):
 
@@ -323,10 +305,6 @@ class audio_low_latency_record_start(item):
         self.experiment.audio_low_latency_record_locked = 0
 
     def process_data(self, stream, wav_file, chunk, frames):
-        """
-        desc:
-            Process data.
-        """
 
         # Read data from device
         if self.module == self.experiment.pyalsaaudio_module_name:
@@ -342,12 +320,7 @@ class audio_low_latency_record_start(item):
         elif self.ram_cache == u'no':
             wav_file.writeframes(data)
 
-
     def check_keys(self):
-        """
-        desc:
-            Check keys.
-        """
 
         key1, time1 = self.kb.get_key()
         self.kb.flush()
@@ -365,66 +338,26 @@ class audio_low_latency_record_start(item):
                     self.experiment.audio_low_latency_record_execute_pause = 0
 
     def show_message(self, message):
-        """
-        desc:
-            Show message.
-        """
 
         debug.msg(message)
         if self.verbose == u'yes':
             print(message)
 
-
     def set_stimulus_onset(self, time=None):
-
-        """
-        desc:
-            Set a timestamp for the onset time of the item's execution.
-
-        keywords:
-            time:    A timestamp or None to use the current time.
-
-        returns:
-            desc:    A timestamp.
-        """
 
         if time is None:
             time = self.clock.time()
         self.experiment.var.set(u'time_stimulus_onset_%s' % self.name, time)
         return time
 
-
     def set_stimulus_offset(self, time=None):
-
-        """
-        desc:
-            Set a timestamp for the onset time of the item's execution.
-
-        keywords:
-            time:    A timestamp or None to use the current time.
-
-        returns:
-            desc:    A timestamp.
-        """
 
         if time is None:
             time = self.clock.time()
         self.experiment.var.set(u'time_stimulus_offset_%s' % self.name, time)
         return time
 
-
     def set_stimulus_timing(self, _type, time=None):
-
-        """
-        desc:
-            Set a timestamp for the onset time of the item's execution.
-
-        keywords:
-            time:    A timestamp or None to use the current time.
-
-        returns:
-            desc:    A timestamp.
-        """
 
         if time is None:
             time = self.clock.time()
@@ -435,8 +368,6 @@ class audio_low_latency_record_start(item):
 class qtaudio_low_latency_record_start(audio_low_latency_record_start, qtautoplugin):
 
     def __init__(self, name, experiment, script=None):
-
-        """plug-in GUI"""
 
         audio_low_latency_record_start.__init__(self, name, experiment, script)
         qtautoplugin.__init__(self, __file__)

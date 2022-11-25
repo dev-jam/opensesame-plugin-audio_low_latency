@@ -2,7 +2,7 @@
 
 """
 Author: Bob Rosbag
-2020
+2022
 
 This plug-in is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -30,16 +30,10 @@ import pygame
 import subprocess
 import re
 
-VERSION = u'8.7.0'
+VERSION = u'8.9.0'
 
 class audio_low_latency_play_init(item):
 
-    """
-    Class handles the basic functionality of the item.
-    It does not deal with GUI stuff.
-    """
-
-    # Provide an informative description for your plug-in.
     description = u'Low Latency Audio: initializes the playback audio device.'
     lazy_init = False
 
@@ -50,12 +44,8 @@ class audio_low_latency_play_init(item):
 
         item.__init__(self, name, experiment, string)
 
-
     def reset(self):
 
-        """Resets plug-in to initial values."""
-
-        # Set default experimental variables and values
         self.var.dummy_mode = u'no'
         self.var.verbose = u'no'
         self.var.bitdepth = str(16)
@@ -146,10 +136,7 @@ class audio_low_latency_play_init(item):
         device_list = self.experiment.audio_low_latency_play_device_dict[self.var.module]
         self.var.device_name = device_list[0]
 
-
     def init_var(self):
-
-        """Set en check variables."""
 
         if hasattr(self.experiment, u'audio_low_latency_play_device'):
             if self.experiment.audio_low_latency_play_device:
@@ -204,9 +191,6 @@ class audio_low_latency_play_init(item):
 
     def prepare(self):
 
-        """Preparation phase"""
-
-        # Call the parent constructor.
         item.prepare(self)
         self.close()
         self.init_var()
@@ -418,31 +402,17 @@ class audio_low_latency_play_init(item):
         else:
             self.show_message(u'Error with dummy mode, mode is: %s' % self.dummy_mode)
 
-
     def run(self):
-
-        """Run phase"""
 
         self.set_item_onset()
 
-
     def show_message(self, message):
-        """
-        desc:
-            Show message.
-        """
 
         debug.msg(message)
         if self.verbose == u'yes':
             print(message)
 
-
     def close(self):
-
-        """
-        desc:
-            Neatly close the connection to the parallel port.
-        """
 
         if not hasattr(self.experiment, "audio_low_latency_play_device") or \
             self.experiment.audio_low_latency_play_device is None:
@@ -465,8 +435,6 @@ class audio_low_latency_play_init(item):
 class qtaudio_low_latency_play_init(audio_low_latency_play_init, qtautoplugin):
 
     def __init__(self, name, experiment, script=None):
-
-        """plug-in GUI"""
 
         audio_low_latency_play_init.__init__(self, name, experiment, script)
         qtautoplugin.__init__(self, __file__)
@@ -497,24 +465,12 @@ class qtaudio_low_latency_play_init(audio_low_latency_play_init, qtautoplugin):
 
     def apply_edit_changes(self):
 
-        """
-        desc:
-            Applies the controls.
-        """
-
         if not qtautoplugin.apply_edit_changes(self) or self.lock:
             return False
         self.custom_interactions()
         return True
 
     def edit_widget(self):
-
-        """
-        Refreshes the controls.
-
-        Returns:
-        The QWidget containing the controls
-        """
 
         if self.lock:
             return
@@ -525,11 +481,6 @@ class qtaudio_low_latency_play_init(audio_low_latency_play_init, qtautoplugin):
         return w
 
     def custom_interactions(self):
-
-        """
-        desc:
-            Activates the relevant controls for each tracker.
-        """
 
         if self.current_module != self.var.module:
             ## save old device

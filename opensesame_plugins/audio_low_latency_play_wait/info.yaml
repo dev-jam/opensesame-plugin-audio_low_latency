@@ -1,5 +1,5 @@
 description: Low Latency Audio - waits until the background audio playback has finished.
-version: 8.7.0
+version: 8.9.0
 author: "Bob Rosbag"
 url: "http://osdoc.cogsci.nl/"
 category: "Audio Low Latency Playback"
@@ -11,5 +11,5 @@ controls:
     type: text
 -
     label:  |
-      <small>Audio Low Latency version 8.7.0</small>
+      <small>Audio Low Latency version 8.9.0</small>
     type: text

@@ -1,9 +1,9 @@
 #!/usr/bin/env python
-#-*- coding:utf-8 -*-
+# -*- coding: utf-8 -*-
 
 """
 Author: Bob Rosbag
-2020
+2022
 
 This plug-in is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -18,15 +18,23 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this plug-in.  If not, see <http://www.gnu.org/licenses/>.
 """
-
+import os
 from setuptools import setup
 
+
+def get_readme():
+
+    if os.path.exists('README.md'):
+        with open('README.md') as fd:
+            return fd.read()
+    return 'No readme information'
+
+
 setup(
-    # Some general metadata. By convention, a plugin is named:
-    # opensesame-plugin-[plugin name]
     name='opensesame-plugin-audio_low_latency',
-    version='8.7.0',
+    version='8.9.0',
     description='An OpenSesame Plug-in for playing and recording audio files with low latency on Linux.',
+    long_description=get_readme(),
     author='Bob Rosbag',
     author_email='debian@bobrosbag.nl',
     url='https://github.com/dev-jam/opensesame-plugin-audio_low_latency',
@@ -38,15 +46,10 @@ setup(
         'Environment :: Win32 (MS Windows)',
         'Environment :: X11 Applications',
         'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',
-        'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 3',
     ],
-    # The important bit that specifies how the plugin files should be installed,
-    # so that they are found by OpenSesame. This is a bit different from normal
-    # Python modules, because an OpenSesame plugin is not a (normal) Python
-    # module.
+    packages=[],
     data_files=[
-        # First the target folder.
         ('share/opensesame_plugins/audio_low_latency_play',
         # Then a list of files that are copied into the target folder. Make sure
         # that these files are also included by MANIFEST.in!
@@ -59,8 +62,6 @@ setup(
             ]
         ),
         ('share/opensesame_plugins/audio_low_latency_play_init',
-        # Then a list of files that are copied into the target folder. Make sure
-        # that these files are also included by MANIFEST.in!
         [
             'opensesame_plugins/audio_low_latency_play_init/audio_low_latency_play_init.md',
             'opensesame_plugins/audio_low_latency_play_init/audio_low_latency_play_init.png',
@@ -70,8 +71,6 @@ setup(
             ]
         ),
         ('share/opensesame_plugins/audio_low_latency_play_start',
-        # Then a list of files that are copied into the target folder. Make sure
-        # that these files are also included by MANIFEST.in!
         [
             'opensesame_plugins/audio_low_latency_play_start/audio_low_latency_play_start.md',
             'opensesame_plugins/audio_low_latency_play_start/audio_low_latency_play_start.png',
@@ -81,8 +80,6 @@ setup(
             ]
         ),
         ('share/opensesame_plugins/audio_low_latency_play_stop',
-        # Then a list of files that are copied into the target folder. Make sure
-        # that these files are also included by MANIFEST.in!
         [
             'opensesame_plugins/audio_low_latency_play_stop/audio_low_latency_play_stop.md',
             'opensesame_plugins/audio_low_latency_play_stop/audio_low_latency_play_stop.png',
@@ -92,8 +89,6 @@ setup(
             ]
         ),
         ('share/opensesame_plugins/audio_low_latency_play_wait',
-        # Then a list of files that are copied into the target folder. Make sure
-        # that these files are also included by MANIFEST.in!
         [
             'opensesame_plugins/audio_low_latency_play_wait/audio_low_latency_play_wait.md',
             'opensesame_plugins/audio_low_latency_play_wait/audio_low_latency_play_wait.png',
@@ -103,8 +98,6 @@ setup(
             ]
         ),
         ('share/opensesame_plugins/audio_low_latency_play_pause',
-        # Then a list of files that are copied into the target folder. Make sure
-        # that these files are also included by MANIFEST.in!
         [
             'opensesame_plugins/audio_low_latency_play_pause/audio_low_latency_play_pause.md',
             'opensesame_plugins/audio_low_latency_play_pause/audio_low_latency_play_pause.png',
@@ -114,8 +107,6 @@ setup(
             ]
         ),
         ('share/opensesame_plugins/audio_low_latency_play_resume',
-        # Then a list of files that are copied into the target folder. Make sure
-        # that these files are also included by MANIFEST.in!
         [
             'opensesame_plugins/audio_low_latency_play_resume/audio_low_latency_play_resume.md',
             'opensesame_plugins/audio_low_latency_play_resume/audio_low_latency_play_resume.png',
@@ -125,8 +116,6 @@ setup(
             ]
         ),
         ('share/opensesame_plugins/audio_low_latency_record',
-        # Then a list of files that are copied into the target folder. Make sure
-        # that these files are also included by MANIFEST.in!
         [
             'opensesame_plugins/audio_low_latency_record/audio_low_latency_record.md',
             'opensesame_plugins/audio_low_latency_record/audio_low_latency_record.png',
@@ -136,8 +125,6 @@ setup(
             ]
         ),
         ('share/opensesame_plugins/audio_low_latency_record_init',
-        # Then a list of files that are copied into the target folder. Make sure
-        # that these files are also included by MANIFEST.in!
         [
             'opensesame_plugins/audio_low_latency_record_init/audio_low_latency_record_init.md',
             'opensesame_plugins/audio_low_latency_record_init/audio_low_latency_record_init.png',
@@ -147,8 +134,6 @@ setup(
             ]
         ),
         ('share/opensesame_plugins/audio_low_latency_record_start',
-        # Then a list of files that are copied into the target folder. Make sure
-        # that these files are also included by MANIFEST.in!
         [
             'opensesame_plugins/audio_low_latency_record_start/audio_low_latency_record_start.md',
             'opensesame_plugins/audio_low_latency_record_start/audio_low_latency_record_start.png',
@@ -158,8 +143,6 @@ setup(
             ]
         ),
         ('share/opensesame_plugins/audio_low_latency_record_stop',
-        # Then a list of files that are copied into the target folder. Make sure
-        # that these files are also included by MANIFEST.in!
         [
             'opensesame_plugins/audio_low_latency_record_stop/audio_low_latency_record_stop.md',
             'opensesame_plugins/audio_low_latency_record_stop/audio_low_latency_record_stop.png',
@@ -169,8 +152,6 @@ setup(
             ]
         ),
         ('share/opensesame_plugins/audio_low_latency_record_wait',
-        # Then a list of files that are copied into the target folder. Make sure
-        # that these files are also included by MANIFEST.in!
         [
             'opensesame_plugins/audio_low_latency_record_wait/audio_low_latency_record_wait.md',
             'opensesame_plugins/audio_low_latency_record_wait/audio_low_latency_record_wait.png',
@@ -180,8 +161,6 @@ setup(
             ]
         ),
         ('share/opensesame_plugins/audio_low_latency_record_pause',
-        # Then a list of files that are copied into the target folder. Make sure
-        # that these files are also included by MANIFEST.in!
         [
             'opensesame_plugins/audio_low_latency_record_pause/audio_low_latency_record_pause.md',
             'opensesame_plugins/audio_low_latency_record_pause/audio_low_latency_record_pause.png',
@@ -191,8 +170,6 @@ setup(
             ]
         ),
         ('share/opensesame_plugins/audio_low_latency_record_resume',
-        # Then a list of files that are copied into the target folder. Make sure
-        # that these files are also included by MANIFEST.in!
         [
             'opensesame_plugins/audio_low_latency_record_resume/audio_low_latency_record_resume.md',
             'opensesame_plugins/audio_low_latency_record_resume/audio_low_latency_record_resume.png',

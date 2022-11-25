@@ -2,7 +2,7 @@
 
 """
 Author: Bob Rosbag
-2020
+2022
 
 This plug-in is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -27,16 +27,10 @@ from libqtopensesame.items.qtautoplugin import qtautoplugin
 from libopensesame.exceptions import osexception
 from openexp.keyboard import keyboard
 
-VERSION = u'2020.11-1'
+VERSION = u'8.9.0'
 
 class audio_low_latency_record_pause(item):
 
-    """
-    Class handles the basic functionality of the item.
-    It does not deal with GUI stuff.
-    """
-
-    # Provide an informative description for your plug-in.
     description = u'Low Latency Audio: pauses the background audio recording.'
 
     def __init__(self, name, experiment, string=None):
@@ -45,16 +39,11 @@ class audio_low_latency_record_pause(item):
         self.verbose = u'no'
         self.poll_time = 100
 
-
     def reset(self):
 
-        """Resets plug-in to initial values."""
         pass
 
-
     def init_var(self):
-
-        """Set en check variables."""
 
         if hasattr(self.experiment, "audio_low_latency_record_dummy_mode"):
             self.dummy_mode = self.experiment.audio_low_latency_record_dummy_mode
@@ -65,12 +54,8 @@ class audio_low_latency_record_pause(item):
 
         self.experiment.audio_low_latency_record_pause = 1
 
-
     def prepare(self):
 
-        """Preparation phase"""
-
-        # Call the parent constructor.
         item.prepare(self)
 
         self.init_var()
@@ -78,10 +63,7 @@ class audio_low_latency_record_pause(item):
         # create keyboard object
         self.kb = keyboard(self.experiment,timeout=1)
 
-
     def run(self):
-
-        """Run phase"""
 
         if not hasattr(self.experiment, "audio_low_latency_record_start"):
             raise osexception(
@@ -104,13 +86,8 @@ class audio_low_latency_record_pause(item):
         else:
             self.show_message(u'Error with dummy mode!')
 
-
     def show_message(self, message):
-        """
-        desc:
-            Show message.
-        """
-
+ 
         debug.msg(message)
         if self.verbose == u'yes':
             print(message)
@@ -119,8 +96,6 @@ class audio_low_latency_record_pause(item):
 class qtaudio_low_latency_record_pause(audio_low_latency_record_pause, qtautoplugin):
 
     def __init__(self, name, experiment, script=None):
-
-        """plug-in GUI"""
 
         audio_low_latency_record_pause.__init__(self, name, experiment, script)
         qtautoplugin.__init__(self, __file__)
