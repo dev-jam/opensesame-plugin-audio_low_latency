@@ -1,7 +1,7 @@
 OpenSesame Plug-in: Audio Low Latency
 ==========
 
-*An OpenSesame plug-in for playing and recording audio files with low latency on Linux.*  
+*An OpenSesame plug-in for playing and recording audio files with low latency.*  
 
 Copyright, 2022, Bob Rosbag
 
@@ -10,11 +10,7 @@ Copyright, 2022, Bob Rosbag
 --------
 
 The main goal of this plug-in is to play and record audio with minimal and predictable latencies to achieve a high accuracy and precision. The 'PyAlsaAudio' package which uses the Linux ALSA audio system provided the best results within Python. 
-For compatibility reasons the 'PortAudio' and 'sounddevice' options were added so experiments can be created and fully executed on Windows systems. 'PortAudio' and 'sounddevice' are cross-platform and work on both Windows as Linux but these give a higher and more variable latency than the 'alsaaudio' option.
-To fully utilize this plug-in you need a Linux system with ALSA and the 'PyAlsaAudio' package (version 0.8.4 or higher). In Debian and Ubuntu this package is named python3-pyalsaaudio. The Python package is also available on pypi and the source on github:
-
-https://github.com/larsimmisch/pyalsaaudio
-
+'PortAudio' and 'sounddevice' are cross-platform and work on both Windows as Linux.
 
 This plug-in consist of playback and recording items as well as foreground as background (multi-threaded) items.
 Both playback and recording have their own *init* item. These should be placed at the beginning of an experiment.
