@@ -29,7 +29,7 @@ from openexp.keyboard import keyboard
 import threading
 import wave
 
-VERSION = u'8.9.1'
+VERSION = u'8.9.2'
 
 class audio_low_latency_play_start(item):
 

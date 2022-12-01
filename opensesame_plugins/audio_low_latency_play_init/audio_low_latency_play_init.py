@@ -30,7 +30,7 @@ import pygame
 import subprocess
 import re
 
-VERSION = u'8.9.1'
+VERSION = u'8.9.2'
 
 class audio_low_latency_play_init(item):
 
