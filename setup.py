@@ -32,7 +32,7 @@ def get_readme():
 
 setup(
     name='opensesame-plugin-audio_low_latency',
-    version='8.9.0',
+    version='8.9.1',
     description='An OpenSesame Plug-in for playing and recording audio files with low latency on Linux.',
     long_description=get_readme(),
     long_description_content_type='text/markdown',

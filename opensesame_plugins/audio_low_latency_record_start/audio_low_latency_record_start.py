@@ -31,7 +31,7 @@ import wave
 import numpy
 import os, re, os.path
 
-VERSION = u'8.9.0'
+VERSION = u'8.9.1'
 
 class audio_low_latency_record_start(item):
 
