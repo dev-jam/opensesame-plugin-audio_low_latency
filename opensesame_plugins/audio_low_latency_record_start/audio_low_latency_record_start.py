@@ -326,15 +326,15 @@ class audio_low_latency_record_start(item):
         self.kb.flush()
         if self.stop != u'':
             if key1 in self._allowed_responses_stop:
-                self.show_message(u'Stopped audio recording')
+                self.show_message(u'Detected key press for stopping audio')
                 self.experiment.audio_low_latency_record_continue = 0
         if self.pause_resume != u'':
             if key1 in self._allowed_responses_pause_resume:
                 if self.experiment.audio_low_latency_record_execute_pause == 0:
-                    self.show_message(u'Paused audio recording')
+                    self.show_message(u'Detected key press for pausing audio recording')
                     self.experiment.audio_low_latency_record_execute_pause = 1
                 elif self.experiment.audio_low_latency_record_execute_pause == 1:
-                    self.show_message(u'Resumed audio recording')
+                    self.show_message(u'Detected key press for resuming audio recording')
                     self.experiment.audio_low_latency_record_execute_pause = 0
 
     def show_message(self, message):
