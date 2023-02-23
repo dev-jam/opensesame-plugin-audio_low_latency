@@ -317,11 +317,11 @@ class audio_low_latency_play_init(item):
                 else:
                     try:
                         self.device = self.device_init.open(format=self.device_init.get_format_from_width(self.samplewidth),
-                                channels=self.channels,
-                                rate=self.samplerate,
-                                output=True,
-                                frames_per_buffer=self.period_size,
-                                output_device_index=self.device_index)
+                                                            channels=self.channels,
+                                                            rate=self.samplerate,
+                                                            output=True,
+                                                            frames_per_buffer=self.period_size,
+                                                            output_device_index=self.device_index)
 
                         self.show_message(u"Audio device opened")
 
