@@ -28,7 +28,7 @@ from libopensesame.exceptions import osexception
 from openexp.keyboard import keyboard
 import wave
 
-VERSION = u'8.9.2'
+VERSION = u'9.0.0'
 
 class audio_low_latency_play(item):
 

@@ -30,7 +30,7 @@ import pygame
 import subprocess
 import re
 
-VERSION = u'8.9.2'
+VERSION = u'9.0.0'
 
 class audio_low_latency_record_init(item):
 
@@ -396,7 +396,7 @@ class audio_low_latency_record_init(item):
 
             self.experiment.audio_low_latency_record_device = self.device
             self.experiment.cleanup_functions.append(self.close)
-            self.python_workspace[u'audio_low_latency_record'] = self.experiment.audio_low_latency_record_device
+
 
         elif self.dummy_mode == u'yes':
             self.show_message(u'Dummy mode enabled, run phase')
@@ -422,6 +422,7 @@ class audio_low_latency_record_init(item):
         try:
             self.show_message(u"Closing audio device")
             self.device.close()
+            self.experiment.audio_low_latency_record_device
             if  self.module == self.pyaudio_module_name:
                 self.device.stop_stream()
                 self.device.close()
