@@ -30,7 +30,7 @@ import wave
 import numpy
 import os, re, os.path
 
-VERSION = u'9.0.0'
+VERSION = u'9.1.0'
 
 class audio_low_latency_record(item):
 
@@ -295,6 +295,11 @@ class audio_low_latency_record(item):
 
         wav_file.close()
 
+
+        if self.module == self.experiment.pyaudio_module_name:
+           self.device.stop_stream()
+
+        self.device.close()
         self.show_message(u'Finished audio recording')
         self.experiment.audio_low_latency_record_locked = 0
 

@@ -30,7 +30,7 @@ import pygame
 import subprocess
 import re
 
-VERSION = u'9.0.0'
+VERSION = u'9.1.0'
 
 class audio_low_latency_play_init(item):
 
@@ -419,12 +419,13 @@ class audio_low_latency_play_init(item):
                 return
         try:
             self.show_message(u"Closing audio device")
-            self.device.close()
-            self.experiment.audio_low_latency_play_device.close()
-            if  self.module == self.pyaudio_module_name:
-                self.device.stop_stream()
-                self.device.close()
-                self.device_init.terminate()
+
+            if self.module == self.pyaudio_module_name:
+               self.device.stop_stream()
+               self.device.close()
+               self.device_init.terminate()
+            else:
+               self.device.close()
             self.device = None
             self.experiment.audio_low_latency_play_device = None
             self.show_message(u"Audio device closed")
