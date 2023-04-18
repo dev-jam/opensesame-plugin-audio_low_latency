@@ -30,7 +30,7 @@ import pygame
 import subprocess
 import re
 
-VERSION = u'9.1.0'
+VERSION = u'9.2.0'
 
 class audio_low_latency_play_init(item):
 
@@ -390,7 +390,7 @@ class audio_low_latency_play_init(item):
                 self.experiment.audio_low_latency_play_data_size = self.data_size
                 self.experiment.var.audio_low_latency_play_period_size = self.period_size
 
-                print('Overruling period size with hardware buffer for OSS4, using: ' + str(self.period_size) + ' frames or ' + str(self.period_size_time) + 'ms')
+                self.show_message('Overruling period size with hardware buffer for OSS4, using: ' + str(self.period_size) + ' frames or ' + str(self.period_size_time) + 'ms')
 
             self.experiment.audio_low_latency_play_device = self.device
             self.experiment.cleanup_functions.append(self.close)
@@ -421,12 +421,11 @@ class audio_low_latency_play_init(item):
             self.show_message(u"Closing audio device")
 
             if self.module == self.pyaudio_module_name:
-               self.device.stop_stream()
-               self.device.close()
+               self.experiment.audio_low_latency_play_device.stop_stream()
+               self.experiment.audio_low_latency_play_device.close()
                self.device_init.terminate()
             else:
-               self.device.close()
-            self.device = None
+                self.experiment.audio_low_latency_play_device.close()
             self.experiment.audio_low_latency_play_device = None
             self.show_message(u"Audio device closed")
         except:

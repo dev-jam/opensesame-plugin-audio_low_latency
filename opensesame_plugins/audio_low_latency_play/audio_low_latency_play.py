@@ -28,7 +28,7 @@ from libopensesame.exceptions import osexception
 from openexp.keyboard import keyboard
 import wave
 
-VERSION = u'9.1.0'
+VERSION = u'9.2.0'
 
 class audio_low_latency_play(item):
 
@@ -270,11 +270,6 @@ class audio_low_latency_play(item):
 
         if self.ram_cache == u'no':
             wav_file.close()
-
-        if self.module == self.experiment.pyaudio_module_name:
-           self.device.stop_stream()
-
-        self.device.close()
 
         self.show_message(u'Finished audio playback')
 
