@@ -1,5 +1,5 @@
 description: Low Latency Audio - starts audio recording on the foreground.
-version: 9.1.0
+version: 9.2.0
 author: "Bob Rosbag"
 url: "http://osdoc.cogsci.nl/"
 category: "Audio Low Latency Recording"
@@ -66,5 +66,5 @@ controls:
     type: text
 -
     label:  |
-      <small>Audio Low Latency version 9.1.0</small>
+      <small>Audio Low Latency version 9.2.0</small>
     type: text
