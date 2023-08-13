@@ -277,6 +277,11 @@ class audio_low_latency_record_start(item):
                 if self.pause_resume != u'' or self.stop != u'':
                     self.check_keys()
 
+            if self.duration_check:
+                if self.clock.time() - start_time >= self.duration:
+                    self.show_message(u'Audio recording stopping, duration exceeded')
+                    self.experiment.audio_low_latency_record_continue = 0
+
             # check for stop item
             if self.experiment.audio_low_latency_record_continue == 0:
                 if delay_stop >= 1:
@@ -286,10 +291,6 @@ class audio_low_latency_record_start(item):
                         self.process_data(stream, wav_file, chunk, frames)
                     self.show_message(u'Delay done')
                 break
-            elif self.duration_check:
-                if self.clock.time() - start_time >= self.duration:
-                    self.show_message(u'Audio recording stopped, duration exceeded')
-                    break
 
             self.process_data(stream, wav_file, chunk, frames)
 
