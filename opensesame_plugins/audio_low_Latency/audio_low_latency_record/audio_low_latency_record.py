@@ -257,9 +257,9 @@ class AudioLowLatencyRecord(Item):
         extension = '.wav'
         # Make output location relative to location of experiment
         rel_loc = os.path.normpath(self.var.filename)
-        if self.var.experiment_path is None:
-            raise OSException("Path to experiment not found. Please save the experiment to a file first")
-        output_file = os.path.normpath(os.path.join(self.var.experiment_path, rel_loc)) + extension
+        if self.var.logfile is None:
+            raise OSException("Path to log file not found.")
+        output_file = os.path.normpath(os.path.join(os.path.dirname(self.var.logfile), rel_loc)) + extension
         # Check for a subfolder (when it is specified) that it exists and if not, create it
         if os.path.exists(os.path.dirname(output_file)):
             if self.file_exists_action == 'yes':
