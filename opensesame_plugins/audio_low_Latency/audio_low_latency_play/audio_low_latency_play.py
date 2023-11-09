@@ -165,6 +165,7 @@ class AudioLowLatencyPlay(Item):
             data = wav_file.readframes(chunk)
         elif self.ram_cache == 'yes':
             data = wav_data[start:start+chunk]
+        start += chunk
         self._show_message('Chunk size: %d bytes' % (self.experiment.audio_low_latency_play_data_size))
         if self.delay_check:
             if delay >= 1:
