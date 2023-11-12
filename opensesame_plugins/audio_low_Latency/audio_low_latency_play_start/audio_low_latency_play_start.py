@@ -28,6 +28,7 @@ import threading
 import wave
 
 POLL_TIME = 1
+TIMESTAMP = 0
 
 
 class AudioLowLatencyPlayStart(Item):
@@ -44,7 +45,7 @@ class AudioLowLatencyPlayStart(Item):
         super().prepare()
         self._check_init()
         self._init_var()
-        self.kb = Keyboard(self.experiment,timeout=1)
+        self.kb = Keyboard(self.experiment, timeout=1)
 
         if self.pause_resume != '':
             self._allowed_responses_pause_resume = []
@@ -64,59 +65,6 @@ class AudioLowLatencyPlayStart(Item):
                 self._allowed_responses_stop = None
             self._show_message("allowed stop keys set to %s" % self._allowed_responses_stop)
 
-        error_msg = 'Duration must be a string named sound or a an integer greater than 1'
-
-        try:
-            self._show_message('\n')
-            self._show_message('Loading sound file: '+self.filename+' ...')
-            self.wav_file = wave.open(self.filename, 'rb')
-            self._show_message('Succesfully loaded sound file...')
-        except Exception as e:
-            raise OSException(
-                'Could not load audio file\n\nMessage: %s' % e)
-
-        self.wav_duration = int(round(float(self.wav_file.getnframes()) / float(self.wav_file.getframerate()) * 1000, 1))
-        self._show_message('Audio file duration: %d ms' % (self.wav_duration))
-        self._show_message('Period size: %d frames' % (self.period_size))
-        self._show_message('Period duration: %s ms' % (str(self.period_size_time)))
-
-        error_msg_list = []
-
-        if self.wav_file.getsampwidth() * 8 != self.bitdepth:
-            error_msg_list.append('- bitdepth incorrect, file is %dbit but experiment is set to %dbit\n' % (self.wav_file.getsampwidth()*8, self.bitdepth))
-        if self.wav_file.getframerate() != self.samplerate:
-            error_msg_list.append('- samplerate incorrect, file is %dHz but experiment is set to %dHz\n' % (self.wav_file.getframerate(), self.samplerate))
-        if self.wav_file.getnchannels() != self.channels:
-            error_msg_list.append('- number of channels incorrect, file has %d channel(s) but experiment is set to %d channel(s)\n' % (self.wav_file.getnchannels(), self.channels))
-        if self.wav_file.getnframes() < self.period_size:
-            error_msg_list.append('- Period size is larger than total number of frames in wave file, use a period size smaller than %d frames\n' % (self.wav_file.getnframes()))
-        if error_msg_list:
-            raise OSException('Error with audio file %s\n%s' % (self.filename, ''.join(error_msg_list)))
-
-        if self.ram_cache == 'yes':
-            wav_file_nframes = self.wav_file.getnframes()
-            self._show_message('Loading wave file into cache...')
-            self.wav_file_data = self.wav_file.readframes(wav_file_nframes)
-            self._show_message('Done! Closing wave file...')
-            self.wav_file.close()
-        elif self.ram_cache == 'no':
-            self._show_message('Reading directly from wave file, no cache')
-
-        if isinstance(self.var.duration, str):
-            if self.var.duration == 'sound':
-                self.duration_check = False
-                self.duration = self.wav_duration
-            else:
-                raise OSException(error_msg)
-        elif isinstance(self.var.duration, int):
-            if self.var.duration >= 1:
-                self.duration_check = True
-                self.duration = int(self.var.duration)
-            else:
-                raise OSException(error_msg)
-        else:
-            raise OSException(error_msg)
-
         if isinstance(self.var.delay, int):
             if self.var.delay >= 0:
                 self.delay = int(self.var.delay)
@@ -128,6 +76,76 @@ class AudioLowLatencyPlayStart(Item):
                 raise OSException('Delay can not be negative')
         else:
             raise OSException('Delay should be a integer')
+
+        if self.dummy_mode == 'no':
+            try:
+                self._show_message('\n')
+                self._show_message('Loading sound file: '+self.filename+' ...')
+                self.wav_file = wave.open(self.filename, 'rb')
+                self._show_message('Succesfully loaded sound file...')
+            except Exception as e:
+                raise OSException(
+                    'Could not load audio file\n\nMessage: %s' % e)
+    
+            error_msg_list = []
+    
+            if self.wav_file.getsampwidth() * 8 != self.bitdepth:
+                error_msg_list.append('- bitdepth incorrect, file is %dbit but experiment is set to %dbit\n' % (self.wav_file.getsampwidth()*8, self.bitdepth))
+            if self.wav_file.getframerate() != self.samplerate:
+                error_msg_list.append('- samplerate incorrect, file is %dHz but experiment is set to %dHz\n' % (self.wav_file.getframerate(), self.samplerate))
+            if self.wav_file.getnchannels() != self.channels:
+                error_msg_list.append('- number of channels incorrect, file has %d channel(s) but experiment is set to %d channel(s)\n' % (self.wav_file.getnchannels(), self.channels))
+            if self.wav_file.getnframes() < self.period_size:
+                error_msg_list.append('- Period size is larger than total number of frames in wave file, use a period size smaller than %d frames\n' % (self.wav_file.getnframes()))
+            if error_msg_list:
+                raise OSException('Error with audio file %s\n%s' % (self.filename, ''.join(error_msg_list)))
+    
+            wav_file_nframes = self.wav_file.getnframes()
+            self.wav_duration = round(float(wav_file_nframes) / float(self.wav_file.getframerate()) * 1000, 1)
+            n_periods = round(wav_file_nframes / self.period_size, 2)
+            self.experiment.var.wav_duration = self.wav_duration
+            self._show_message('Audio file duration: %d ms' % (self.wav_duration))
+            self._show_message('Wave file contains: %d frames' % (wav_file_nframes))
+            self._show_message('Period size: %d frames' % (self.period_size))
+            self._show_message('Period size: %d bytes' % (self.data_size))
+            self._show_message('Period time: %s ms' % (str(self.period_time)))
+            self._show_message('Number of periods to be played: %s periods' % (str(n_periods)))
+            if self.experiment.audio_low_latency_play_module == self.experiment.pyalsaaudio_module_name:
+                n_buffers = round(n_periods / self.periods, 2)
+                self._show_message('Buffer consists: %d periods' % (self.periods))
+                self._show_message('Number of buffers to be played: %s buffers' % (str(n_buffers)))
+            self._show_message('')
+
+            error_msg = 'Duration must be a string named sound or a an integer greater than 1'
+            if isinstance(self.var.duration, str):
+                if self.var.duration == 'sound':
+                    self.duration_check = False
+                    self.duration = self.wav_duration
+                else:
+                    raise OSException(error_msg)
+            elif isinstance(self.var.duration, int):
+                if self.var.duration >= 1:
+                    self.duration_check = True
+                    self.duration = int(self.var.duration)
+                else:
+                    raise OSException(error_msg)
+            else:
+                raise OSException(error_msg)    
+
+            if self.ram_cache == 'yes':
+                self._show_message('Loading wave file into cache...')
+                self.wav_file_data = self.wav_file.readframes(wav_file_nframes)
+                self._show_message('Done! Closing wave file...')
+                self.wav_file.close()
+            elif self.ram_cache == 'no':
+                self._show_message('Reading directly from wave file, no cache')
+               
+        elif self.dummy_mode == 'yes':
+            self._set_stimulus_onset()
+            self._show_message('Dummy mode enabled, prepare phase')
+        else:
+            raise OSException('Error with dummy mode!')
+
 
     def run(self):
         self._check_stop_wait
@@ -149,8 +167,8 @@ class AudioLowLatencyPlayStart(Item):
                     _keylist.extend(self._allowed_responses_stop)
                 self.kb.keylist = _keylist
                 self.kb.flush()
-
             self._show_message('Initializing audio playback')
+
             self.experiment.audio_low_latency_play_locked = 1
 
             if self.ram_cache == 'no':
@@ -167,13 +185,17 @@ class AudioLowLatencyPlayStart(Item):
     def _play(self, stream, wav_file, chunk, delay, wav_data=None):
         self.experiment.audio_low_latency_play_thread_running = 1
 
+        period = 0
+        self.duration_exceeded = False
+
         if self.ram_cache == 'no':
             data = wav_file.readframes(chunk)
         elif self.ram_cache == 'yes':
             start = 0
             data = wav_data[start:start+chunk]
             start += chunk
-        self._show_message('Chunk size: %d bytes' % (len(data)))
+        data_length = len(data)
+        self._show_message('Chunk size: %d bytes' % (data_length))
         if self.delay_check:
             if delay >= 1:
                 self._show_message('Delaying audio playback for %d ms' % (delay))
@@ -182,32 +204,90 @@ class AudioLowLatencyPlayStart(Item):
         start_time = self._set_stimulus_onset()
         self._show_message('Starting audio playback')
 
+        if TIMESTAMP == 1:
+            timestamp_list = []
+            timestamp_list.append(str(self.clock.time()))
+        elif TIMESTAMP == 2:
+            self._show_message(self.clock.time())
+        
         while len(data) > 0:
+
             stream.write(data)
+            period += 1
+
+            if TIMESTAMP == 1:
+                timestamp_list.append(str(self.clock.time()))
+            elif TIMESTAMP == 2:
+                self._show_message(self.clock.time())
+
             if self.ram_cache == 'no':
-                # Read data from wave
                 data = wav_file.readframes(chunk)
+                data_length = len(data)
             elif self.ram_cache == 'yes':
-                if len(wav_data) >= start+chunk:
+                if start+chunk <= len(wav_data):
                     data = wav_data[start:start+chunk]
-                elif len(wav_data) < start+chunk:
-                    data = wav_data[start:len(wav_data)]
+                    data_length = len(data)
+                elif start+chunk > len(wav_data) and start < len(wav_data):
+                    data = wav_data[start:start+len(wav_data)]
+                    data_length = len(data)
+                elif start+chunk > len(wav_data) and start >= len(wav_data):
+                    data = []
                 start += chunk
+
             if self.pause_resume != '' or self.stop != '':
                 self._check_keys()
-            while self.experiment.audio_low_latency_play_execute_pause == 1 and self.experiment.audio_low_latency_play_continue == 1:
-                if self.pause_resume != '' or self.stop != '':
-                    self._check_keys()
+            if self.experiment.audio_low_latency_play_execute_pause == 1 and self.experiment.audio_low_latency_play_continue == 1:
+                if self.experiment.audio_low_latency_play_module == self.experiment.pyalsaaudio_module_name:
+                    stream.pause(True)
+                while self.play_execute_pause == 1 and self.play_continue == 1:
+                    if self.pause_resume != '' or self.stop != '':
+                        self._check_keys()
+                if self.experiment.audio_low_latency_play_module == self.experiment.pyalsaaudio_module_name:
+                    stream.pause(False)
             if self.experiment.audio_low_latency_play_continue == 0:
                 break
             elif self.duration_check:
                 if self.clock.time() - start_time >= self.duration:
                     self._show_message('Audio playback stopped, duration exceeded')
+                    self.duration_exceeded = True
                     break
+
+        if self.experiment.audio_low_latency_play_module == self.experiment.pyalsaaudio_module_name:
+            stream.drop()
+            self._show_message('ALSA stream stopped')
+
+        self._show_message('Processing audio data done!')
+        time_elapsed_processing = int(round(self.clock.time() - start_time))
+        self._show_message('Elapsed time: %d ms' % time_elapsed_processing)
+
+        if self.duration_check and not self.duration_exceeded:
+            while not self.clock.time() - start_time >= self.duration and not self.clock.time() - start_time >= self.wav_duration:
+                 self.clock.sleep(1)
+        else:
+            self._show_message('Wave duration: %d ms' % self.wav_duration)
+            self.experiment.var.wait_to_finish = int(round(self.wav_duration - time_elapsed_processing))
+            self._show_message('Waiting %d ms for audio to finish' % self.experiment.var.wait_to_finish)
+            while self.clock.time() - start_time < self.wav_duration:
+                 self.clock.sleep(1)
+
         self._set_stimulus_offset()
         if self.ram_cache == 'no':
             wav_file.close()
         self._show_message('Finished audio playback')
+        self._show_message('')
+
+        if self.experiment.audio_low_latency_play_module == self.experiment.pyalsaaudio_module_name:
+            mod_period = (period - 1) % self.periods + 1
+            self._show_message('Number of periods played: %d' % (period))
+            self._show_message('Finished in period: %d' % (mod_period))
+            #self.experiment.var.mod_period = mod_period
+            #self.experiment.var.data_length = data_length
+            #self._show_message('Full period length: %d bytes' % (self.data_size))
+            #self._show_message('Last period length: %d bytes' % (data_length))
+
+        if TIMESTAMP == 1:
+            self._show_message("\n".join(timestamp_list))
+
         self.experiment.audio_low_latency_play_locked = 0
 
     def _check_keys(self):
@@ -232,8 +312,11 @@ class AudioLowLatencyPlayStart(Item):
         if self.dummy_mode == 'no':
             self.module = self.experiment.audio_low_latency_play_module
             self.device = self.experiment.audio_low_latency_play_device
+            if self.experiment.audio_low_latency_play_module == self.experiment.pyalsaaudio_module_name:
+                self.buffer_size = self.experiment.audio_low_latency_play_buffer_size
+                self.periods = self.experiment.audio_low_latency_play_periods
         self.period_size = self.experiment.audio_low_latency_play_period_size
-        self.period_size_time = self.experiment.audio_low_latency_play_period_size_time
+        self.period_time = self.experiment.audio_low_latency_play_period_time
         self.data_size = self.experiment.audio_low_latency_play_data_size
         self.bitdepth = self.experiment.audio_low_latency_play_bitdepth
         self.samplewidth = self.experiment.audio_low_latency_play_samplewidth

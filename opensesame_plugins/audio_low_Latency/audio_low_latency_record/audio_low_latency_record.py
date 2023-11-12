@@ -31,7 +31,7 @@ import re
 import os.path
 
 POLL_TIME = 10
-
+TIMESTAMP = 0
 
 class AudioLowLatencyRecord(Item):
 
@@ -43,9 +43,6 @@ class AudioLowLatencyRecord(Item):
         self.var.delay_stop = 0
         self.var.pause_resume = ''
         self.var.stop = ''
-        self.var.bitdepth = str(16)
-        self.var.samplerate = str(44100)
-        self.var.channels = str(2)
         self.var.ram_cache = 'no'
 
     def prepare(self):
@@ -61,20 +58,18 @@ class AudioLowLatencyRecord(Item):
                     self._allowed_responses_pause_resume.append(r)
             if not self._allowed_responses_pause_resume:
                 self._allowed_responses_pause_resume = None
-            self._show_message('allowed pause/resume keys set to %s' % self._allowed_responses_pause_resume)
+            self._show_message("allowed pause/resume keys set to %s" % self._allowed_responses_pause_resume)
 
         if self.stop != '':
-            # Prepare the pause resume responses
             self._allowed_responses_stop = []
             for r in safe_decode(self.stop).split(';'):
                 if r.strip() != '':
                     self._allowed_responses_stop.append(r)
             if not self._allowed_responses_stop:
                 self._allowed_responses_stop = None
-            self._show_message('allowed stop keys set to %s' % self._allowed_responses_stop)
+            self._show_message("allowed stop keys set to %s" % self._allowed_responses_stop)
 
         error_msg = 'Duration must be a string named infinite or a an integer greater than 1'
-
         if isinstance(self.var.duration, str):
             if self.var.duration == 'infinite':
                 if self.stop == '':
@@ -88,7 +83,7 @@ class AudioLowLatencyRecord(Item):
             if self.var.duration >= 1:
                 self.duration_check = True
                 self.duration = int(self.var.duration)
-                if self.duration < self.period_size_time:
+                if self.duration < self.period_time:
                     raise OSException(
                         'Duration should be larger than period duration')
             else:
@@ -131,7 +126,11 @@ class AudioLowLatencyRecord(Item):
             self.wav_file.setnchannels(self.channels)
 
             self._show_message('Period size: %d frames' % (self.period_size))
-            self._show_message('Period duration: %s ms' % (str(self.period_size_time)))
+            self._show_message('Period size: %d bytes' % (self.data_size))
+            self._show_message('Period time: %s ms' % (str(self.period_time)))
+            if self.experiment.audio_low_latency_record_module == self.experiment.pyalsaaudio_module_name:
+                self._show_message('Buffer consists: %d periods' % (self.periods))
+            self._show_message('')
 
     def run(self):
         start_time = self.set_item_onset()
@@ -143,7 +142,7 @@ class AudioLowLatencyRecord(Item):
 
             if self.delay_start_check:
                 self._show_message('Requested audio recording delay: %d ms' % (self.delay_start))
-                time_passed = int(self.clock.time()) - start_time
+                time_passed = self.clock.time() - start_time
                 self._show_message('Time passed: %d ms' % (time_passed))
                 delay_start = self.delay_start - time_passed
             else:
@@ -157,7 +156,6 @@ class AudioLowLatencyRecord(Item):
                     _keylist.extend(self._allowed_responses_pause_resume)
                 if self.stop != '':
                     _keylist.extend(self._allowed_responses_stop)
-
                 self.kb.keylist = _keylist
                 self.kb.flush()
 
@@ -178,13 +176,25 @@ class AudioLowLatencyRecord(Item):
                 self.clock.sleep(delay_start)
                 self._show_message('Delay done')
         start_time = self._set_stimulus_onset()
+        self._show_message('Starting audio recording')
+
+        if TIMESTAMP == 1:
+            timestamp_list = []
+            timestamp_list.append(str(self.clock.time()))
+        elif TIMESTAMP == 2:
+            self._show_message(self.clock.time())
 
         while True:
             if self.pause_resume != '' or self.stop != '':
                 self._check_keys()
-            while self.record_execute_pause == 1 and self.record_continue == 1:
-                if self.pause_resume != '' or self.stop != '':
-                    self._check_keys()
+            if self.record_execute_pause == 1 and self.record_continue == 1:
+                if self.experiment.audio_low_latency_record_module == self.experiment.pyalsaaudio_module_name:
+                    stream.pause(True)
+                while self.record_execute_pause == 1 and self.record_continue == 1:
+                    if self.pause_resume != '' or self.stop != '':
+                        self._check_keys()
+                if self.experiment.audio_low_latency_record_module == self.experiment.pyalsaaudio_module_name:
+                    stream.pause(False)
             if self.duration_check:
                 if self.clock.time() - start_time >= self.duration:
                     self._show_message('Audio recording stopping, duration exceeded')
@@ -196,14 +206,30 @@ class AudioLowLatencyRecord(Item):
                     while self.clock.time() - stop_time <= delay_stop:
                         self._process_data(stream, wav_file, chunk, frames)
                     self._show_message('Delay done')
+                if self.experiment.audio_low_latency_record_module == self.experiment.pyalsaaudio_module_name:
+                    stream.drop()
+                    self._show_message('ALSA stream stopped')
                 break
             self._process_data(stream, wav_file, chunk, frames)
+
+            if TIMESTAMP == 1:
+                timestamp_list.append(str(self.clock.time()))
+            elif TIMESTAMP == 2:
+                self._show_message(self.clock.time())
+
         self._set_stimulus_offset()
+
+        self._show_message('Processing audio data done!')
+        time_elapsed_processing = int(round(self.clock.time() - start_time))
+        self._show_message('Elapsed time: %d ms' % time_elapsed_processing)
+
         if self.ram_cache == 'yes':
             self._show_message('Writing data to wav file')
             wav_file.writeframes(b''.join(frames))
         wav_file.close()
         self._show_message('Finished audio recording')
+        self.wav_duration = round((self.clock.time() - start_time) / 1000, 1)
+        self._show_message('Duration recorded wave file: %d s' % self.wav_duration)
         self.experiment.audio_low_latency_record_locked = 0
 
     def _init_var(self):
@@ -212,8 +238,11 @@ class AudioLowLatencyRecord(Item):
         if self.dummy_mode == 'no':
             self.module = self.experiment.audio_low_latency_record_module
             self.device = self.experiment.audio_low_latency_record_device
+            if self.experiment.audio_low_latency_record_module == self.experiment.pyalsaaudio_module_name:
+                self.buffer_size = self.experiment.audio_low_latency_record_buffer_size
+                self.periods = self.experiment.audio_low_latency_record_periods
         self.period_size = self.experiment.audio_low_latency_record_period_size
-        self.period_size_time = self.experiment.audio_low_latency_record_period_size_time
+        self.period_time = self.experiment.audio_low_latency_record_period_time
         self.data_size = self.experiment.audio_low_latency_record_data_size
         self.bitdepth = self.experiment.audio_low_latency_record_bitdepth
         self.samplewidth = self.experiment.audio_low_latency_record_samplewidth

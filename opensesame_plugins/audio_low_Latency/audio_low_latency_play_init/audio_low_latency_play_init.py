@@ -37,10 +37,11 @@ class AudioLowLatencyPlayInit(Item):
         self.verbose = 'yes'
         self.var.dummy_mode = 'no'
         self.var.verbose = 'yes'
-        self.var.bitdepth = str(16)
-        self.var.samplerate = str(44100)
-        self.var.channels = str(2)
+        self.var.bitdepth = 16
+        self.var.samplerate = 44100
+        self.var.channels = 2
         self.var.period_size = 1024
+        self.periods = 4
 
         self.experiment.audio_low_latency_play_module_list = list()
         self.experiment.audio_low_latency_play_device_dict = dict()
@@ -126,16 +127,23 @@ class AudioLowLatencyPlayInit(Item):
 
     def prepare(self):
         super().prepare()
-        self._reset_device()        
+        self._reset_device()
         self._init_var()
 
         if self.dummy_mode == 'no':
+            self._show_message('\nChoosen playback parameters:\n')
             self._show_message('Module: %s' % self.module)
             self._show_message('Device: %s' % self.device_name)
             self._show_message('Bitdepth: %dbit' % self.bitdepth)
             self._show_message('Samplerate: %dHz' % self.samplerate)
             self._show_message('Channels: %d' % self.channels)
-            self._show_message('Period size time: %dms' % self.period_size_time)
+            self._show_message('Period size: %d frames' % self.period_size)
+            self._show_message('Period time: %s ms' % str(self.period_time))
+            if self.module == self.pyalsaaudio_module_name:
+                self._show_message('Buffer size: %d frames' % self.buffer_size)
+                self._show_message('Number of periods per buffer: %d' % self.periods)
+            self._show_message('')
+
             try:
                 pygame.mixer.stop()
                 pygame.mixer.quit()
@@ -165,7 +173,8 @@ class AudioLowLatencyPlayInit(Item):
                                             device=self.device_name,
                                             channels=self.channels,
                                             rate=self.samplerate,
-                                            periodsize=self.period_size)
+                                            periodsize=self.period_size,
+                                            periods=self.periods)
 
                 self._show_message('Audio device opened')
 
@@ -176,9 +185,21 @@ class AudioLowLatencyPlayInit(Item):
                 reported_format_name = device_info['format_name']
                 reported_period_size = device_info['period_size']
                 reported_period_time = device_info['period_time']
+                reported_periods = device_info['periods']
+
+                real_period_time_round = round(reported_period_time / 1000, 1)
+
+                # self._show_message('\nReported parameters:\n')
+                # #self._show_message('Bitdepth: %dbit' % self.bitdepth)
+                # self._show_message('Samplerate: %dHz' % reported_rate)
+                # self._show_message('Channels: %d' % reported_channels)
+                # self._show_message('Period size: %d frames' % reported_period_size)
+                # self._show_message('Period time: %dms\n' % real_period_time_round)
 
                 if reported_period_size != self.period_size:
                     error_msg_list.append('Period size of %d frames not supported. %d frames is recommended.\n' % (self.period_size, reported_period_size))
+                if reported_periods != self.periods:
+                    error_msg_list.append('Number of periods per buffer of %d not supported. factor of %d is recommended.\n' % (self.periods, reported_periods))
                 if reported_channels != self.channels:
                     error_msg_list.append('%d channel(s) not supported. %d channel(s) is recommended.\n' % (self.channels, reported_channels))
                 if reported_rate != self.samplerate:
@@ -217,22 +238,33 @@ class AudioLowLatencyPlayInit(Item):
                         real_samplerate_string = re.search(pattern_samplerate, real_samplerate_string)
                         real_samplerate = int(real_samplerate_string.group(1))
 
-                        period_size_set = real_period_size
+                        real_periods = int(real_buffer_size / real_period_size)
+                        real_period_time = round(float(real_period_size) / float(real_samplerate) * 1000, 1)
 
-                        if period_size_set != self.period_size:
-                            error_msg_list.append('Period size of %d frames not supported. %d frames is recommended.\n' % (self.period_size, period_size_set))
+                        # self._show_message('\nHardware using parameters:\n')
+                        # #self._show_message('Bitdepth: %dbit' % self.bitdepth)
+                        # self._show_message('Samplerate: %dHz' % real_samplerate)
+                        # self._show_message('Channels: %d' % real_channel_size)
+                        # self._show_message('Period size: %d frames' % real_period_size)
+                        # self._show_message('Period size time: %dms\n' % real_period_time)
+
+                        if real_period_size != self.period_size:
+                            error_msg_list.append('Period size of %d frames not supported. %d frames is recommended.\n' % (self.period_size, real_period_size))
                         else:
-                            self._show_message('Chosen period size is supported and verified')
+                            self._show_message('Chosen period size is supported and use is verified')
+                        if real_periods != self.periods:
+                            error_msg_list.append('%d periods per buffer not supported\n' % (self.periods))
                         if real_channel_size != self.channels:
                             error_msg_list.append('%d channel(s) not supported\n' % (self.channels))
                         if real_samplerate != self.samplerate:
                             error_msg_list.append('Samplerate of %d Hz not supported\n' % (self.samplerate))
+
                     except:
                         self._show_message('Could not verify parameters within Linux')
-                        period_size_set = None
+                        real_period_size = None
                 else:
                     self._show_message('Could not verify parameters within Linux')
-                    period_size_set = None
+                    real_period_size = None
 
                 if error_msg_list:
                     raise OSException('Error with device: %s\n%s' % (self.device_name, ''.join(error_msg_list)))
@@ -312,18 +344,20 @@ class AudioLowLatencyPlayInit(Item):
                     raise OSException('Device does not support %dbit audio\n\nMessage: %s' % (self.bitdepth, e))
 
                 self.period_size = self.device.bufsize()
-                self.period_size_time = round(float(self.period_size) / float(self.samplerate) * 1000, 1)
-                self.data_size = self.frame_size * self.period_size // 8
+                self.period_time = round(float(self.period_size) / float(self.samplerate) * 1000, 1)
+                self.data_size = int(self.frame_size * self.period_size / 8)
 
                 self.experiment.audio_low_latency_play_period_size = self.period_size
                 self.experiment.audio_low_latency_play_data_size = self.data_size
                 self.experiment.var.audio_low_latency_play_period_size = self.period_size
+                self.experiment.var.audio_low_latency_play_period_time = self.period_time
 
-                self._show_message('Overruling period size with hardware buffer for OSS4, using: %d frames or %dms' % (self.period_size, self.period_size_time))
+                self._show_message('Overruling period size with hardware buffer for OSS4, using: %d frames or %dms' % (self.period_size, self.period_time))
 
             self.experiment.audio_low_latency_play_device = self.device
             self.experiment.cleanup_functions.append(self.close)
         elif self.dummy_mode == 'yes':
+            self.experiment.audio_low_latency_play_device = None
             self._show_message('Dummy mode enabled, run phase')
         else:
             self._show_message('Error with dummy mode, mode is: %s' % self.dummy_mode)
@@ -351,19 +385,40 @@ class AudioLowLatencyPlayInit(Item):
         self.verbose = self.var.verbose
         self.module = self.var.module
         self.device_name = self.var.device_name
-        self.bitdepth = int(self.var.bitdepth)
-        self.samplewidth = self.bitdepth // 8
-        self.samplerate = int(self.var.samplerate)
-        self.channels = int(self.var.channels)
 
         if isinstance(self.var.period_size, int):
-            self.period_size = int(self.var.period_size)
+            self.period_size = self.var.period_size
         else:
             raise OSException('Period size value should be a integer')
 
-        self.frame_size = self.bitdepth * self.channels
-        self.data_size = self.frame_size * self.period_size // 8
-        self.period_size_time = round(float(self.period_size) / float(self.samplerate) * 1000, 1)
+        if isinstance(self.var.samplerate, int):
+            self.samplerate = self.var.samplerate
+        else:
+            raise OSException('Sample rate value should be a integer')
+
+        if isinstance(self.var.channels, int):
+            self.channels = self.var.channels
+        else:
+            raise OSException('Channel value should be a integer')
+
+        if isinstance(self.var.periods, int):
+            self.periods = self.var.periods
+        else:
+            raise OSException('Number of periods per buffer value should be a integer')
+
+        if isinstance(self.var.bitdepth, int):
+            if self.var.bitdepth % 8 != 0:
+                raise OSException('Bit depth should be a multiple of 8')
+            else:
+                self.bitdepth = self.var.bitdepth
+                self.samplewidth = int(self.bitdepth / 8)
+        else:
+            raise OSException('Bit depth should be a integer')
+
+        self.buffer_size = int(self.period_size * self.periods)
+        self.frame_size = int(self.samplewidth * self.channels)
+        self.data_size = int(self.frame_size * self.period_size)
+        self.period_time = round(float(self.period_size) / float(self.samplerate) * 1000, 1)
 
         self.experiment.audio_low_latency_play_dummy_mode = self.dummy_mode
         self.experiment.audio_low_latency_play_verbose = self.verbose
@@ -375,11 +430,20 @@ class AudioLowLatencyPlayInit(Item):
         self.experiment.audio_low_latency_play_channels = self.channels
         self.experiment.audio_low_latency_play_period_size = self.period_size
         self.experiment.audio_low_latency_play_data_size = self.data_size
-        self.experiment.audio_low_latency_play_period_size_time = self.period_size_time
+        self.experiment.audio_low_latency_play_period_time = self.period_time
+        if self.module == self.pyalsaaudio_module_name:
+            self.experiment.audio_low_latency_play_buffer_size = self.buffer_size
+            self.experiment.audio_low_latency_play_periods = self.periods
+            self.experiment.audio_low_latency_play_buffer_time = round(self.periods * self.period_time, 1)
 
         self.experiment.var.audio_low_latency_play_module = self.module
         self.experiment.var.audio_low_latency_play_device_name = self.device_name
         self.experiment.var.audio_low_latency_play_period_size = self.period_size
+        self.experiment.var.audio_low_latency_play_period_time = self.period_time
+        if self.module == self.pyalsaaudio_module_name:
+            self.experiment.var.audio_low_latency_play_buffer_size = self.buffer_size
+            self.experiment.var.audio_low_latency_play_periods = self.periods
+            self.experiment.var.audio_low_latency_play_buffer_time = self.experiment.audio_low_latency_play_buffer_time
         self.experiment.var.audio_low_latency_play_bitdepth = self.bitdepth
         self.experiment.var.audio_low_latency_play_samplewidth = self.samplewidth
         self.experiment.var.audio_low_latency_play_samplerate = self.samplerate
@@ -477,6 +541,11 @@ class QtAudioLowLatencyPlayInit(AudioLowLatencyPlayInit, QtAutoPlugin):
         elif self.var.dummy_mode == 'no':
             self.combobox_module.setEnabled(True)
             self.combobox_device_name.setEnabled(True)
+
+        if self.current_module == self.pyalsaaudio_module_name:
+            self.line_edit_periods.setEnabled(True)
+        else:
+            self.line_edit_periods.setDisabled(True)
 
         if self.current_module == self.oss4_module_name:
             self.line_edit_period_size.setDisabled(True)

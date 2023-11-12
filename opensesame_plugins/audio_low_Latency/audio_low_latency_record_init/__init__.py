@@ -57,6 +57,12 @@ controls = [
         "name": "line_edit_period_size",
         "tooltip": "Period size, value is number of samples (64 seems to be the bare minimum, 65536 the maximum)"
     }, {
+        "type": "line_edit",
+        "var": "periods",
+        "label": "Number of periods per buffer",
+        "name": "line_edit_periods",
+        "tooltip": "value is an integer"
+    }, {
         "type": "text",
         "label": " <small><b>Note:</b> Audio Low Latency Record Init item at the begin of the experiment is needed for initialization of the audio device</small>"
     }, {
