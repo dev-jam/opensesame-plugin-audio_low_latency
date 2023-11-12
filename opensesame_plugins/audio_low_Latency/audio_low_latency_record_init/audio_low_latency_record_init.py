@@ -37,9 +37,9 @@ class AudioLowLatencyRecordInit(Item):
         self.verbose = 'yes'
         self.var.dummy_mode = 'no'
         self.var.verbose = 'yes'
-        self.var.bitdepth = str(16)
-        self.var.samplerate = str(44100)
-        self.var.channels = str(2)
+        self.var.bitdepth = 16)
+        self.var.samplerate = 44100
+        self.var.channels = 2
         self.var.period_size = 1024
 
         self.experiment.audio_low_latency_record_module_list = list()
@@ -355,19 +355,34 @@ class AudioLowLatencyRecordInit(Item):
         self.verbose = self.var.verbose
         self.module = self.var.module
         self.device_name = self.var.device_name
-        self.bitdepth = int(self.var.bitdepth)
-        self.samplewidth = self.bitdepth // 8
-        self.samplerate = int(self.var.samplerate)
-        self.channels = int(self.var.channels)
-
+        
         if isinstance(self.var.period_size, int):
-            self.period_size = int(self.var.period_size)
+            self.period_size = self.var.period_size
         else:
             raise OSException('Period size value should be a integer')
 
-        self.frame_size = self.bitdepth * self.channels
-        self.data_size = self.frame_size * self.period_size // 8
-        self.period_size_time = round(float(self.period_size) / float(self.samplerate) * 1000, 1)
+        if isinstance(self.var.samplerate, int):
+            self.samplerate = self.var.samplerate
+        else:
+            raise OSException('Sample rate value should be a integer')
+
+        if isinstance(self.var.channels, int):
+            self.channels = self.var.channels
+        else:
+            raise OSException('Channel value should be a integer')
+
+        if isinstance(self.var.bitdepth, int):
+            if self.var.bitdepth % 8 != 0:
+                raise OSException('Bit depth should be a multiple of 8')
+            else:
+                self.bitdepth = self.var.bitdepth
+                self.samplewidth = self.bitdepth / 8
+        else:
+            raise OSException('Bit depth should be a integer')
+
+        self.frame_size = self.samplewidth * self.channels
+        self.data_size = self.frame_size * self.period_size
+        self.period_time = round(float(self.period_size) / float(self.samplerate) * 1000, 1)
 
         self.experiment.audio_low_latency_record_dummy_mode = self.dummy_mode
         self.experiment.audio_low_latency_record_verbose = self.verbose
