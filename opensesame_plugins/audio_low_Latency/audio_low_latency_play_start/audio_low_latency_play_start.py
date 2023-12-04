@@ -148,7 +148,7 @@ class AudioLowLatencyPlayStart(Item):
 
 
     def run(self):
-        self._check_stop_wait
+        self._check_stop_wait()
         start_time = self.set_item_onset()
 
         if self.dummy_mode == 'no':
@@ -239,7 +239,7 @@ class AudioLowLatencyPlayStart(Item):
             if self.experiment.audio_low_latency_play_execute_pause == 1 and self.experiment.audio_low_latency_play_continue == 1:
                 if self.experiment.audio_low_latency_play_module == self.experiment.pyalsaaudio_module_name:
                     stream.pause(True)
-                while self.play_execute_pause == 1 and self.play_continue == 1:
+                while self.experiment.audio_low_latency_play_execute_pause == 1 and self.experiment.audio_low_latency_play_continue == 1:
                     if self.pause_resume != '' or self.stop != '':
                         self._check_keys()
                 if self.experiment.audio_low_latency_play_module == self.experiment.pyalsaaudio_module_name:
@@ -327,17 +327,22 @@ class AudioLowLatencyPlayStart(Item):
         self.pause_resume = self.var.pause_resume
         self.stop = self.var.stop
         self.ram_cache = self.var.ram_cache
+        self.experiment.audio_low_latency_play_pause_resume_key = self.var.pause_resume
         self.experiment.audio_low_latency_play_continue = 1
-        self.experiment.audio_low_latency_play_start = 1
+        self.experiment.audio_low_latency_play_start = True
         self.experiment.audio_low_latency_play_execute_pause = 0
+        self.experiment.audio_low_latency_play_stop = False
+        self.experiment.audio_low_latency_play_wait = False
+        self.experiment.audio_low_latency_play_pause = False
+        self.experiment.audio_low_latency_play_resume = False
 
     def _check_init(self):
         if not hasattr(self.experiment, 'audio_low_latency_play_device'):
-            raise OSException('Audio Low Latency Play Init item is missing')
+            raise OSException('`Audio Low Latency Play Init` item is missing')
 
     def _check_stop_wait(self):
-        if not (hasattr(self.experiment, "audio_low_latency_play_stop") or hasattr(self.experiment, "audio_low_latency_play_wait")):
-            raise OSException('Audio Low Latency Play Stop or Audio Low Latency Play Wait item is missing')
+        if not self.experiment.audio_low_latency_play_stop and not self.experiment.audio_low_latency_play_wait:
+            raise OSException('`Audio Low Latency Play Stop` or `Audio Low Latency Play Wait` item is missing')
 
     def _show_message(self, message):
         oslogger.debug(message)

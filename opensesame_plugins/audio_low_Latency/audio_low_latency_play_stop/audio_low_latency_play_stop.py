@@ -54,17 +54,17 @@ class AudioLowLatencyPlayStop(Item):
     def _init_var(self):
         self.dummy_mode = self.experiment.audio_low_latency_play_dummy_mode
         self.verbose = self.experiment.audio_low_latency_play_verbose
-        self.experiment.audio_low_latency_play_stop = 1
+        self.experiment.audio_low_latency_play_stop = True
 
     def _check_play(self):
-        if not hasattr(self.experiment, "audio_low_latency_play_start"):
+        if not self.experiment.audio_low_latency_play_start:
             raise OSException(
-                    'Audio Low Latency Play Start item is missing')
+                    '`Audio Low Latency Play Start` item is missing')
 
     def _check_init(self):
         if not hasattr(self.experiment, 'audio_low_latency_play_device'):
             raise OSException(
-                'Audio Low Latency Play Init item is missing')
+                '`Audio Low Latency Play Init` item is missing')
 
     def _show_message(self, message):
         oslogger.debug(message)

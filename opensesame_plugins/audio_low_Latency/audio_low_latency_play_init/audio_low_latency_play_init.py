@@ -41,7 +41,7 @@ class AudioLowLatencyPlayInit(Item):
         self.var.samplerate = 44100
         self.var.channels = 2
         self.var.period_size = 1024
-        self.periods = 4
+        self.var.periods = 4
 
         self.experiment.audio_low_latency_play_module_list = list()
         self.experiment.audio_low_latency_play_device_dict = dict()
@@ -450,11 +450,12 @@ class AudioLowLatencyPlayInit(Item):
         self.experiment.var.audio_low_latency_play_channels = self.channels
 
         # reset experimental variables
-        self.experiment.audio_low_latency_play_wait = None
-        self.experiment.audio_low_latency_play_stop = None
-        self.experiment.audio_low_latency_play_start = None
-        self.experiment.audio_low_latency_play_pause = None
-        self.experiment.audio_low_latency_play_resume = None
+        self.experiment.audio_low_latency_play_background = None
+        # self.experiment.audio_low_latency_play_wait = None
+        # self.experiment.audio_low_latency_play_stop = None
+        # self.experiment.audio_low_latency_play_start = None
+        # self.experiment.audio_low_latency_play_pause = None
+        # self.experiment.audio_low_latency_play_resume = None
 
         self.experiment.audio_low_latency_play_thread_running = 0
 

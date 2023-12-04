@@ -40,7 +40,7 @@ class AudioLowLatencyPlayResume(Item):
 
         if self.dummy_mode == 'no':
             while not self.experiment.audio_low_latency_play_thread_running:
-                self.clock.sleep(self.poll_time)
+                self.clock.sleep(POLL_TIME)
             self._show_message('Sending resume signal')
             self.experiment.audio_low_latency_play_execute_pause = 0
         elif self.dummy_mode == 'yes':
@@ -51,17 +51,21 @@ class AudioLowLatencyPlayResume(Item):
     def _init_var(self):
         self.dummy_mode = self.experiment.audio_low_latency_play_dummy_mode
         self.verbose = self.experiment.audio_low_latency_play_verbose
-        self.experiment.audio_low_latency_play_resume = 1
+        self.experiment.audio_low_latency_play_resume = True
 
     def _check_play(self):
-        if not hasattr(self.experiment, "audio_low_latency_play_start"):
+        if not self.experiment.audio_low_latency_play_start:
             raise OSException(
-                    'Audio Low Latency Play Start item is missing')
+                    '`Audio Low Latency Play Start` item is missing')
+
+    def _check_pause_resume(self):
+        if not self.experiment.audio_low_latency_play_pause_resume_key and not self.experiment.audio_low_latency_play_pause:
+            raise OSException('`Audio Low Latency Play Resume` item is missing a resume/pause key or item')
 
     def _check_init(self):
         if not hasattr(self.experiment, 'audio_low_latency_play_device'):
             raise OSException(
-                'Audio Low Latency Play Init item is missing')
+                '`Audio Low Latency Play Init` item is missing')
 
     def _show_message(self, message):
         oslogger.debug(message)
