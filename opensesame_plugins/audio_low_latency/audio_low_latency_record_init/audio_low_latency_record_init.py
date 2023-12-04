@@ -41,7 +41,7 @@ class AudioLowLatencyRecordInit(Item):
         self.var.samplerate = 44100
         self.var.channels = 2
         self.var.period_size = 1024
-        self.periods = 4
+        self.var.periods = 4
 
         self.experiment.audio_low_latency_record_module_list = list()
         self.experiment.audio_low_latency_record_device_dict = dict()
@@ -451,11 +451,12 @@ class AudioLowLatencyRecordInit(Item):
         self.experiment.var.audio_low_latency_record_channels = self.channels
 
         # reset experimental variables
-        self.experiment.audio_low_latency_record_wait = None
-        self.experiment.audio_low_latency_record_stop = None
-        self.experiment.audio_low_latency_record_start = None
-        self.experiment.audio_low_latency_record_pause = None
-        self.experiment.audio_low_latency_record_resume = None
+        self.experiment.audio_low_latency_record_background = None
+        # self.experiment.audio_low_latency_record_wait = None
+        # self.experiment.audio_low_latency_record_stop = None
+        # self.experiment.audio_low_latency_record_start = None
+        # self.experiment.audio_low_latency_record_pause = None
+        # self.experiment.audio_low_latency_record_resume = None
 
         self.experiment.audio_low_latency_record_thread_running = 0
 

@@ -40,7 +40,7 @@ class AudioLowLatencyRecordStop(Item):
 
         if self.dummy_mode == 'no':
             while not self.experiment.audio_low_latency_record_thread_running:
-                self.clock.sleep(self.poll_time)
+                self.clock.sleep(POLL_TIME)
             self._show_message('Sending stop signal')
             self.experiment.audio_low_latency_record_continue = 0
             if self.experiment.audio_low_latency_record_locked:
@@ -56,15 +56,15 @@ class AudioLowLatencyRecordStop(Item):
         self.verbose = self.experiment.audio_low_latency_record_verbose
         self.experiment.audio_low_latency_record_stop = 1
 
-    def _check_record(self):
-        if not hasattr(self.experiment, "audio_low_latency_record_start"):
-            raise OSException(
-                'Audio Low Latency Record Start item is missing')
-
     def _check_init(self):
         if not hasattr(self.experiment, 'audio_low_latency_record_device'):
             raise OSException(
-                'Audio Low Latency Record Init item is missing')
+                '`Audio Low Latency Record Init` item is missing')
+
+    def _check_record(self):
+        if not self.experiment.audio_low_latency_record_start:
+            raise OSException(
+                    '`Audio Low Latency Record Start` item is missing')
 
     def _show_message(self, message):
         oslogger.debug(message)

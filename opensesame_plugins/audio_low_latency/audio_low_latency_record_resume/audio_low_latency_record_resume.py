@@ -36,13 +36,14 @@ class AudioLowLatencyRecordResume(Item):
 
     def run(self):
         self._check_record()
+        self._check_pause_resume()
         self.set_item_onset()
 
         if self.dummy_mode == 'no':
             while not self.experiment.audio_low_latency_record_thread_running:
                 self.clock.sleep(POLL_TIME)
             self._show_message('Sending resume signal')
-            self.experiment.audio_low_latency_record_execute_pause = 0
+            self.experiment.audio_low_latency_record_execute_pause = False
         elif self.dummy_mode == 'yes':
             self._show_message('Dummy mode enabled, NOT recording audio')
         else:
@@ -51,17 +52,21 @@ class AudioLowLatencyRecordResume(Item):
     def _init_var(self):
         self.dummy_mode = self.experiment.audio_low_latency_record_dummy_mode
         self.verbose = self.experiment.audio_low_latency_record_verbose
-        self.experiment.audio_low_latency_record_resume = 1
-
-    def _check_record(self):
-        if not hasattr(self.experiment, "audio_low_latency_record_start"):
-            raise OSException(
-                    'Audio Low Latency Record Start item is missing')
+        self.experiment.audio_low_latency_record_resume = True
 
     def _check_init(self):
         if not hasattr(self.experiment, 'audio_low_latency_record_device'):
             raise OSException(
-                'Audio Low Latency Record Init item is missing')
+                '`Audio Low Latency Record Init` item is missing')
+
+    def _check_record(self):
+        if not self.experiment.audio_low_latency_record_start:
+            raise OSException(
+                    '`Audio Low Latency Record Start` item is missing')
+
+    def _check_pause_resume(self):
+        if not self.experiment.audio_low_latency_record_pause_resume_key and not self.experiment.audio_low_latency_record_pause:
+            raise OSException('`Audio Low Latency Record Resume` item is missing a resume/pause key or item')
 
     def _show_message(self, message):
         oslogger.debug(message)

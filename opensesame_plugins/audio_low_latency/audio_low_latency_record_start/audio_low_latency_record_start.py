@@ -256,19 +256,23 @@ class AudioLowLatencyRecordStart(Item):
         self.pause_resume = self.var.pause_resume
         self.stop = self.var.stop
         self.ram_cache = self.var.ram_cache
+        self.experiment.audio_low_latency_record_pause_resume_key = self.var.pause_resume
         self.experiment.audio_low_latency_record_continue = 1
-        self.experiment.audio_low_latency_record_start = 1
+        self.experiment.audio_low_latency_record_start = True
         self.experiment.audio_low_latency_record_execute_pause = 0
-
-    def _check_stop_wait(self):
-        if not (hasattr(self.experiment, "audio_low_latency_record_stop") or hasattr(self.experiment, "audio_low_latency_record_wait")):
-            raise OSException(
-                'Audio Low Latency Record Stop or Audio Low Latency Record Wait item is missing')
+        self.experiment.audio_low_latency_record_stop = False
+        self.experiment.audio_low_latency_record_wait = False
+        self.experiment.audio_low_latency_record_pause = False
+        self.experiment.audio_low_latency_record_resume = False
 
     def _check_init(self):
         if not hasattr(self.experiment, 'audio_low_latency_record_device'):
             raise OSException(
-                'Audio Low Latency Record Init item is missing')
+                '`Audio Low Latency Record Init` item is missing')
+
+    def _check_stop_wait(self):
+        if not self.experiment.audio_low_latency_record_stop and not self.experiment.audio_low_latency_record_wait:
+            raise OSException('`Audio Low Latency Record Stop` or `Audio Low Latency Record Wait` item is missing')
 
     def _generate_suffix(self, path_to_file):
         pattern = "_[0-9]+$"
