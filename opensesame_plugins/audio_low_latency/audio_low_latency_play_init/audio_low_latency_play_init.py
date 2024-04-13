@@ -418,7 +418,9 @@ class AudioLowLatencyPlayInit(Item):
         self.buffer_size = int(self.period_size * self.periods)
         self.frame_size = int(self.samplewidth * self.channels)
         self.data_size = int(self.frame_size * self.period_size)
-        self.period_time = round(float(self.period_size) / float(self.samplerate) * 1000, 1)
+        self.period_time_exact = float(self.period_size) / float(self.samplerate) * 1000
+        self.period_time = round(self.period_time_exact, 1)
+
 
         self.experiment.audio_low_latency_play_dummy_mode = self.dummy_mode
         self.experiment.audio_low_latency_play_verbose = self.verbose
@@ -430,6 +432,7 @@ class AudioLowLatencyPlayInit(Item):
         self.experiment.audio_low_latency_play_channels = self.channels
         self.experiment.audio_low_latency_play_period_size = self.period_size
         self.experiment.audio_low_latency_play_data_size = self.data_size
+        self.experiment.audio_low_latency_play_period_time_exact = self.period_time_exact
         self.experiment.audio_low_latency_play_period_time = self.period_time
         if self.module == self.pyalsaaudio_module_name:
             self.experiment.audio_low_latency_play_buffer_size = self.buffer_size
@@ -439,6 +442,7 @@ class AudioLowLatencyPlayInit(Item):
         self.experiment.var.audio_low_latency_play_module = self.module
         self.experiment.var.audio_low_latency_play_device_name = self.device_name
         self.experiment.var.audio_low_latency_play_period_size = self.period_size
+        self.experiment.var.audio_low_latency_play_period_time_exact = self.period_time_exact
         self.experiment.var.audio_low_latency_play_period_time = self.period_time
         if self.module == self.pyalsaaudio_module_name:
             self.experiment.var.audio_low_latency_play_buffer_size = self.buffer_size
