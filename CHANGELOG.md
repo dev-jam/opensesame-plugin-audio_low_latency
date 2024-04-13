@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+
+## [10.4.0] - 2024-04-13
+
+- fixed offset correction for the stop function
+- fixed reporting of duration of the recording
     
 ## [10.3.0] - 2023-12-04
 
