@@ -226,9 +226,11 @@ class AudioLowLatencyRecord(Item):
         if self.ram_cache == 'yes':
             self._show_message('Writing data to wav file')
             wav_file.writeframes(b''.join(frames))
+        wav_file_nframes = self.wav_file.getnframes()
+        self.wav_duration = round(float(wav_file_nframes) / float(self.wav_file.getframerate()) * 1000, 1)
+
         wav_file.close()
         self._show_message('Finished audio recording')
-        self.wav_duration = round((self.clock.time() - start_time) / 1000, 1)
         self._show_message('Duration recorded wave file: %d s' % self.wav_duration)
         self.experiment.audio_low_latency_record_locked = 0
 
@@ -362,3 +364,4 @@ class QtAudioLowLatencyRecord(AudioLowLatencyRecord, QtAutoPlugin):
     def __init__(self, name, experiment, script=None):
         AudioLowLatencyRecord.__init__(self, name, experiment, script)
         QtAutoPlugin.__init__(self, __file__)
+
