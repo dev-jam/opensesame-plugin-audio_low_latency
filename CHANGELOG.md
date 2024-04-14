@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 
 
+## [10.5.0] - 2024-04-14
+
+- additional fix for offset correction for the stop function
+- added logging of stop and pause/resume keypresses and timestamps
+
 ## [10.4.0] - 2024-04-13
 
 - fixed offset correction for the stop function
