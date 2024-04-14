@@ -266,6 +266,8 @@ class AudioLowLatencyRecordStart(Item):
         self.experiment.audio_low_latency_record_wait = False
         self.experiment.audio_low_latency_record_pause = False
         self.experiment.audio_low_latency_record_resume = False
+        self.experiment.var.audio_low_latency_record_start_key_presses = ''
+        self.experiment.var.audio_low_latency_record_start_key_timestamps = ''
 
     def _check_init(self):
         if not hasattr(self.experiment, 'audio_low_latency_record_device'):
@@ -337,15 +339,21 @@ class AudioLowLatencyRecordStart(Item):
         if self.stop != '':
             if key1 in self._allowed_responses_stop:
                 self._show_message('Detected key press for stopping audio')
+                self._log_keys(key1,str(time1))
                 self.experiment.audio_low_latency_record_continue = 0
         if self.pause_resume != '':
             if key1 in self._allowed_responses_pause_resume:
+                self._log_keys(key1,str(time1))
                 if self.experiment.audio_low_latency_record_execute_pause == 0:
                     self._show_message('Detected key press for pausing audio recording')
                     self.experiment.audio_low_latency_record_execute_pause = 1
                 elif self.experiment.audio_low_latency_record_execute_pause == 1:
                     self._show_message('Detected key press for resuming audio recording')
                     self.experiment.audio_low_latency_record_execute_pause = 0
+
+    def _log_keys(self, key1, time1):
+        self.experiment.var.audio_low_latency_record_start_key_presses += key1 + ';'
+        self.experiment.var.audio_low_latency_record_start_key_timestamps += time1 + ';'
 
     def _show_message(self, message):
         oslogger.debug(message)

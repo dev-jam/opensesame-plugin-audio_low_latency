@@ -149,13 +149,13 @@ class AudioLowLatencyPlayStart(Item):
 
     def run(self):
         self._check_stop_wait()
-        start_time = self.set_item_onset()
+        self.start_time = self.set_item_onset()
 
         if self.dummy_mode == 'no':
             while self.experiment.audio_low_latency_play_locked:
                 self.clock.sleep(POLL_TIME)
             if self.delay_check:
-                time_passed = self.clock.time() - start_time
+                time_passed = self.clock.time() - self.start_time
                 delay = self.delay - time_passed
             else:
                 delay = self.delay
@@ -203,7 +203,7 @@ class AudioLowLatencyPlayStart(Item):
                 self._show_message('Delaying audio playback for %d ms' % (delay))
                 self.clock.sleep(delay)
                 self._show_message('Delay done')
-        start_time = self._set_stimulus_onset()
+        self.start_time = self._set_stimulus_onset()
         self._show_message('Starting audio playback')
 
         if TIMESTAMP == 1:
@@ -213,12 +213,6 @@ class AudioLowLatencyPlayStart(Item):
             self._show_message(self.clock.time())
 
         while len(data) > 0:
-
-            if self.duration_check:
-                if self.clock.time() - start_time >= self.duration:
-                    self._show_message('Audio playback stopped, duration exceeded')
-                    self.duration_exceeded = True
-                    break
 
             stream.write(data)
             period += 1
@@ -245,6 +239,7 @@ class AudioLowLatencyPlayStart(Item):
             if self.pause_resume != '' or self.stop != '':
                 self._check_keys()
             if self.experiment.audio_low_latency_play_execute_pause == 1 and self.experiment.audio_low_latency_play_continue == 1:
+                self._show_message('Paused audio playback')
                 pause_start_time = self.clock.time()
                 if self.experiment.audio_low_latency_play_module == self.experiment.pyalsaaudio_module_name:
                     stream.pause(True)
@@ -252,15 +247,17 @@ class AudioLowLatencyPlayStart(Item):
                     if self.pause_resume != '' or self.stop != '':
                         self._check_keys()
                     if self.duration_check:
-                        if self.clock.time() - start_time >= self.duration:
-                            self._show_message('Audio playback stopped, duration exceeded')
-                            self.duration_exceeded = True
+                        if self._check_duration():
                             break
                 if self.experiment.audio_low_latency_play_module == self.experiment.pyalsaaudio_module_name:
                     stream.pause(False)
+                self._show_message('Resumed audio playback')
                 pause_stop_time = self.clock.time()
                 pause_duration += pause_stop_time - pause_start_time
+            if self.duration_check and not self.duration_exceeded:
+                self._check_duration()
             if self.experiment.audio_low_latency_play_continue == 0 or self.duration_exceeded:
+                self._show_message('Stopped audio playback')
                 break
 
         if self.experiment.audio_low_latency_play_module == self.experiment.pyalsaaudio_module_name:
@@ -270,17 +267,16 @@ class AudioLowLatencyPlayStart(Item):
         self._show_message('Processing audio data done!')
 
         playback_duration = int(round(period * self.period_time_exact))
-        time_elapsed_processing = int(round(self.clock.time() - start_time))
+        time_elapsed_processing = int(round(self.clock.time() - self.start_time))
         time_elapsed_processing_real = time_elapsed_processing - pause_duration
         self._show_message('Elapsed time: %d ms' % time_elapsed_processing)
 
-        if not self.duration_exceeded:
-            self._show_message('Processed wave playback duration: %d ms' % playback_duration)
-            self._show_message('Current wave playback duration: %d ms' % time_elapsed_processing_real)
-            self.experiment.var.wait_to_finish = int(round(playback_duration - time_elapsed_processing_real))
-            if self.experiment.var.wait_to_finish > 0:
-                self._show_message('Waiting %d ms for audio to finish' % self.experiment.var.wait_to_finish)
-                self.clock.sleep(self.experiment.var.wait_to_finish)
+        self._show_message('Processed wave playback duration: %d ms' % playback_duration)
+        self._show_message('Current wave playback duration: %d ms' % time_elapsed_processing_real)
+        self.experiment.var.wait_to_finish = int(round(playback_duration - time_elapsed_processing_real))
+        if self.experiment.var.wait_to_finish > 0:
+            self._show_message('Waiting %d ms for audio to finish' % self.experiment.var.wait_to_finish)
+            self.clock.sleep(self.experiment.var.wait_to_finish)
 
         self._set_stimulus_offset()
         if self.ram_cache == 'no':
@@ -307,16 +303,30 @@ class AudioLowLatencyPlayStart(Item):
         self.kb.flush()
         if self.stop != '':
             if key1 in self._allowed_responses_stop:
-                self._show_message('Stopped audio playback')
+                self._show_message('Detected key press for stopping audio')
+                self._log_keys(key1,str(time1))
                 self.experiment.audio_low_latency_play_continue = 0
         if self.pause_resume != '':
             if key1 in self._allowed_responses_pause_resume:
+                self._log_keys(key1,str(time1))
                 if self.experiment.audio_low_latency_play_execute_pause == 0:
-                    self._show_message('Paused audio playback')
+                    self._show_message('Detected key press for pausing audio playback')
                     self.experiment.audio_low_latency_play_execute_pause = 1
                 elif self.experiment.audio_low_latency_play_execute_pause == 1:
-                    self._show_message('Resumed audio playback')
+                    self._show_message('Detected key press for resuming audio playback')
                     self.experiment.audio_low_latency_play_execute_pause = 0
+
+    def _log_keys(self, key1, time1):
+        self.experiment.var.audio_low_latency_play_start_key_presses += key1 + ';'
+        self.experiment.var.audio_low_latency_play_start_key_timestamps += time1 + ';'
+
+    def _check_duration(self):
+        if self.clock.time() - self.start_time >= self.duration:
+            self._show_message('Stopping audio playback, duration exceeded')
+            self.duration_exceeded = True
+            return True
+        else:
+            return False
 
     def _init_var(self):
         self.dummy_mode = self.experiment.audio_low_latency_play_dummy_mode
@@ -348,6 +358,8 @@ class AudioLowLatencyPlayStart(Item):
         self.experiment.audio_low_latency_play_wait = False
         self.experiment.audio_low_latency_play_pause = False
         self.experiment.audio_low_latency_play_resume = False
+        self.experiment.var.audio_low_latency_play_start_key_presses = ''
+        self.experiment.var.audio_low_latency_play_start_key_timestamps = ''
 
     def _check_init(self):
         if not hasattr(self.experiment, 'audio_low_latency_play_device'):
