@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 
 
+## [10.6.0] - 2024-04-16
+
+- duration check during pause in recording items
+
 ## [10.5.0] - 2024-04-14
 
 - additional fix for offset correction for the stop function
