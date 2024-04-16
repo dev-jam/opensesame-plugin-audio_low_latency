@@ -149,13 +149,13 @@ class AudioLowLatencyPlayStart(Item):
 
     def run(self):
         self._check_stop_wait()
-        self.start_time = self.set_item_onset()
+        _start_time = self.clock.time()
 
         if self.dummy_mode == 'no':
             while self.experiment.audio_low_latency_play_locked:
                 self.clock.sleep(POLL_TIME)
             if self.delay_check:
-                time_passed = self.clock.time() - self.start_time
+                time_passed = self.clock.time() - _start_time
                 delay = self.delay - time_passed
             else:
                 delay = self.delay
