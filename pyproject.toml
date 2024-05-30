@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "opensesame-plugin-audio_low_latency"
-version = "10.6.1"
+version = "10.6.2"
 description = "An OpenSesame Plug-in for playing and recording audio files with low latency on Linux"
 authors = ["Bob Rosbag <debian@bobrosbag.nl>"]
 readme = "README.md"
