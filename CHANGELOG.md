@@ -8,15 +8,19 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 
 
+## [10.6.1] - 2024-05-30
+
+- correct accidental removal of item onset
+    
 ## [10.6.0] - 2024-04-16
 
 - duration check during pause in recording items
-
+    
 ## [10.5.0] - 2024-04-14
 
 - additional fix for offset correction for the stop function
 - added logging of stop and pause/resume keypresses and timestamps
-
+    
 ## [10.4.0] - 2024-04-13
 
 - fixed offset correction for the stop function
@@ -113,7 +117,11 @@ Bug fixes:
 - fixed wav duration bug
 - implemented delay for stopping the audio recording 
 
-[Unreleased]: https://github.com/dev-jam/opensesame-plugin-audio_low_latency/compare/10.3.0...HEAD
+[Unreleased]: https://github.com/dev-jam/opensesame-plugin-audio_low_latency/compare/10.6.1...HEAD
+[10.6.1]: https://github.com/dev-jam/opensesame-plugin-audio_low_latency/compare/10.6.0...10.6.1
+[10.6.0]: https://github.com/dev-jam/opensesame-plugin-audio_low_latency/compare/10.5.0...10.6.0
+[10.5.0]: https://github.com/dev-jam/opensesame-plugin-audio_low_latency/compare/10.4.0...10.5.0
+[10.4.0]: https://github.com/dev-jam/opensesame-plugin-audio_low_latency/compare/10.3.0...10.4.0
 [10.3.0]: https://github.com/dev-jam/opensesame-plugin-audio_low_latency/compare/10.2.0...10.3.0
 [10.2.0]: https://github.com/dev-jam/opensesame-plugin-audio_low_latency/compare/10.0.2...10.2.0
 [10.0.2]: https://github.com/dev-jam/opensesame-plugin-audio_low_latency/compare/10.0.0...10.0.2
