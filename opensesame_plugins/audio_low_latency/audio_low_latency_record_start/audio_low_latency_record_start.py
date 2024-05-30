@@ -133,6 +133,7 @@ class AudioLowLatencyRecordStart(Item):
 
     def run(self):
         self._check_stop_wait()
+        self.set_item_onset()
         _start_time = self.clock.time()
 
         if self.dummy_mode == 'no':
