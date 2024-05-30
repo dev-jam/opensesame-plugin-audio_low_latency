@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 
 
+## [10.6.2] - 2024-05-31
+
+- also record items: correct accidental removal of item onset
+    
 ## [10.6.1] - 2024-05-30
 
 - correct accidental removal of item onset
@@ -117,7 +121,8 @@ Bug fixes:
 - fixed wav duration bug
 - implemented delay for stopping the audio recording 
 
-[Unreleased]: https://github.com/dev-jam/opensesame-plugin-audio_low_latency/compare/10.6.1...HEAD
+[Unreleased]: https://github.com/dev-jam/opensesame-plugin-audio_low_latency/compare/10.6.2...HEAD
+[10.6.2]: https://github.com/dev-jam/opensesame-plugin-audio_low_latency/compare/10.6.1...10.6.2
 [10.6.1]: https://github.com/dev-jam/opensesame-plugin-audio_low_latency/compare/10.6.0...10.6.1
 [10.6.0]: https://github.com/dev-jam/opensesame-plugin-audio_low_latency/compare/10.5.0...10.6.0
 [10.5.0]: https://github.com/dev-jam/opensesame-plugin-audio_low_latency/compare/10.4.0...10.5.0
