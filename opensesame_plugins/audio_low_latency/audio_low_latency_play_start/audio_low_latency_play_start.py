@@ -297,6 +297,7 @@ class AudioLowLatencyPlayStart(Item):
         if TIMESTAMP == 1:
             self._show_message("\n".join(timestamp_list))
 
+        self._show_message('Unlocking thread')
         self.experiment.audio_low_latency_play_locked = 0
 
     def _check_keys(self):

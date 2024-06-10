@@ -248,6 +248,7 @@ class AudioLowLatencyRecordStart(Item):
         wav_file.close()
         self._show_message('Finished audio recording')
         self._show_message('Duration recorded wave file: %d s' % self.wav_duration)
+        self._show_message('Unlocking thread')
         self.experiment.audio_low_latency_record_locked = 0
 
     def _init_var(self):
