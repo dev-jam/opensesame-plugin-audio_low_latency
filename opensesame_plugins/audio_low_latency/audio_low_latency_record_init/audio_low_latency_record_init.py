@@ -365,22 +365,7 @@ class AudioLowLatencyRecordInit(Item):
             self._show_message('Error with dummy mode, mode is: %s' % self.dummy_mode)
 
     def close(self):
-        if not hasattr(self.experiment, "audio_low_latency_record_device") or \
-            self.experiment.audio_low_latency_record_device is None:
-            self._show_message("no active Audio Device")
-            return
-        try:
-            self._show_message("Closing audio device")
-            if self.module == self.pyaudio_module_name:
-                self.experiment.audio_low_latency_record_device.stop_stream()
-                self.experiment.audio_low_latency_record_device.close()
-                self.device_init.terminate()
-            else:
-                self.experiment.audio_low_latency_record_device.close()
-            self.experiment.audio_low_latency_record_device = None
-            self._show_message("Audio device closed")
-        except:
-            self._show_message("failed to close Audio Device")
+        self._reset_device()
 
     def _init_var(self):
         self.dummy_mode = self.var.dummy_mode
@@ -462,8 +447,23 @@ class AudioLowLatencyRecordInit(Item):
 
     def _reset_device(self):
         if hasattr(self.experiment, 'audio_low_latency_record_device'):
-            if self.experiment.audio_low_latency_record_device:
-                self.experiment.audio_low_latency_record_device.close()
+            try:
+                self._show_message("Closing audio device")
+                if self.module == self.pyaudio_module_name:
+                    self.experiment.audio_low_latency_record_device.stop_stream()
+                    self.experiment.audio_low_latency_record_device.close()
+                    self.device_init.terminate()
+                    del self.device_init
+                else:
+                    self.experiment.audio_low_latency_record_device.close()
+
+                del self.experiment.audio_low_latency_record_device
+                del self.device
+                self._show_message("Audio device closed")
+            except:
+                self._show_message("failed to close Audio Device")
+        else:
+            self._show_message("no active Audio Device")
 
     def _show_message(self, message):
         oslogger.debug(message)
