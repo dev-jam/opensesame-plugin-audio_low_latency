@@ -9,6 +9,6 @@ controls = [
         "label": "<small><b>Note:</b> Audio Low Latency Record Init item at the begin of the experiment is needed for initialization of the audio device</small>"
     }, {
         "type": "text",
-        "label": "<small>Audio Low Latency version 10.6.2</small>"
+        "label": "<small>Audio Low Latency version 10.7.0</small>"
     }
 ]
