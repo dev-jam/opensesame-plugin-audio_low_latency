@@ -6,8 +6,7 @@ OpenSesame Plug-in: Audio Low Latency
 Copyright, 2022, Bob Rosbag
 
 
-## 1. About
---------
+## About
 
 The main goal of this plug-in is to play and record audio with minimal and predictable latencies to achieve a high accuracy and precision. The 'PyAlsaAudio' package which uses the Linux ALSA audio system provided the best results within Python. 
 'PortAudio' and 'sounddevice' are cross-platform and work on both Windows as Linux.
@@ -63,19 +62,16 @@ Known bugs:
 
 
 
-## 2. LICENSE
-----------
+## License
 
-The Audio Low Latency plug-in is distributed under the terms of the GNU General Public License 3.
-The full license should be included in the file COPYING, or can be obtained from
+This software is distributed under the terms of the GNU General Public License 3. The full license should be included in the file `COPYING`, or can be obtained from:
 
 - <http://www.gnu.org/licenses/gpl.txt>
 
 This plug-in contains works of others. Icons are derivatives of the Faience icon theme, Faenza icon theme and Papirus icon theme.
 
 
-## 3. Documentation
-----------------
+## Documentation
 
 Installation instructions and documentation on OpenSesame are available on the documentation website:
 
