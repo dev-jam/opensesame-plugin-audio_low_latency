@@ -60,7 +60,7 @@ class AudioLowLatencyRecordStart(Item):
                     self._allowed_responses_pause_resume.append(r)
             if not self._allowed_responses_pause_resume:
                 self._allowed_responses_pause_resume = None
-            self._show_message("allowed pause/resume keys set to %s" % self._allowed_responses_pause_resume)
+            self._show_message(f"allowed pause/resume keys set to {self._allowed_responses_pause_resume}")
 
         if self.stop != '':
             self._allowed_responses_stop = []
@@ -69,7 +69,7 @@ class AudioLowLatencyRecordStart(Item):
                     self._allowed_responses_stop.append(r)
             if not self._allowed_responses_stop:
                 self._allowed_responses_stop = None
-            self._show_message("allowed stop keys set to %s" % self._allowed_responses_stop)
+            self._show_message(f"allowed stop keys set to {self._allowed_responses_stop}")
 
         error_msg = 'Duration must be a string named infinite or a an integer greater than 1'
         if isinstance(self.var.duration, str):
@@ -113,22 +113,21 @@ class AudioLowLatencyRecordStart(Item):
         if self.dummy_mode == 'no':
             try:
                 self._show_message('\n')
-                self._show_message('Creating wave file: '+self.filename+' ...')
+                self._show_message(f"Creating wave file: {self.filename} ...")
                 self.wav_file = wave.open(self.filename, 'wb')
                 self._show_message('Succesfully created wave file...')
             except Exception as e:
-                raise OSException(
-                    'Could not create wave file\n\nMessage: %s' % e)
+                raise OSException(f"Could not create wave file\n\nMessage: {e}")
 
             self.wav_file.setsampwidth(self.samplewidth)
             self.wav_file.setframerate(self.samplerate)
             self.wav_file.setnchannels(self.channels)
 
-            self._show_message('Period size: %d frames' % (self.period_size))
-            self._show_message('Period size: %d bytes' % (self.data_size))
-            self._show_message('Period time: %s ms' % (str(self.period_time)))
+            self._show_message(f"Period size: {self.period_size} frames")
+            self._show_message(f"Period size: {self.data_size} bytes")
+            self._show_message(f"Period time: {self.period_time} ms")
             if self.experiment.audio_low_latency_record_module == self.experiment.pyalsaaudio_module_name:
-                self._show_message('Buffer consists: %d periods' % (self.periods))
+                self._show_message(f"Buffer consists: {self.periods} periods")
             self._show_message('')
 
     def run(self):
@@ -142,9 +141,9 @@ class AudioLowLatencyRecordStart(Item):
                 self.clock.sleep(POLL_TIME)
 
             if self.delay_start_check:
-                self._show_message('Requested audio recording delay: %d ms' % (self.delay_start))
+                self._show_message(f"Requested audio recording delay: {self.delay_start} ms")
                 time_passed = self.clock.time() - _start_time
-                self._show_message('Time passed: %d ms' % (time_passed))
+                self._show_message(f"Time passed: {time_passed} ms")
                 delay_start = self.delay_start - time_passed
             else:
                 delay_start = self.delay_start
@@ -152,7 +151,7 @@ class AudioLowLatencyRecordStart(Item):
             delay_stop = self.delay_stop
 
             if self.pause_resume != '' or self.stop != '':
-                _keylist = list()
+                _keylist = []
                 if self.pause_resume != '':
                     _keylist.extend(self._allowed_responses_pause_resume)
                 if self.stop != '':
@@ -176,10 +175,10 @@ class AudioLowLatencyRecordStart(Item):
         pause_duration = 0
         self.duration_exceeded = False
 
-        frames = list()
+        frames = []
         if self.delay_start_check:
             if delay_start >= 1:
-                self._show_message('Delaying audio recording for %d ms' % (delay_start))
+                self._show_message(f"Delaying audio recording for {delay_start} ms")
                 self.clock.sleep(delay_start)
                 self._show_message('Delay done')
         self.start_time = self._set_stimulus_onset()
@@ -215,7 +214,7 @@ class AudioLowLatencyRecordStart(Item):
             if self.experiment.audio_low_latency_record_continue == 0 or self.duration_exceeded:
                 if delay_stop >= 1:
                     stop_time = self.clock.time()
-                    self._show_message('Initializing stopping audio recording with delay for %d ms' % (delay_stop))
+                    self._show_message(f"Initializing stopping audio recording with delay for {delay_stop} ms")
                     while self.clock.time() - stop_time <= delay_stop:
                         self._process_data(stream, wav_file, chunk, frames)
                     self._show_message('Delay done')
@@ -237,7 +236,7 @@ class AudioLowLatencyRecordStart(Item):
 
         self._show_message('Processing audio data done!')
         time_elapsed_processing = int(round(self.clock.time() - self.start_time))
-        self._show_message('Elapsed time: %d ms' % time_elapsed_processing)
+        self._show_message(f"Elapsed time: {time_elapsed_processing} ms")
 
         if self.ram_cache == 'yes':
             self._show_message('Writing data to wav file')
@@ -247,7 +246,7 @@ class AudioLowLatencyRecordStart(Item):
 
         wav_file.close()
         self._show_message('Finished audio recording')
-        self._show_message('Duration recorded wave file: %d s' % self.wav_duration)
+        self._show_message(f"Duration recorded wave file: {self.wav_duration} s")
         self._show_message('Unlocking thread')
         self.experiment.audio_low_latency_record_locked = 0
 
@@ -303,11 +302,11 @@ class AudioLowLatencyRecordStart(Item):
             match = re.search(pattern, filename)
             if match:
                 no = int(filename[match.start() + 1:]) + 1
-                filename = re.sub(pattern, "_" + str(no), filename)
+                filename = re.sub(pattern, f"_{no}", filename)
             else:
-                filename = filename + "_1"
+                filename = f"{filename}_1"
 
-            new_filename = filename + ext
+            new_filename = f"{filename}{ext}"
             if not os.path.exists(new_filename):
                 filename_exists = False
 
@@ -319,7 +318,7 @@ class AudioLowLatencyRecordStart(Item):
         rel_loc = os.path.normpath(self.var.filename)
         if self.var.logfile is None:
             raise OSException("Path to log file not found.")
-        output_file = os.path.normpath(os.path.join(os.path.dirname(self.var.logfile), rel_loc)) + extension
+        output_file = f"{os.path.normpath(os.path.join(os.path.dirname(self.var.logfile), rel_loc))}{extension}"
         # Check for a subfolder (when it is specified) that it exists and if not, create it
         if os.path.exists(os.path.dirname(output_file)):
             if self.file_exists_action == 'yes':
@@ -330,7 +329,7 @@ class AudioLowLatencyRecordStart(Item):
                 try:
                     os.makedirs(os.path.dirname(output_file))
                 except Exception as e:
-                    raise OSException("Error creating sound file: " + str(e))
+                    raise OSException(f"Error creating sound file: {e}")
         return output_file
 
     def _process_data(self, stream, wav_file, chunk, frames):
@@ -367,8 +366,8 @@ class AudioLowLatencyRecordStart(Item):
                     self.experiment.audio_low_latency_record_execute_pause = 0
 
     def _log_keys(self, key1, time1):
-        self.experiment.var.audio_low_latency_record_start_key_presses += key1 + ';'
-        self.experiment.var.audio_low_latency_record_start_key_timestamps += time1 + ';'
+        self.experiment.var.audio_low_latency_record_start_key_presses += f"{key1};"
+        self.experiment.var.audio_low_latency_record_start_key_timestamps += f"{time1};"
 
     def _check_duration(self):
         if self.clock.time() - self.start_time >= self.duration:
@@ -386,19 +385,19 @@ class AudioLowLatencyRecordStart(Item):
     def _set_stimulus_onset(self, time=None):
         if time is None:
             time = self.clock.time()
-        self.experiment.var.set('time_stimulus_onset_%s' % self.name, time)
+        self.experiment.var.set(f"time_stimulus_onset_{self.name}", time)
         return time
 
     def _set_stimulus_offset(self, time=None):
         if time is None:
             time = self.clock.time()
-        self.experiment.var.set('time_stimulus_offset_%s' % self.name, time)
+        self.experiment.var.set(f"time_stimulus_offset_{self.name}", time)
         return time
 
     def _set_stimulus_timing(self, _type, time=None):
         if time is None:
             time = self.clock.time()
-        self.experiment.var.set('time_stimulus_%s_%s' % (_type, self.name), time)
+        self.experiment.var.set(f"time_stimulus_{_type}_{self.name}", time)
         return time
 
 
@@ -407,4 +406,3 @@ class QtAudioLowLatencyRecordStart(AudioLowLatencyRecordStart, QtAutoPlugin):
     def __init__(self, name, experiment, script=None):
         AudioLowLatencyRecordStart.__init__(self, name, experiment, script)
         QtAutoPlugin.__init__(self, __file__)
-
