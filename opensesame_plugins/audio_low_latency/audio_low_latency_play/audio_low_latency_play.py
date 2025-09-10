@@ -216,7 +216,7 @@ class AudioLowLatencyPlay(Item):
             if self.ram_cache == 'no':
                 data = wav_file.readframes(chunk)
                 if len(data) == 0:
-                    self._show_message('Processed all audio data')
+                    self._show_message('Finished processing audio data')
                     break
                 else:
                     data_length = len(data)
@@ -229,7 +229,7 @@ class AudioLowLatencyPlay(Item):
                     data = wav_data[start:start+len(wav_data)]
                     data_length = len(data)
                 elif start+chunk > len(wav_data) and start >= len(wav_data):
-                    self._show_message('Processed all audio data')
+                    self._show_message('Finished processing audio data')
                     break
                 start += chunk
 
@@ -278,23 +278,19 @@ class AudioLowLatencyPlay(Item):
         duration_playing_audio = int(round(duration_playing_audio_exact))
         duration_pause = int(round(pause_duration))
 
-
-        self._show_message(f"Duration total: {duration_total} ms")
-        self._show_message(f"Duration pauses: {duration_pause} ms")
-        self._show_message(f"Duration processing audio: {duration_processing_audio} ms")
-        self._show_message(f"Duration playing audio: {duration_playing_audio} ms")
-        self._show_message(f"Audio file duration: {self.wav_duration} ms")
-
         self.experiment.var.wait_to_finish = int(round(self.duration - duration_playing_audio))
         if self.experiment.var.wait_to_finish > 0:
             self._show_message(f"Waiting {self.experiment.var.wait_to_finish} ms for audio to finish")
             self.clock.sleep(self.experiment.var.wait_to_finish)
 
-        # self._set_stimulus_offset()
-
         if self.ram_cache == 'no':
             wav_file.close()
         self._show_message('Finished audio playback')
+        self._show_message(f"Audio file duration: {self.wav_duration} ms")
+        self._show_message(f"Duration total: {duration_total} ms")
+        self._show_message(f"Duration pauses: {duration_pause} ms")
+        self._show_message(f"Duration processing audio: {duration_processing_audio} ms")
+        self._show_message(f"Duration playing audio: {duration_playing_audio} ms")
         self._show_message('')
 
         if self.experiment.audio_low_latency_play_module == self.experiment.pyalsaaudio_module_name:
