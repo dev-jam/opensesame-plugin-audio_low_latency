@@ -8,6 +8,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 
 
+## [10.9.0] - 2025-09-10
+
+- fixed early break off of audio playback in pyalsaaudio
+- replaced the incorrect pcm.drop() with pcm.drain() for pyalsaaudio
+- added padding to fill incomplete periods with silence (other backends)
+- removed last excessive write attempt of empty data
+
 ## [10.8.0] - 2025-09-05
 
 - convert string handling to f-strings
@@ -130,7 +137,8 @@ Bug fixes:
 - fixed wav duration bug
 - implemented delay for stopping the audio recording 
 
-[Unreleased]: https://github.com/dev-jam/opensesame-plugin-audio_low_latency/compare/10.8.0...HEAD
+[Unreleased]: https://github.com/dev-jam/opensesame-plugin-audio_low_latency/compare/10.9.0...HEAD
+[10.9.0]: https://github.com/dev-jam/opensesame-plugin-audio_low_latency/compare/10.8.0...10.9.0
 [10.8.0]: https://github.com/dev-jam/opensesame-plugin-audio_low_latency/compare/10.7.0...10.8.0
 [10.7.0]: https://github.com/dev-jam/opensesame-plugin-audio_low_latency/compare/10.6.2...10.7.0
 [10.6.2]: https://github.com/dev-jam/opensesame-plugin-audio_low_latency/compare/10.6.1...10.6.2
