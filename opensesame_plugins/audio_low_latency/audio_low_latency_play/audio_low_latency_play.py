@@ -28,6 +28,8 @@ import wave
 
 POLL_TIME = 1
 TIMESTAMP = 0
+PADDING = True
+
 
 class AudioLowLatencyPlay(Item):
 
@@ -213,7 +215,12 @@ class AudioLowLatencyPlay(Item):
 
             if self.ram_cache == 'no':
                 data = wav_file.readframes(chunk)
-                data_length = len(data)
+                if len(data) == 0:
+                    self._show_message('Processed all audio data')
+                    break
+                else:
+                    data_length = len(data)
+
             elif self.ram_cache == 'yes':
                 if start+chunk <= len(wav_data):
                     data = wav_data[start:start+chunk]
@@ -222,8 +229,14 @@ class AudioLowLatencyPlay(Item):
                     data = wav_data[start:start+len(wav_data)]
                     data_length = len(data)
                 elif start+chunk > len(wav_data) and start >= len(wav_data):
-                    data = []
+                    self._show_message('Processed all audio data')
+                    break
                 start += chunk
+
+            if PADDING and data_length < self.data_size:
+                self._show_message('Padding last period with silence')
+                padding = self.data_size - data_length
+                data = data + b'\x00' * padding
 
             if self.pause_resume != '' or self.stop != '':
                 self._check_keys()
@@ -249,25 +262,36 @@ class AudioLowLatencyPlay(Item):
                 self._show_message('Stopped audio playback')
                 break
 
+        duration_processing_audio = int(round(self.clock.time() - self.start_time - pause_duration))
+        offset = (data_length / self.data_size) * self.period_time_exact
+        processing_offset_time = self.clock.time()
+
         if self.experiment.audio_low_latency_play_module == self.experiment.pyalsaaudio_module_name:
-            stream.drop()
-            self._show_message('ALSA stream stopped')
+            stream.drain()
+            self._show_message('Draining ALSA stream')
 
-        self._show_message('Processing audio data done!')
+        self._set_stimulus_offset()
 
-        playback_duration = int(round(period * self.period_time_exact))
-        time_elapsed_processing = int(round(self.clock.time() - self.start_time))
-        time_elapsed_processing_real = time_elapsed_processing - pause_duration
-        self._show_message(f"Elapsed time: {time_elapsed_processing} ms")
+        duration_total_exact = self.clock.time() - self.start_time
+        duration_playing_audio_exact = duration_total_exact - pause_duration
+        duration_total = int(round(duration_total_exact))
+        duration_playing_audio = int(round(duration_playing_audio_exact))
+        duration_pause = int(round(pause_duration))
 
-        self._show_message(f"Processed wave playback duration: {playback_duration} ms")
-        self._show_message(f"Current wave playback duration: {time_elapsed_processing_real} ms")
-        self.experiment.var.wait_to_finish = int(round(playback_duration - time_elapsed_processing_real))
+
+        self._show_message(f"Duration total: {duration_total} ms")
+        self._show_message(f"Duration pauses: {duration_pause} ms")
+        self._show_message(f"Duration processing audio: {duration_processing_audio} ms")
+        self._show_message(f"Duration playing audio: {duration_playing_audio} ms")
+        self._show_message(f"Audio file duration: {self.wav_duration} ms")
+
+        self.experiment.var.wait_to_finish = int(round(self.duration - duration_playing_audio))
         if self.experiment.var.wait_to_finish > 0:
             self._show_message(f"Waiting {self.experiment.var.wait_to_finish} ms for audio to finish")
             self.clock.sleep(self.experiment.var.wait_to_finish)
 
-        self._set_stimulus_offset()
+        # self._set_stimulus_offset()
+
         if self.ram_cache == 'no':
             wav_file.close()
         self._show_message('Finished audio playback')
