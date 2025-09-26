@@ -160,8 +160,8 @@ class AudioLowLatencyRecordStart(Item):
                 self.kb.flush()
 
             self._show_message('Initializing audio recording')
-            self.experiment.audio_low_latency_record_locked = 1
             self.experiment.audio_low_latency_record_thread = threading.Thread(target=self._record, args=(self.device, self.wav_file, self.period_size, delay_start, delay_stop))
+            self.experiment.audio_low_latency_record_locked = 1
             self.experiment.audio_low_latency_record_thread.start()
         elif self.dummy_mode == 'yes':
             self._set_stimulus_onset()
