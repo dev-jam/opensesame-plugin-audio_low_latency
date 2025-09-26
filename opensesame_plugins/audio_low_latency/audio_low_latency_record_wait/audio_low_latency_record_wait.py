@@ -41,8 +41,7 @@ class AudioLowLatencyRecordWait(Item):
         if self.dummy_mode == 'no':
             while not self.experiment.audio_low_latency_record_thread_running:
                 self.clock.sleep(POLL_TIME)
-            if self.experiment.audio_low_latency_record_locked:
-                self.experiment.audio_low_latency_record_thread.join()
+            self.experiment.audio_low_latency_record_thread.join()
             self.experiment.audio_low_latency_record_thread_running = 0
         elif self.dummy_mode == 'yes':
             self._show_message('Dummy mode enabled, NOT recording audio')
