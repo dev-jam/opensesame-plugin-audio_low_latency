@@ -19,7 +19,7 @@ controls = [
     }, {
        "type": "combobox",
        "var": "module",
-       "label": "Choose module",
+       "label": "Module",
        "options": [
        ],
        "name": "combobox_module",
@@ -27,7 +27,7 @@ controls = [
     }, {
        "type": "combobox",
        "var": "device_name",
-       "label": "Choose device",
+       "label": "Device",
        "options": [
        ],
        "name": "combobox_device_name",
