@@ -156,7 +156,7 @@ class AudioLowLatencyPlayStart(Item):
                 self.clock.sleep(POLL_TIME)
             if self.delay_check:
                 time_passed = self.clock.time() - _start_time
-                delay = round(self.delay - time_passed, 2)
+                delay = round(self.delay - time_passed, 1)
             else:
                 delay = self.delay
             if self.pause_resume != '' or self.stop != '':
