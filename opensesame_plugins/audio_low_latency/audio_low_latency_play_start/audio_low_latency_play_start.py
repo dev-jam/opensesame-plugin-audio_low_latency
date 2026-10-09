@@ -290,12 +290,12 @@ class AudioLowLatencyPlayStart(Item):
         duration_pause = int(round(pause_duration))
 
         self.experiment.var.wait_to_finish = int(round(self.duration - duration_playing_audio))
-        if self.experiment.var.wait_to_finish > 0:
-            self._show_message(f"Waiting {self.experiment.var.wait_to_finish} ms for audio to finish")
-            if os.name == 'posix':
-                self.clock.sleep(self.experiment.var.wait_to_finish)
-            else:
-                time.sleep(self.experiment.var.wait_to_finish / 1000)
+        # if self.experiment.var.wait_to_finish > 0:
+        #     self._show_message(f"Waiting {self.experiment.var.wait_to_finish} ms for audio to finish")
+        #     if os.name == 'posix':
+        #         self.clock.sleep(self.experiment.var.wait_to_finish)
+        #     else:
+        #         time.sleep(self.experiment.var.wait_to_finish / 1000)
 
         if self.ram_cache == 'no':
             wav_file.close()
