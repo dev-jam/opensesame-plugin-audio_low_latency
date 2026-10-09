@@ -146,7 +146,7 @@ class AudioLowLatencyRecordStart(Item):
                 self._show_message(f"Requested audio recording delay: {self.delay_start} ms")
                 time_passed = self.clock.time() - _start_time
                 self._show_message(f"Time passed: {time_passed} ms")
-                delay_start = self.delay_start - time_passed
+                delay_start = round(self.delay_start - time_passed, 2)
             else:
                 delay_start = self.delay_start
 
