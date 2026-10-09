@@ -181,6 +181,7 @@ class AudioLowLatencyPlayInit(Item):
 
                 device_info = self.device.info()
 
+                reported_bitdepth = device_info['physical_bits']
                 reported_channels = device_info['channels']
                 reported_rate = device_info['rate']
                 reported_format_name = device_info['format_name']
@@ -197,6 +198,8 @@ class AudioLowLatencyPlayInit(Item):
                 # self._show_message(f'Period size: {reported_period_size} frames')
                 # self._show_message(f'Period time: {real_period_time_round}ms\n')
 
+                if reported_bitdepth != self.bitdepth:
+                    error_msg_list.append(f'Bit depth of {self.bitdepth} bit not supported. {reported_bitdepth} bit is recommended.\n')
                 if reported_period_size != self.period_size:
                     error_msg_list.append(f'Period size of {self.period_size} frames not supported. {reported_period_size} frames is recommended.\n')
                 if reported_periods != self.periods:
