@@ -371,10 +371,21 @@ class AudioLowLatencyPlayStart(Item):
         self.channels = self.experiment.audio_low_latency_play_channels
 
         self.filename = self.experiment.pool[self.var.filename]
-        self.pause_resume = self.var.pause_resume
-        self.stop = self.var.stop
         self.ram_cache = self.var.ram_cache
-        self.experiment.audio_low_latency_play_pause_resume_key = self.var.pause_resume
+
+        if self.var.pause_resume != '' and os.name != 'posix':
+            self.pause_resume = ''
+            print("WARNING: pause/resume disabled! These are nonfunctional for the background item under Windows")
+        else:
+            self.pause_resume = self.var.pause_resume
+
+        if self.var.stop != '' and os.name != 'posix':
+            self.stop = ''
+            print("WARNING: stop keys disabled! These are nonfunctional for the background item under Windows")
+        else:
+            self.stop = self.var.stop
+
+        self.experiment.audio_low_latency_play_pause_resume_key = self.pause_resume
         self.experiment.audio_low_latency_play_continue = 1
         self.experiment.audio_low_latency_play_start = True
         self.experiment.audio_low_latency_play_execute_pause = 0
