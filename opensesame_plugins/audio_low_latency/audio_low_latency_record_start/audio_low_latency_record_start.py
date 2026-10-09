@@ -24,6 +24,8 @@ from libqtopensesame.items.qtautoplugin import QtAutoPlugin
 from libopensesame.exceptions import OSException
 from libopensesame.oslogging import oslogger
 from openexp.keyboard import Keyboard
+import os
+import time
 import threading
 import wave
 import numpy
@@ -179,7 +181,10 @@ class AudioLowLatencyRecordStart(Item):
         if self.delay_start_check:
             if delay_start >= 1:
                 self._show_message(f"Delaying audio recording for {delay_start} ms")
-                self.clock.sleep(delay_start)
+                if os.name == 'posix':
+                    self.clock.sleep(delay_start)
+                else:
+                    time.sleep(delay_start / 1000)
                 self._show_message('Delay done')
         self.start_time = self._set_stimulus_onset()
         self._show_message('Starting audio recording')

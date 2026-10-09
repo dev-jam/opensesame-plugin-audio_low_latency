@@ -24,6 +24,8 @@ from libqtopensesame.items.qtautoplugin import QtAutoPlugin
 from libopensesame.exceptions import OSException
 from libopensesame.oslogging import oslogger
 from openexp.keyboard import Keyboard
+import os
+import time
 import threading
 import wave
 
@@ -198,7 +200,10 @@ class AudioLowLatencyPlayStart(Item):
         if self.delay_check:
             if delay >= 1:
                 self._show_message(f"Delaying audio playback for {delay} ms")
-                self.clock.sleep(delay)
+                if os.name == 'posix':
+                    self.clock.sleep(delay)
+                else:
+                    time.sleep(delay / 1000)
                 self._show_message('Delay done')
         self.start_time = self._set_stimulus_onset()
         self._show_message('Starting audio playback')
@@ -287,7 +292,10 @@ class AudioLowLatencyPlayStart(Item):
         self.experiment.var.wait_to_finish = int(round(self.duration - duration_playing_audio))
         if self.experiment.var.wait_to_finish > 0:
             self._show_message(f"Waiting {self.experiment.var.wait_to_finish} ms for audio to finish")
-            self.clock.sleep(self.experiment.var.wait_to_finish)
+            if os.name == 'posix':
+                self.clock.sleep(self.experiment.var.wait_to_finish)
+            else:
+                time.sleep(self.experiment.var.wait_to_finish / 1000)
 
         if self.ram_cache == 'no':
             wav_file.close()
