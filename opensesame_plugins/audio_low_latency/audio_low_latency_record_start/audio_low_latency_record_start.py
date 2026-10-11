@@ -29,7 +29,6 @@ import time
 import threading
 import wave
 import numpy
-import os
 import re
 import os.path
 
@@ -131,6 +130,10 @@ class AudioLowLatencyRecordStart(Item):
             if self.experiment.audio_low_latency_record_module == self.experiment.pyalsaaudio_module_name:
                 self._show_message(f"Buffer consists: {self.periods} periods")
             self._show_message('')
+        elif self.dummy_mode == 'yes':
+            self._show_message('Dummy mode enabled, prepare phase')
+        else:
+            raise OSException('Error with dummy mode!')
 
     def run(self):
         self._check_stop_wait()
@@ -181,10 +184,7 @@ class AudioLowLatencyRecordStart(Item):
         if self.delay_start_check:
             if delay_start >= 1:
                 self._show_message(f"Delaying audio recording for {delay_start} ms")
-                if os.name == 'posix':
-                    self.clock.sleep(delay_start)
-                else:
-                    time.sleep(delay_start / 1000)
+                self._bg_sleep(delay_start)
                 self._show_message('Delay done')
         self.start_time = self._set_stimulus_onset()
         self._show_message('Starting audio recording')
@@ -415,6 +415,11 @@ class AudioLowLatencyRecordStart(Item):
             time = self.clock.time()
         self.experiment.var.set(f"time_stimulus_{_type}_{self.name}", time)
         return time
+
+    def _bg_sleep(self, duration_ms):
+        target_time = time.perf_counter() + (duration_ms / 1000.0)
+        while time.perf_counter() < target_time:
+            time.sleep(0.001)
 
 
 class QtAudioLowLatencyRecordStart(AudioLowLatencyRecordStart, QtAutoPlugin):

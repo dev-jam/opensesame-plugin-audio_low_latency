@@ -140,7 +140,6 @@ class AudioLowLatencyPlayStart(Item):
                 self._show_message('Reading directly from wave file, no cache')
 
         elif self.dummy_mode == 'yes':
-            self._set_stimulus_onset()
             self._show_message('Dummy mode enabled, prepare phase')
         else:
             raise OSException('Error with dummy mode!')
@@ -200,10 +199,7 @@ class AudioLowLatencyPlayStart(Item):
         if self.delay_check:
             if delay >= 1:
                 self._show_message(f"Delaying audio playback for {delay} ms")
-                if os.name == 'posix':
-                    self.clock.sleep(delay)
-                else:
-                    time.sleep(delay / 1000)
+                self._bg_sleep(delay)
                 self._show_message('Delay done')
         self.start_time = self._set_stimulus_onset()
         self._show_message('Starting audio playback')
@@ -292,10 +288,7 @@ class AudioLowLatencyPlayStart(Item):
         self.experiment.var.wait_to_finish = int(round(self.duration - duration_playing_audio))
         # if self.experiment.var.wait_to_finish > 0:
         #     self._show_message(f"Waiting {self.experiment.var.wait_to_finish} ms for audio to finish")
-        #     if os.name == 'posix':
-        #         self.clock.sleep(self.experiment.var.wait_to_finish)
-        #     else:
-        #         time.sleep(self.experiment.var.wait_to_finish / 1000)
+        #     self._bg_sleep(self.experiment.var.wait_to_finish)
 
         if self.ram_cache == 'no':
             wav_file.close()
@@ -426,6 +419,11 @@ class AudioLowLatencyPlayStart(Item):
             time = self.clock.time()
         self.experiment.var.set(f"time_stimulus_{_type}_{self.name}", time)
         return time
+
+    def _bg_sleep(self, duration_ms):
+        target_time = time.perf_counter() + (duration_ms / 1000.0)
+        while time.perf_counter() < target_time:
+            time.sleep(0.001)
 
 
 class QtAudioLowLatencyPlayStart(AudioLowLatencyPlayStart, QtAutoPlugin):
