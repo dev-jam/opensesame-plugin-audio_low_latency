@@ -179,6 +179,7 @@ class AudioLowLatencyRecordStart(Item):
 
         pause_duration = 0
         self.duration_exceeded = False
+        self.experiment.audio_low_latency_record_continue = 1
 
         frames = []
         if self.delay_start_check:

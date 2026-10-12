@@ -187,6 +187,7 @@ class AudioLowLatencyPlayStart(Item):
         pause_duration = 0
 
         self.duration_exceeded = False
+        self.experiment.audio_low_latency_play_continue = 1
 
         if self.ram_cache == 'no':
             data = wav_file.readframes(chunk)
