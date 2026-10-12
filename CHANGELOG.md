@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [11.0.1] - 2026-10-12
+
+- added bg sleep method for sleep outside the main thread
+- set continue variable to 1 at every start
+
 ## [11.0.0] - 2026-10-09
 
 - bg items are now fixed under Windows. Stop, pause and resume keys are disabled under Windows when set and give a warning
@@ -147,7 +152,8 @@ Bug fixes:
 - fixed wav duration bug
 - implemented delay for stopping the audio recording 
 
-[Unreleased]: https://github.com/dev-jam/opensesame-plugin-audio_low_latency/compare/11.0.0...HEAD
+[Unreleased]: https://github.com/dev-jam/opensesame-plugin-audio_low_latency/compare/11.0.1...HEAD
+[11.0.1]: https://github.com/dev-jam/opensesame-plugin-audio_low_latency/compare/11.0.0...11.0.1
 [11.0.0]: https://github.com/dev-jam/opensesame-plugin-audio_low_latency/compare/10.9.1...11.0.0
 [10.9.1]: https://github.com/dev-jam/opensesame-plugin-audio_low_latency/compare/10.9.0...10.9.1
 [10.9.0]: https://github.com/dev-jam/opensesame-plugin-audio_low_latency/compare/10.8.0...10.9.0
