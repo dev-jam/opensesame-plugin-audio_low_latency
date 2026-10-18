@@ -37,6 +37,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - changed: the record pause and resume items set `audio_low_latency_record_execute_pause` to 1 and 0 (was True and False), and the record stop and wait items set `audio_low_latency_record_stop`/`_wait` to True (was 1), as the play items do
 - changed: all "item is missing" messages name the item in backticks
 - removed: the ossaudiodev code (it was not enabled, and Python 3.13 no longer has ossaudiodev) and `experiment.oss4_module_name`
+- changed: the version in the items is read from the installed package (`unknown` when running from a source folder that is not installed)
 
 ## [11.0.1] - 2026-10-12
 
