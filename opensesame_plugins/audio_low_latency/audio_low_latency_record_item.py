@@ -19,7 +19,6 @@ __author__ = "Bob Rosbag"
 __license__ = "GPLv3"
 
 import os
-import re
 import wave
 
 from libopensesame.exceptions import OSException
@@ -197,25 +196,17 @@ class AudioLowLatencyRecordItem(AudioLowLatencyStreamItem):
             self._show_message('Unlocking thread')
         self._set('locked', 0)
 
-    def _generate_suffix(self, path_to_file):
-        pattern = "_[0-9]+$"
+    def _free_filename(self, path_to_file):
+        """Returns path_to_file, or, when that file exists, the first free
+        name with _1, _2, ... before the extension.
+        """
+        if not os.path.exists(path_to_file):
+            return path_to_file
         (filename, ext) = os.path.splitext(path_to_file)
-
-        # Keep increasing suffix number if file with the current suffix already exists
-        filename_exists = True
-        while filename_exists:
-            match = re.search(pattern, filename)
-            if match:
-                no = int(filename[match.start() + 1:]) + 1
-                filename = re.sub(pattern, f"_{no}", filename)
-            else:
-                filename = f"{filename}_1"
-
-            new_filename = f"{filename}{ext}"
-            if not os.path.exists(new_filename):
-                filename_exists = False
-
-        return new_filename
+        number = 1
+        while os.path.exists(f"{filename}_{number}{ext}"):
+            number += 1
+        return f"{filename}_{number}{ext}"
 
     def _build_output_file(self):
         extension = '.wav'
@@ -229,8 +220,7 @@ class AudioLowLatencyRecordItem(AudioLowLatencyStreamItem):
         # Check for a subfolder (when it is specified) that it exists and if not, create it
         if os.path.exists(os.path.dirname(output_file)):
             if self.file_exists_action == 'yes':
-                # Search for underscore/number suffixes
-                output_file = self._generate_suffix(output_file)
+                output_file = self._free_filename(output_file)
         else:
             if os.path.dirname(rel_loc) != "":
                 try:
