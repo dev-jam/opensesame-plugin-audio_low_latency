@@ -15,6 +15,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - changed: the stop, wait, pause and resume items no longer check every 100 ms whether the thread of the start item has started
 - fixed: a paused background playback or recording without pause/resume keys used a full CPU core
 - fixed: after a stop key, the play item waited for the rest of the duration of the sound before going on
+- fixed: 24 bit audio with PyAlsaAudio always failed (since 11.0.0) and played or recorded wrong data before: it now uses the packed format S24_3LE, as in a wave file
+- fixed: PyAudio recording used the default input device instead of the selected device
+- fixed: the init items check the hardware parameters of the selected ALSA device (`DEV=n`); before, they always read those of device 0
+- fixed: init items without PortAudio devices or without the PortAudio library could not be loaded; a module without devices is no longer listed
+- fixed: clear errors for a module or device that is not available (e.g. an experiment made on another computer), a device that can't be opened, an invalid dummy mode, and a bit depth other than 8, 16, 24 or 32; sample rate, channels, period size and periods must be positive
+- fixed: failing to close the audio device is a warning in the log
 
 ## [11.0.1] - 2026-10-12
 
