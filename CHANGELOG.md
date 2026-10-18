@@ -21,6 +21,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - fixed: init items without PortAudio devices or without the PortAudio library could not be loaded; a module without devices is no longer listed
 - fixed: clear errors for a module or device that is not available (e.g. an experiment made on another computer), a device that can't be opened, an invalid dummy mode, and a bit depth other than 8, 16, 24 or 32; sample rate, channels, period size and periods must be positive
 - fixed: failing to close the audio device is a warning in the log
+- fixed: spaces around keys in the pause/resume and stop lists (`a; b`) made those keys never match; a list without keys (`;`) is now an error instead of a crash
+- fixed: an invalid preload/cache setting played or recorded nothing without an error
+- fixed: an empty recording filename saved the recording next to the log folder (`data_1.wav`); now an error
+- fixed: a stop, wait, pause or resume item without any start item gave "An unexpected error occurred"
+- fixed: PyAudio recording failed with "Input overflowed" when the stream had not been read for a while (e.g. between trials)
+- fixed: SoundDevice recording failed when a period was not a multiple of 8 bytes (e.g. 8 bit mono)
+- fixed: with the psycho backend, the key list of the pause/resume and stop keys grew with every key check
+- removed: the numpy dependency (no longer used)
 
 ## [11.0.1] - 2026-10-12
 

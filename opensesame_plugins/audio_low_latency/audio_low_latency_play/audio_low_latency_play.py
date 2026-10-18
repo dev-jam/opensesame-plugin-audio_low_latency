@@ -51,18 +51,18 @@ class AudioLowLatencyPlay(Item):
             self._allowed_responses_pause_resume = []
             for r in safe_decode(self.pause_resume).split(';'):
                 if r.strip() != '':
-                    self._allowed_responses_pause_resume.append(r)
+                    self._allowed_responses_pause_resume.append(r.strip())
             if not self._allowed_responses_pause_resume:
-                self._allowed_responses_pause_resume = None
+                raise OSException('Pause/resume keys should be a semicolon-separated list of keys, e.g. a;b;c')
             self._show_message(f"allowed pause/resume keys set to {self._allowed_responses_pause_resume}")
 
         if self.stop != '':
             self._allowed_responses_stop = []
             for r in safe_decode(self.stop).split(';'):
                 if r.strip() != '':
-                    self._allowed_responses_stop.append(r)
+                    self._allowed_responses_stop.append(r.strip())
             if not self._allowed_responses_stop:
-                self._allowed_responses_stop = None
+                raise OSException('Stop keys should be a semicolon-separated list of keys, e.g. a;b;c')
             self._show_message(f"allowed stop keys set to {self._allowed_responses_stop}")
 
         if isinstance(self.var.delay, int):
@@ -161,7 +161,7 @@ class AudioLowLatencyPlay(Item):
                     _keylist.extend(self._allowed_responses_pause_resume)
                 if self.stop != '':
                     _keylist.extend(self._allowed_responses_stop)
-                self.kb.keylist = _keylist
+                self._keylist = _keylist
                 self.kb.flush()
             self._show_message('Initializing audio playback')
             if self.ram_cache == 'no':
@@ -310,7 +310,9 @@ class AudioLowLatencyPlay(Item):
             self._show_message("\n".join(timestamp_list))
 
     def _check_keys(self):
-        key1, time1 = self.kb.get_key()
+        # Pass the key list on every call: the psycho backend adds 'escape'
+        # to a stored key list each time get_key() is called
+        key1, time1 = self.kb.get_key(keylist=self._keylist)
         self.kb.flush()
         if self.stop != '':
             if key1 in self._allowed_responses_stop:
@@ -361,6 +363,8 @@ class AudioLowLatencyPlay(Item):
         self.pause_resume = self.var.pause_resume
         self.stop = self.var.stop
         self.ram_cache = self.var.ram_cache
+        if self.ram_cache not in ('yes', 'no'):
+            raise OSException(f'Preload should be yes or no, not {self.ram_cache}')
         self.play_continue = 1
         self.play_execute_pause = 0
 

@@ -52,7 +52,7 @@ class AudioLowLatencyPlayWait(Item):
         self.experiment.audio_low_latency_play_wait = True
 
     def _check_play(self):
-        if not self.experiment.audio_low_latency_play_start:
+        if not getattr(self.experiment, 'audio_low_latency_play_start', False):
             raise OSException(
                     '`Audio Low Latency Play Start` item is missing')
 

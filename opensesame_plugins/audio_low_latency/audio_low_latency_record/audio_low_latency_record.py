@@ -25,7 +25,6 @@ from libopensesame.exceptions import OSException
 from libopensesame.oslogging import oslogger
 from openexp.keyboard import Keyboard
 import wave
-import numpy
 import os
 import re
 import os.path
@@ -55,18 +54,18 @@ class AudioLowLatencyRecord(Item):
             self._allowed_responses_pause_resume = []
             for r in safe_decode(self.pause_resume).split(';'):
                 if r.strip() != '':
-                    self._allowed_responses_pause_resume.append(r)
+                    self._allowed_responses_pause_resume.append(r.strip())
             if not self._allowed_responses_pause_resume:
-                self._allowed_responses_pause_resume = None
+                raise OSException('Pause/resume keys should be a semicolon-separated list of keys, e.g. a;b;c')
             self._show_message(f"allowed pause/resume keys set to {self._allowed_responses_pause_resume}")
 
         if self.stop != '':
             self._allowed_responses_stop = []
             for r in safe_decode(self.stop).split(';'):
                 if r.strip() != '':
-                    self._allowed_responses_stop.append(r)
+                    self._allowed_responses_stop.append(r.strip())
             if not self._allowed_responses_stop:
-                self._allowed_responses_stop = None
+                raise OSException('Stop keys should be a semicolon-separated list of keys, e.g. a;b;c')
             self._show_message(f"allowed stop keys set to {self._allowed_responses_stop}")
 
         error_msg = 'Duration must be a string named infinite or a an integer greater than 1'
@@ -156,7 +155,7 @@ class AudioLowLatencyRecord(Item):
                     _keylist.extend(self._allowed_responses_pause_resume)
                 if self.stop != '':
                     _keylist.extend(self._allowed_responses_stop)
-                self.kb.keylist = _keylist
+                self._keylist = _keylist
                 self.kb.flush()
 
             self._show_message('Initializing audio recording')
@@ -244,7 +243,7 @@ class AudioLowLatencyRecord(Item):
 
         wav_file.close()
         self._show_message('Finished audio recording')
-        self._show_message(f"Duration recorded wave file: {self.wav_duration} s")
+        self._show_message(f"Duration recorded wave file: {self.wav_duration} ms")
         self.experiment.audio_low_latency_record_locked = 0
 
     def _init_var(self):
@@ -269,6 +268,8 @@ class AudioLowLatencyRecord(Item):
         self.pause_resume = self.var.pause_resume
         self.stop = self.var.stop
         self.ram_cache = self.var.ram_cache
+        if self.ram_cache not in ('yes', 'no'):
+            raise OSException(f'Cache to RAM should be yes or no, not {self.ram_cache}')
         self.record_continue = 1
         self.record_execute_pause = 0
         self.experiment.var.audio_low_latency_record_key_presses = ''
@@ -303,7 +304,9 @@ class AudioLowLatencyRecord(Item):
     def _build_output_file(self):
         extension = '.wav'
         # Make output location relative to location of experiment
-        rel_loc = os.path.normpath(self.var.filename)
+        if str(self.var.filename).strip() == '':
+            raise OSException('Audio filename is empty')
+        rel_loc = os.path.normpath(str(self.var.filename))
         if self.var.logfile is None:
             raise OSException("Path to log file not found.")
         output_file = f"{os.path.normpath(os.path.join(os.path.dirname(self.var.logfile), rel_loc))}{extension}"
@@ -325,9 +328,13 @@ class AudioLowLatencyRecord(Item):
         if self.module == self.experiment.pyalsaaudio_module_name:
             l, data = stream.read()
         else:
-            data = stream.read(chunk)
+            if self.module == self.experiment.pyaudio_module_name:
+                # PyAudio raises an exception on an overflow by default
+                data = stream.read(chunk, exception_on_overflow=False)
+            else:
+                data = stream.read(chunk)
             if self.module == self.experiment.sounddevice_module_name:
-                data = numpy.frombuffer(data[0])
+                data = bytes(data[0])
 
         # save data to file/ram
         if self.ram_cache == 'yes':
@@ -336,7 +343,9 @@ class AudioLowLatencyRecord(Item):
             wav_file.writeframes(data)
 
     def _check_keys(self):
-        key1, time1 = self.kb.get_key()
+        # Pass the key list on every call: the psycho backend adds 'escape'
+        # to a stored key list each time get_key() is called
+        key1, time1 = self.kb.get_key(keylist=self._keylist)
         self.kb.flush()
         if self.stop != '':
             if key1 in self._allowed_responses_stop:

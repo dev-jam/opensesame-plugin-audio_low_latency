@@ -52,7 +52,7 @@ class AudioLowLatencyRecordWait(Item):
         self.experiment.audio_low_latency_record_wait = 1
 
     def _check_record(self):
-        if not hasattr(self.experiment, "audio_low_latency_record_start"):
+        if not getattr(self.experiment, 'audio_low_latency_record_start', False):
             raise OSException(
                 'Audio Low Latency Record Start item is missing')
 
