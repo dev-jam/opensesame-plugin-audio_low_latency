@@ -287,8 +287,13 @@ class AudioLowLatencyStreamItem(AudioLowLatencyItem):
         else:
             self.clock.sleep(ms)
 
-    def _wait_while_paused(self, stream):
-        """Waits until resumed or stopped; returns the pause duration (ms)."""
+    def _wait_while_paused(self, stream, drop_on_duration=False):
+        """Waits until resumed or stopped; returns the pause duration (ms).
+
+        With drop_on_duration (playback), a pause that lasts until the
+        duration stops the playback without resuming it: ALSA drops the
+        queued audio (self.dropped).
+        """
         self._show_message(f'Paused audio {self._activity}')
         pause_start_time = self.clock.time()
         if self.module == PYALSAAUDIO:
@@ -301,9 +306,15 @@ class AudioLowLatencyStreamItem(AudioLowLatencyItem):
             if self.duration_check:
                 if self._check_duration():
                     break
-        if self.module == PYALSAAUDIO:
-            stream.pause(False)
-        self._show_message(f'Resumed audio {self._activity}')
+        if drop_on_duration and self.duration_exceeded:
+            if self.module == PYALSAAUDIO:
+                stream.drop()
+                self.dropped = True
+            self._show_message(f'Stopped paused audio {self._activity}')
+        else:
+            if self.module == PYALSAAUDIO:
+                stream.pause(False)
+            self._show_message(f'Resumed audio {self._activity}')
         return self.clock.time() - pause_start_time
 
     def _paused(self):

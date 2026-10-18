@@ -39,6 +39,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - removed: the ossaudiodev code (it was not enabled, and Python 3.13 no longer has ossaudiodev) and `experiment.oss4_module_name`
 - changed: the version in the items is read from the installed package (`unknown` when running from a source folder that is not installed)
 - added: pause/resume and stop keys of the background items work under Windows: they read the key state with `GetAsyncKeyState()`, because the OpenSesame keyboard can't be read in a thread there (11.0.0 disabled these keys). Keys: a-z, 0-9, f1-f12 and a few named keys; a press is also seen when the experiment window doesn't have the focus
+- changed: with a fixed duration, playback including pauses no longer exceeds the duration: a period that would end after the duration is not played (the playback ends at most one period early); a pause that lasts until the duration stops the playback without resuming it (before, about one buffer of sound played after the pause); audio queued before a late resume is cut at the duration; and the play item no longer waits afterwards for the pause time (before, it ended at duration + pause). A sound shorter than the duration still waits until the duration, pauses included. A duration shorter than one period is an error
 
 ## [11.0.1] - 2026-10-12
 

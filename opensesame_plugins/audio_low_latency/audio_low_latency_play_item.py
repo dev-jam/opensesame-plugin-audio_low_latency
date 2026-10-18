@@ -106,6 +106,9 @@ class AudioLowLatencyPlayItem(AudioLowLatencyStreamItem):
         elif isinstance(self.var.duration, int) and self.var.duration >= 1:
             self.duration_check = True
             self.duration = self.var.duration
+            # Only whole periods are played within the duration
+            if self.duration < self.period_time:
+                raise OSException('Duration should be larger than period duration')
         else:
             raise OSException(error_msg)
 
@@ -148,8 +151,12 @@ class AudioLowLatencyPlayItem(AudioLowLatencyStreamItem):
         period = 0
         pause_duration = 0
         underruns = 0
+        # When the audio written so far ends (ms after the start)
+        sound_end = 0
+        frame_bytes = self.samplewidth * self.channels
 
         self.duration_exceeded = False
+        self.dropped = False
 
         if self.ram_cache == 'no':
             data = wav_file.readframes(chunk)
@@ -175,7 +182,17 @@ class AudioLowLatencyPlayItem(AudioLowLatencyStreamItem):
 
         while len(data) > 0:
 
+            # Don't write a period that would end after the duration (pauses
+            # included): the playback ends at most one period early
+            chunk_time = len(data) / frame_bytes / self.samplerate * 1000
+            chunk_end = max(sound_end, self.clock.time() - self.start_time) + chunk_time
+            if self.duration_check and chunk_end > self.duration:
+                self._show_message('Stopping audio playback, duration exceeded')
+                self.duration_exceeded = True
+                break
+
             result = stream.write(data)
+            sound_end = chunk_end
             # PyAlsaAudio returns -EPIPE after an underrun: this period was not played
             if self.module == PYALSAAUDIO and result < 0:
                 underruns += 1
@@ -208,18 +225,26 @@ class AudioLowLatencyPlayItem(AudioLowLatencyStreamItem):
             if self._keylist:
                 self._check_keys()
             if self._paused():
-                pause_duration += self._wait_while_paused(stream)
-            if self.duration_check and not self.duration_exceeded:
-                self._check_duration()
+                pause_time = self._wait_while_paused(stream, drop_on_duration=True)
+                pause_duration += pause_time
+                # ALSA keeps the queued audio during a pause, PortAudio plays it
+                if self.module == PYALSAAUDIO:
+                    sound_end += pause_time
             if self._flag('continue') == 0 or self.duration_exceeded:
                 self._show_message('Stopped audio playback')
                 break
 
         duration_processing_audio = int(round(self.clock.time() - self.start_time - pause_duration))
 
-        if self.module == PYALSAAUDIO:
-            stream.drain()
-            self._show_message('Draining ALSA stream')
+        if self.module == PYALSAAUDIO and not self.dropped:
+            if self.duration_check and sound_end > self.duration:
+                # Resumed late: cut the queued audio at the duration
+                self._sleep(self.start_time + self.duration - self.clock.time())
+                stream.drop()
+                self._show_message('Dropped the rest of the ALSA stream at the duration')
+            else:
+                stream.drain()
+                self._show_message('Draining ALSA stream')
 
         self._set_stimulus_offset()
 
@@ -229,10 +254,15 @@ class AudioLowLatencyPlayItem(AudioLowLatencyStreamItem):
         duration_playing_audio = int(round(duration_playing_audio_exact))
         duration_pause = int(round(pause_duration))
 
-        if self._flag('continue') == 0:
-            # Stopped by a key: don't wait for the rest of the duration
+        if self._flag('continue') == 0 or self.duration_exceeded:
+            # Stopped by a key or at the duration: nothing to wait for
             self.experiment.var.wait_to_finish = 0
+        elif self.duration_check:
+            # The sound ended before the duration: wait until the duration,
+            # pauses included, has passed
+            self.experiment.var.wait_to_finish = int(round(self.duration - duration_total_exact))
         else:
+            # Until the end of the sound (PortAudio has no drain)
             self.experiment.var.wait_to_finish = int(round(self.duration - duration_playing_audio))
         # The background item doesn't wait: the next items run meanwhile
         if not self.background and self.experiment.var.wait_to_finish > 0:
