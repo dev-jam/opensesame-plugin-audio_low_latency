@@ -30,6 +30,7 @@ import threading
 import wave
 
 POLL_TIME = 1
+PAUSE_POLL_TIME = 0.001
 TIMESTAMP = 0
 PADDING = True
 
@@ -169,10 +170,14 @@ class AudioLowLatencyPlayStart(Item):
             self._show_message('Initializing audio playback')
 
             if self.ram_cache == 'no':
-                self.experiment.audio_low_latency_play_thread = threading.Thread(target=self._play, args=(self.device, self.wav_file, self.period_size, delay))
+                self.experiment.audio_low_latency_play_thread = threading.Thread(target=self._play_thread, args=(self.device, self.wav_file, self.period_size, delay))
             elif self.ram_cache == 'yes':
-                self.experiment.audio_low_latency_play_thread = threading.Thread(target=self._play, args=(self.device, self.wav_file, self.data_size, delay, self.wav_file_data))
+                self.experiment.audio_low_latency_play_thread = threading.Thread(target=self._play_thread, args=(self.device, self.wav_file, self.data_size, delay, self.wav_file_data))
             self.experiment.audio_low_latency_play_locked = 1
+            self.experiment.audio_low_latency_play_thread_error = None
+            self.experiment.audio_low_latency_play_continue = 1
+            self.experiment.audio_low_latency_play_execute_pause = 0
+            self.experiment.audio_low_latency_play_thread_running = 1
             self.experiment.audio_low_latency_play_thread.start()
         elif self.dummy_mode == 'yes':
             self._set_stimulus_onset()
@@ -180,14 +185,20 @@ class AudioLowLatencyPlayStart(Item):
         else:
             raise OSException('Error with dummy mode!')
 
-    def _play(self, stream, wav_file, chunk, delay, wav_data=None):
-        self.experiment.audio_low_latency_play_thread_running = 1
+    def _play_thread(self, *args):
+        try:
+            self._play(*args)
+        except Exception as e:
+            self._show_message(f'Error in background playback: {e}')
+            self.experiment.audio_low_latency_play_thread_error = e
+        finally:
+            self.experiment.audio_low_latency_play_locked = 0
 
+    def _play(self, stream, wav_file, chunk, delay, wav_data=None):
         period = 0
         pause_duration = 0
 
         self.duration_exceeded = False
-        self.experiment.audio_low_latency_play_continue = 1
 
         if self.ram_cache == 'no':
             data = wav_file.readframes(chunk)
@@ -256,6 +267,8 @@ class AudioLowLatencyPlayStart(Item):
                 while self.experiment.audio_low_latency_play_execute_pause == 1 and self.experiment.audio_low_latency_play_continue == 1:
                     if self.pause_resume != '' or self.stop != '':
                         self._check_keys()
+                    else:
+                        time.sleep(PAUSE_POLL_TIME)
                     if self.duration_check:
                         if self._check_duration():
                             break

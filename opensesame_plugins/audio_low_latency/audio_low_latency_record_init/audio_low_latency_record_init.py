@@ -30,6 +30,8 @@ from libopensesame.exceptions import OSException
 from libopensesame.oslogging import oslogger
 
 MODULES_ENABLED = ['alsaaudio', 'sounddevice', 'pyaudio']
+# Seconds to wait for a background thread to stop at the end of the experiment
+THREAD_STOP_TIMEOUT = 10
 
 
 class AudioLowLatencyRecordInit(Item):
@@ -369,7 +371,21 @@ class AudioLowLatencyRecordInit(Item):
             self._show_message(f'Error with dummy mode, mode is: {self.dummy_mode}')
 
     def close(self):
+        self._stop_thread()
         self._reset_device()
+
+    def _stop_thread(self):
+        # A background recording that is still running (e.g. after an error or
+        # a user abort) uses the device: stop it before closing the device
+        thread = getattr(self.experiment, 'audio_low_latency_record_thread', None)
+        if thread is None or not thread.is_alive():
+            return
+        self._show_message('Stopping background audio recording')
+        self.experiment.audio_low_latency_record_continue = 0
+        self.experiment.audio_low_latency_record_execute_pause = 0
+        thread.join(THREAD_STOP_TIMEOUT)
+        if thread.is_alive():
+            oslogger.warning('background audio recording did not stop')
 
     def _init_var(self):
         self.dummy_mode = self.var.dummy_mode

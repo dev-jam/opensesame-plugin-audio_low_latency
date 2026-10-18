@@ -24,8 +24,6 @@ from libqtopensesame.items.qtautoplugin import QtAutoPlugin
 from libopensesame.exceptions import OSException
 from libopensesame.oslogging import oslogger
 
-POLL_TIME = 100
-
 
 class AudioLowLatencyRecordResume(Item):
 
@@ -40,8 +38,7 @@ class AudioLowLatencyRecordResume(Item):
         self.set_item_onset()
 
         if self.dummy_mode == 'no':
-            while not self.experiment.audio_low_latency_record_thread_running:
-                self.clock.sleep(POLL_TIME)
+            self._check_thread_running()
             self._show_message('Sending resume signal')
             self.experiment.audio_low_latency_record_execute_pause = False
         elif self.dummy_mode == 'yes':
@@ -67,6 +64,11 @@ class AudioLowLatencyRecordResume(Item):
     def _check_pause_resume(self):
         if not self.experiment.audio_low_latency_record_pause_resume_key and not self.experiment.audio_low_latency_record_pause:
             raise OSException('`Audio Low Latency Record Resume` item is missing a resume/pause key or item')
+
+    def _check_thread_running(self):
+        if not self.experiment.audio_low_latency_record_thread_running:
+            raise OSException(
+                '`Audio Low Latency Record Start` did not run before this item')
 
     def _show_message(self, message):
         oslogger.debug(message)

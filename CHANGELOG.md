@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+- fixed: an error in a background playback or recording (e.g. an unplugged device) is raised by the wait or stop item; before, it was only printed, the experiment continued and a later item of the same kind waited forever
+- fixed: a stop, wait, pause or resume item without a running start item (e.g. a skipped start item, or a stop item after a wait item) waited forever; now it is an error
+- fixed: a background playback or recording that still runs at the end of the experiment (after an error or a user abort) is stopped before the audio device is closed
+- fixed: a start item after a pause item without a resume item started paused
+- fixed: the stop signal of a stop item right after a start item could be lost
+- changed: the stop, wait, pause and resume items no longer check every 100 ms whether the thread of the start item has started
+- fixed: a paused background playback or recording without pause/resume keys used a full CPU core
+
 ## [11.0.1] - 2026-10-12
 
 - added bg sleep method for sleep outside the main thread

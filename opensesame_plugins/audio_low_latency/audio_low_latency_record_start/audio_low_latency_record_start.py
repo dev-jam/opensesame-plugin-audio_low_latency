@@ -33,6 +33,7 @@ import re
 import os.path
 
 POLL_TIME = 10
+PAUSE_POLL_TIME = 0.001
 TIMESTAMP = 0
 
 
@@ -165,8 +166,12 @@ class AudioLowLatencyRecordStart(Item):
                 self.kb.flush()
 
             self._show_message('Initializing audio recording')
-            self.experiment.audio_low_latency_record_thread = threading.Thread(target=self._record, args=(self.device, self.wav_file, self.period_size, delay_start, delay_stop))
+            self.experiment.audio_low_latency_record_thread = threading.Thread(target=self._record_thread, args=(self.device, self.wav_file, self.period_size, delay_start, delay_stop))
             self.experiment.audio_low_latency_record_locked = 1
+            self.experiment.audio_low_latency_record_thread_error = None
+            self.experiment.audio_low_latency_record_continue = 1
+            self.experiment.audio_low_latency_record_execute_pause = 0
+            self.experiment.audio_low_latency_record_thread_running = 1
             self.experiment.audio_low_latency_record_thread.start()
         elif self.dummy_mode == 'yes':
             self._set_stimulus_onset()
@@ -174,12 +179,18 @@ class AudioLowLatencyRecordStart(Item):
         else:
             raise OSException('Error with dummy mode!')
 
-    def _record(self, stream, wav_file, chunk, delay_start, delay_stop):
-        self.experiment.audio_low_latency_record_thread_running = 1
+    def _record_thread(self, *args):
+        try:
+            self._record(*args)
+        except Exception as e:
+            self._show_message(f'Error in background recording: {e}')
+            self.experiment.audio_low_latency_record_thread_error = e
+        finally:
+            self.experiment.audio_low_latency_record_locked = 0
 
+    def _record(self, stream, wav_file, chunk, delay_start, delay_stop):
         pause_duration = 0
         self.duration_exceeded = False
-        self.experiment.audio_low_latency_record_continue = 1
 
         frames = []
         if self.delay_start_check:
@@ -207,6 +218,8 @@ class AudioLowLatencyRecordStart(Item):
                 while self.experiment.audio_low_latency_record_execute_pause == 1 and self.experiment.audio_low_latency_record_continue == 1:
                     if self.pause_resume != '' or self.stop != '':
                         self._check_keys()
+                    else:
+                        time.sleep(PAUSE_POLL_TIME)
                     if self.duration_check:
                         if self._check_duration():
                             break

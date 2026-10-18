@@ -24,8 +24,6 @@ from libqtopensesame.items.qtautoplugin import QtAutoPlugin
 from libopensesame.exceptions import OSException
 from libopensesame.oslogging import oslogger
 
-POLL_TIME = 100
-
 
 class AudioLowLatencyPlayStop(Item):
 
@@ -39,12 +37,12 @@ class AudioLowLatencyPlayStop(Item):
         self.set_item_onset()
 
         if self.dummy_mode == 'no':
-            while not self.experiment.audio_low_latency_play_thread_running:
-                self.clock.sleep(POLL_TIME)
+            self._check_thread_running()
             self._show_message('Sending stop signal')
             self.experiment.audio_low_latency_play_continue = 0
             self.experiment.audio_low_latency_play_thread.join()
             self.experiment.audio_low_latency_play_thread_running = 0
+            self._check_thread_error()
         elif self.dummy_mode == 'yes':
             self._show_message('Dummy mode enabled, NOT playing audio')
         else:
@@ -64,6 +62,20 @@ class AudioLowLatencyPlayStop(Item):
         if not hasattr(self.experiment, 'audio_low_latency_play_device'):
             raise OSException(
                 '`Audio Low Latency Play Init` item is missing')
+
+    def _check_thread_running(self):
+        if not self.experiment.audio_low_latency_play_thread_running:
+            raise OSException(
+                '`Audio Low Latency Play Start` did not run before this item')
+
+    def _check_thread_error(self):
+        error = self.experiment.audio_low_latency_play_thread_error
+        if error is not None:
+            self.experiment.audio_low_latency_play_thread_error = None
+            if isinstance(error, OSException):
+                raise error
+            raise OSException(
+                f'Background audio playback failed\n\nMessage: {error}') from error
 
     def _show_message(self, message):
         oslogger.debug(message)
