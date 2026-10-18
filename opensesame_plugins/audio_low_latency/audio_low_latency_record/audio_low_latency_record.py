@@ -170,6 +170,7 @@ class AudioLowLatencyRecord(Item):
     def _record(self, stream, wav_file, chunk, delay_start, delay_stop):
 
         pause_duration = 0
+        self.overruns = 0
         self.duration_exceeded = False
 
         frames = []
@@ -242,6 +243,9 @@ class AudioLowLatencyRecord(Item):
         self.wav_duration = round(float(wav_file_nframes) / float(self.wav_file.getframerate()) * 1000, 1)
 
         wav_file.close()
+        if self.overruns:
+            oslogger.warning(f'{self.overruns} buffer overrun(s) during audio recording: '
+                             'parts of the recording are missing')
         self._show_message('Finished audio recording')
         self._show_message(f"Duration recorded wave file: {self.wav_duration} ms")
         self.experiment.audio_low_latency_record_locked = 0
@@ -327,6 +331,9 @@ class AudioLowLatencyRecord(Item):
         # Read data from device
         if self.module == self.experiment.pyalsaaudio_module_name:
             l, data = stream.read()
+            # A negative length is an overrun: audio data was lost
+            if l < 0:
+                self.overruns += 1
         else:
             if self.module == self.experiment.pyaudio_module_name:
                 # PyAudio raises an exception on an overflow by default

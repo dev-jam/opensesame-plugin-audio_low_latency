@@ -29,6 +29,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - fixed: SoundDevice recording failed when a period was not a multiple of 8 bytes (e.g. 8 bit mono)
 - fixed: with the psycho backend, the key list of the pause/resume and stop keys grew with every key check
 - removed: the numpy dependency (no longer used)
+- added: a warning in the log after ALSA buffer underruns (periods of the sound not played) and overruns (parts of the recording missing); before, they were silent
 
 ## [11.0.1] - 2026-10-12
 

@@ -197,6 +197,7 @@ class AudioLowLatencyPlayStart(Item):
     def _play(self, stream, wav_file, chunk, delay, wav_data=None):
         period = 0
         pause_duration = 0
+        underruns = 0
 
         self.duration_exceeded = False
 
@@ -224,7 +225,10 @@ class AudioLowLatencyPlayStart(Item):
 
         while len(data) > 0:
 
-            stream.write(data)
+            result = stream.write(data)
+            # PyAlsaAudio returns -EPIPE after an underrun: this period was not played
+            if self.experiment.audio_low_latency_play_module == self.experiment.pyalsaaudio_module_name and result < 0:
+                underruns += 1
             period += 1
 
             if TIMESTAMP == 1:
@@ -306,6 +310,9 @@ class AudioLowLatencyPlayStart(Item):
 
         if self.ram_cache == 'no':
             wav_file.close()
+        if underruns:
+            oslogger.warning(f'{underruns} buffer underrun(s) during audio playback: '
+                             f'{underruns} period(s) of the sound were not played')
         self._show_message('Finished audio playback')
         self._show_message(f"Audio file duration: {self.wav_duration} ms")
         self._show_message(f"Duration total: {duration_total} ms")
