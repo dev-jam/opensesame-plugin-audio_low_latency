@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - fixed: init items without PortAudio devices or without the PortAudio library could not be loaded; a module without devices is no longer listed
 - fixed: clear errors for a module or device that is not available (e.g. an experiment made on another computer), a device that can't be opened, an invalid dummy mode, and a bit depth other than 8, 16, 24 or 32; sample rate, channels, period size and periods must be positive
 - fixed: failing to close the audio device is a warning in the log
+- fixed: the description of the record pause item said that it waits until the recording has finished
 - fixed: spaces around keys in the pause/resume and stop lists (`a; b`) made those keys never match; a list without keys (`;`) is now an error instead of a crash
 - fixed: an invalid preload/cache setting played or recorded nothing without an error
 - fixed: an empty recording filename saved the recording next to the log folder (`data_1.wav`); now an error

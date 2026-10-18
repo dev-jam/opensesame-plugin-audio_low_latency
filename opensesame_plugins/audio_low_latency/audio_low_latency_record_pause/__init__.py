@@ -1,4 +1,4 @@
-"""Low Latency Audio - waits until the background audio recording has finished"""
+"""Low Latency Audio - pauses the background audio recording"""
 
 # The category determines the group for the plugin in the item toolbar
 category = "Audio Low Latency Recording"
