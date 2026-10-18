@@ -18,73 +18,15 @@ along with OpenSesame.  If not, see <http://www.gnu.org/licenses/>.
 __author__ = "Bob Rosbag"
 __license__ = "GPLv3"
 
-from libopensesame.py3compat import *
-from libopensesame.item import Item
-from libqtopensesame.items.qtautoplugin import QtAutoPlugin
-from libopensesame.exceptions import OSException
-from libopensesame.oslogging import oslogger
+from ..audio_low_latency_item import AudioLowLatencyControlItem
 
 
-class AudioLowLatencyRecordStop(Item):
+class AudioLowLatencyRecordStop(AudioLowLatencyControlItem):
 
-    def prepare(self):
-        super().prepare()
-        self._check_init()
-        self._init_var()
+    kind = 'record'
+    role = 'stop'
 
-    def run(self):
-        self._check_record()
-        self.set_item_onset()
-
-        if self.dummy_mode == 'no':
-            self._check_thread_running()
-            self._show_message('Sending stop signal')
-            self.experiment.audio_low_latency_record_continue = 0
-            self.experiment.audio_low_latency_record_thread.join()
-            self.experiment.audio_low_latency_record_thread_running = 0
-            self._check_thread_error()
-        elif self.dummy_mode == 'yes':
-            self._show_message('Dummy mode enabled, NOT recording audio')
-        else:
-            self._show_message('Error with dummy mode!')
-
-    def _init_var(self):
-        self.dummy_mode = self.experiment.audio_low_latency_record_dummy_mode
-        self.verbose = self.experiment.audio_low_latency_record_verbose
-        self.experiment.audio_low_latency_record_stop = 1
-
-    def _check_init(self):
-        if not hasattr(self.experiment, 'audio_low_latency_record_device'):
-            raise OSException(
-                '`Audio Low Latency Record Init` item is missing')
-
-    def _check_record(self):
-        if not getattr(self.experiment, 'audio_low_latency_record_start', False):
-            raise OSException(
-                    '`Audio Low Latency Record Start` item is missing')
-
-    def _check_thread_running(self):
-        if not self.experiment.audio_low_latency_record_thread_running:
-            raise OSException(
-                '`Audio Low Latency Record Start` did not run before this item')
-
-    def _check_thread_error(self):
-        error = self.experiment.audio_low_latency_record_thread_error
-        if error is not None:
-            self.experiment.audio_low_latency_record_thread_error = None
-            if isinstance(error, OSException):
-                raise error
-            raise OSException(
-                f'Background audio recording failed\n\nMessage: {error}') from error
-
-    def _show_message(self, message):
-        oslogger.debug(message)
-        if self.verbose == 'yes':
-            print(message)
-
-
-class QtAudioLowLatencyRecordStop(AudioLowLatencyRecordStop, QtAutoPlugin):
-
-    def __init__(self, name, experiment, script=None):
-        AudioLowLatencyRecordStop.__init__(self, name, experiment, script)
-        QtAutoPlugin.__init__(self, __file__)
+    def _control(self):
+        self._show_message('Sending stop signal')
+        self._set('continue', 0)
+        self._join_thread()

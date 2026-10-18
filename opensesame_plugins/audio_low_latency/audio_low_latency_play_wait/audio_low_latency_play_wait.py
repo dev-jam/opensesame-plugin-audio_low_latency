@@ -18,71 +18,13 @@ along with OpenSesame.  If not, see <http://www.gnu.org/licenses/>.
 __author__ = "Bob Rosbag"
 __license__ = "GPLv3"
 
-from libopensesame.py3compat import *
-from libopensesame.item import Item
-from libqtopensesame.items.qtautoplugin import QtAutoPlugin
-from libopensesame.exceptions import OSException
-from libopensesame.oslogging import oslogger
+from ..audio_low_latency_item import AudioLowLatencyControlItem
 
 
-class AudioLowLatencyPlayWait(Item):
+class AudioLowLatencyPlayWait(AudioLowLatencyControlItem):
 
-    def prepare(self):
-        super().prepare()
-        self._check_init()
-        self._init_var()
+    kind = 'play'
+    role = 'wait'
 
-    def run(self):
-        self._check_play()
-        self.set_item_onset()
-
-        if self.dummy_mode == 'no':
-            self._check_thread_running()
-            self.experiment.audio_low_latency_play_thread.join()
-            self.experiment.audio_low_latency_play_thread_running = 0
-            self._check_thread_error()
-        elif self.dummy_mode == 'yes':
-            self._show_message('Dummy mode enabled, NOT playing audio')
-        else:
-            self._show_message('Error with dummy mode!')
-
-    def _init_var(self):
-        self.dummy_mode = self.experiment.audio_low_latency_play_dummy_mode
-        self.verbose = self.experiment.audio_low_latency_play_verbose
-        self.experiment.audio_low_latency_play_wait = True
-
-    def _check_play(self):
-        if not getattr(self.experiment, 'audio_low_latency_play_start', False):
-            raise OSException(
-                    '`Audio Low Latency Play Start` item is missing')
-
-    def _check_init(self):
-        if not hasattr(self.experiment, 'audio_low_latency_play_device'):
-            raise OSException(
-                '`Audio Low Latency Play Init` item is missing')
-
-    def _check_thread_running(self):
-        if not self.experiment.audio_low_latency_play_thread_running:
-            raise OSException(
-                '`Audio Low Latency Play Start` did not run before this item')
-
-    def _check_thread_error(self):
-        error = self.experiment.audio_low_latency_play_thread_error
-        if error is not None:
-            self.experiment.audio_low_latency_play_thread_error = None
-            if isinstance(error, OSException):
-                raise error
-            raise OSException(
-                f'Background audio playback failed\n\nMessage: {error}') from error
-
-    def _show_message(self, message):
-        oslogger.debug(message)
-        if self.verbose == 'yes':
-            print(message)
-
-
-class QtAudioLowLatencyPlayWait(AudioLowLatencyPlayWait, QtAutoPlugin):
-
-    def __init__(self, name, experiment, script=None):
-        AudioLowLatencyPlayWait.__init__(self, name, experiment, script)
-        QtAutoPlugin.__init__(self, __file__)
+    def _control(self):
+        self._join_thread()

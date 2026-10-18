@@ -31,6 +31,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - fixed: with the psycho backend, the key list of the pause/resume and stop keys grew with every key check
 - removed: the numpy dependency (no longer used)
 - added: a warning in the log after ALSA buffer underruns (periods of the sound not played) and overruns (parts of the recording missing); before, they were silent
+- changed: the code shared by the items is in base modules next to the item folders; the items without their own GUI no longer have a GUI class (OpenSesame creates the same one) and don't import Qt
+- changed: the record init item also logs `audio_low_latency_record_period_time` and `audio_low_latency_record_period_time_exact`, as the play init item does
+- changed: the play start item logs `wait_to_finish` as 0 after a stop, as the play item does
+- changed: the record pause and resume items set `audio_low_latency_record_execute_pause` to 1 and 0 (was True and False), and the record stop and wait items set `audio_low_latency_record_stop`/`_wait` to True (was 1), as the play items do
+- changed: all "item is missing" messages name the item in backticks
+- removed: the ossaudiodev code (it was not enabled, and Python 3.13 no longer has ossaudiodev) and `experiment.oss4_module_name`
 
 ## [11.0.1] - 2026-10-12
 
