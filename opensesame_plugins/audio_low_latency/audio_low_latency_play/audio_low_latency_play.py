@@ -278,7 +278,11 @@ class AudioLowLatencyPlay(Item):
         duration_playing_audio = int(round(duration_playing_audio_exact))
         duration_pause = int(round(pause_duration))
 
-        self.experiment.var.wait_to_finish = int(round(self.duration - duration_playing_audio))
+        if self.play_continue == 0:
+            # Stopped by a key: don't wait for the rest of the duration
+            self.experiment.var.wait_to_finish = 0
+        else:
+            self.experiment.var.wait_to_finish = int(round(self.duration - duration_playing_audio))
         if self.experiment.var.wait_to_finish > 0:
             self._show_message(f"Waiting {self.experiment.var.wait_to_finish} ms for audio to finish")
             self.clock.sleep(self.experiment.var.wait_to_finish)

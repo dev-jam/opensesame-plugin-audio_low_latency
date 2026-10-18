@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - fixed: the stop signal of a stop item right after a start item could be lost
 - changed: the stop, wait, pause and resume items no longer check every 100 ms whether the thread of the start item has started
 - fixed: a paused background playback or recording without pause/resume keys used a full CPU core
+- fixed: after a stop key, the play item waited for the rest of the duration of the sound before going on
 
 ## [11.0.1] - 2026-10-12
 
