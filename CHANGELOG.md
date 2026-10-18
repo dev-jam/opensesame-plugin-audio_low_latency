@@ -38,6 +38,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - changed: all "item is missing" messages name the item in backticks
 - removed: the ossaudiodev code (it was not enabled, and Python 3.13 no longer has ossaudiodev) and `experiment.oss4_module_name`
 - changed: the version in the items is read from the installed package (`unknown` when running from a source folder that is not installed)
+- added: pause/resume and stop keys of the background items work under Windows: they read the key state with `GetAsyncKeyState()`, because the OpenSesame keyboard can't be read in a thread there (11.0.0 disabled these keys). Keys: a-z, 0-9, f1-f12 and a few named keys; a press is also seen when the experiment window doesn't have the focus
 
 ## [11.0.1] - 2026-10-12
 

@@ -45,6 +45,8 @@ from libopensesame.exceptions import OSException
 from libopensesame.oslogging import oslogger
 from openexp.keyboard import Keyboard
 
+from .win_keyboard import WinKeyboard
+
 PYALSAAUDIO = 'PyAlsaAudio (Linux only)'
 SOUNDDEVICE = 'SoundDevice (PortAudio)'
 PYAUDIO = 'PyAudio (PortAudio)'
@@ -182,13 +184,6 @@ class AudioLowLatencyStreamItem(AudioLowLatencyItem):
         self.pause_resume = self.var.pause_resume
         self.stop = self.var.stop
         if self.background:
-            # Reading the keyboard in a thread does not work under Windows
-            if self.pause_resume != '' and os.name != 'posix':
-                self.pause_resume = ''
-                print("WARNING: pause/resume disabled! These are nonfunctional for the background item under Windows")
-            if self.stop != '' and os.name != 'posix':
-                self.stop = ''
-                print("WARNING: stop keys disabled! These are nonfunctional for the background item under Windows")
             self._set('pause_resume_key', self.pause_resume)
             self._set('continue', 1)
             self._set('start', True)
@@ -206,6 +201,10 @@ class AudioLowLatencyStreamItem(AudioLowLatencyItem):
         self._allowed_responses_pause_resume = self._parse_keys(self.pause_resume, 'Pause/resume')
         self._allowed_responses_stop = self._parse_keys(self.stop, 'Stop')
         self._keylist = self._allowed_responses_pause_resume + self._allowed_responses_stop
+        # The keyboard can't be read in a thread under Windows
+        self._win_keyboard = None
+        if self.background and os.name == 'nt' and self._keylist:
+            self._win_keyboard = WinKeyboard(self.clock, self._keylist)
 
     def _parse_keys(self, keys, label):
         if keys == '':
@@ -239,7 +238,9 @@ class AudioLowLatencyStreamItem(AudioLowLatencyItem):
             self.clock.sleep(self.lock_poll_time)
 
     def _start_keys(self):
-        if self._keylist:
+        if self._win_keyboard is not None:
+            self._win_keyboard.flush()
+        elif self._keylist:
             self.kb.flush()
 
     # The foreground items keep the stop and pause signals themselves, the
@@ -311,8 +312,11 @@ class AudioLowLatencyStreamItem(AudioLowLatencyItem):
     def _check_keys(self):
         # Pass the key list on every call: the psycho backend adds 'escape'
         # to a stored key list each time get_key() is called
-        key1, time1 = self.kb.get_key(keylist=self._keylist)
-        self.kb.flush()
+        if self._win_keyboard is not None:
+            key1, time1 = self._win_keyboard.get_key()
+        else:
+            key1, time1 = self.kb.get_key(keylist=self._keylist)
+            self.kb.flush()
         if key1 in self._allowed_responses_stop:
             self._show_message('Detected key press for stopping audio')
             self._log_keys(key1, str(time1))
