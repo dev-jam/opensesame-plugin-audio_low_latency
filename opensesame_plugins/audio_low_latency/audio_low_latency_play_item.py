@@ -107,7 +107,7 @@ class AudioLowLatencyPlayItem(AudioLowLatencyStreamItem):
             self.duration_check = True
             self.duration = self.var.duration
             # Only whole periods are played within the duration
-            if self.duration < self.period_time:
+            if self.duration < self.period_time_exact:
                 raise OSException('Duration should be larger than period duration')
         else:
             raise OSException(error_msg)
@@ -165,6 +165,9 @@ class AudioLowLatencyPlayItem(AudioLowLatencyStreamItem):
             data = wav_data[start:start+chunk]
             start += chunk
         data_length = len(data)
+        # The first period fits in the duration (checked in the prepare
+        # phase): it is written right after the onset
+        chunk_end = data_length / frame_bytes / self.samplerate * 1000
         self._show_message(f"Chunk size: {data_length} bytes")
         if self.delay_check:
             if delay >= 1:
@@ -181,15 +184,6 @@ class AudioLowLatencyPlayItem(AudioLowLatencyStreamItem):
             self._show_message(self.clock.time())
 
         while len(data) > 0:
-
-            # Don't write a period that would end after the duration (pauses
-            # included): the playback ends at most one period early
-            chunk_time = len(data) / frame_bytes / self.samplerate * 1000
-            chunk_end = max(sound_end, self.clock.time() - self.start_time) + chunk_time
-            if self.duration_check and chunk_end > self.duration:
-                self._show_message('Stopping audio playback, duration exceeded')
-                self.duration_exceeded = True
-                break
 
             result = stream.write(data)
             sound_end = chunk_end
@@ -230,6 +224,13 @@ class AudioLowLatencyPlayItem(AudioLowLatencyStreamItem):
                 # ALSA keeps the queued audio during a pause, PortAudio plays it
                 if self.module == PYALSAAUDIO:
                     sound_end += pause_time
+            # Don't write a period that would end after the duration (pauses
+            # included): the playback ends at most one period early
+            chunk_end = max(sound_end, self.clock.time() - self.start_time) + \
+                len(data) / frame_bytes / self.samplerate * 1000
+            if self.duration_check and not self.duration_exceeded and chunk_end > self.duration:
+                self._show_message('Stopping audio playback, duration exceeded')
+                self.duration_exceeded = True
             if self._flag('continue') == 0 or self.duration_exceeded:
                 self._show_message('Stopped audio playback')
                 break
