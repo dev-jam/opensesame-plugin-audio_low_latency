@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [12.0.1] - 2026-10-21
 
 - fixed: since 12.0.0, the play items checked the duration between the stimulus onset and the first write of the audio device; the first write follows the onset directly again, as in 11.0.1
 - fixed: a start item reported a stop or wait item as missing when that item was prepared before it, e.g. a stop item after a loop with the start item; and a pause item reported a missing resume item or key when a later start item in the same sequence was prepared after the resume item
@@ -200,7 +200,8 @@ Bug fixes:
 - fixed wav duration bug
 - implemented delay for stopping the audio recording 
 
-[Unreleased]: https://github.com/dev-jam/opensesame-plugin-audio_low_latency/compare/12.0.0...HEAD
+[Unreleased]: https://github.com/dev-jam/opensesame-plugin-audio_low_latency/compare/12.0.1...HEAD
+[12.0.1]: https://github.com/dev-jam/opensesame-plugin-audio_low_latency/compare/12.0.0...12.0.1
 [12.0.0]: https://github.com/dev-jam/opensesame-plugin-audio_low_latency/compare/11.0.1...12.0.0
 [11.0.1]: https://github.com/dev-jam/opensesame-plugin-audio_low_latency/compare/11.0.0...11.0.1
 [11.0.0]: https://github.com/dev-jam/opensesame-plugin-audio_low_latency/compare/10.9.1...11.0.0
