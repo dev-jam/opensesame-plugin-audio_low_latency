@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - fixed: a paused playback or recording with pause/resume or stop keys used a full CPU core (12.0.0 fixed this only without keys)
 - changed: clearer messages: a PyAudio device that can't be opened (e.g. an unsupported number of channels) gives "Could not open audio device" instead of "16bit audio not supported"; the duration errors say that sound/infinite or a positive integer is allowed (they said "greater than 1", but 1 is accepted) and show the value; spelling fixes
 - fixed: in dummy mode, the play items did not check the wave file and the duration: a missing file, a file with another bit depth, sample rate or number of channels than the init item, a period size larger than the file, and an invalid duration only failed outside dummy mode. Now the dummy mode loads the file (and preloads it into RAM) and gives the same errors; `wav_duration` is now also set in dummy mode
+- fixed: a record wait item after a record start item with an infinite duration and no stop key waited forever (also with a record stop item after it); now it is an error, also in dummy mode, unless the recording was already stopped (e.g. an inline script set `audio_low_latency_record_continue` to 0). The record start item stores `audio_low_latency_record_infinite` (0/1)
 
 ## [12.0.0] - 2026-10-18
 

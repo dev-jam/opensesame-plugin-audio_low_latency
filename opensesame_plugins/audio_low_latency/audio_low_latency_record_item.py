@@ -104,6 +104,8 @@ class AudioLowLatencyRecordItem(AudioLowLatencyStreamItem):
             # The pause and resume items check the keys of the start item
             # that ran last, not of the one that was prepared last
             self._set('pause_resume_key', self.pause_resume)
+            # Only a stop item can end it: the wait item checks this
+            self._set('infinite', int(not self.duration_check and not self._allowed_responses_stop))
         self.set_item_onset()
         _start_time = self.clock.time()
 

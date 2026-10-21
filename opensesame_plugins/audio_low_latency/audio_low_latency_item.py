@@ -28,7 +28,8 @@ Inline scripts may use these attributes: keep their names and types.
   thread_running (0/1).
 - Set by the start item: thread, thread_error (exception of the thread, or
   None), continue and execute_pause (0/1), pause_resume_key (the pause/resume
-  keys as entered).
+  keys as entered); the record start item also sets infinite (1 when it
+  records without end: infinite duration and no stop key, else 0).
 - start, stop, wait, pause and resume: True when that item has been prepared,
   so that the items can check that the others exist.
 """
@@ -134,6 +135,8 @@ class AudioLowLatencyControlItem(AudioLowLatencyItem):
         self._check_start()
         if self.role in ('pause', 'resume'):
             self._check_pause_resume()
+        if self.role == 'wait':
+            self._check_wait_ends()
         self.set_item_onset()
 
         if self.dummy_mode == 'no':
@@ -146,6 +149,15 @@ class AudioLowLatencyControlItem(AudioLowLatencyItem):
 
     def _control(self):
         raise NotImplementedError
+
+    def _check_wait_ends(self):
+        # Also in dummy mode. An inline script may have stopped the recording
+        # (continue = 0) before this item.
+        if self._get('infinite', 0) and self._get('continue', 1) == 1:
+            raise OSException(
+                f'`Audio Low Latency {self._title} Wait` would wait forever: the duration of '
+                f'`Audio Low Latency {self._title} Start` is infinite and it has no stop key. '
+                f'Use a stop key or an `Audio Low Latency {self._title} Stop` item instead')
 
     def _check_pause_resume(self):
         other = 'resume' if self.role == 'pause' else 'pause'
