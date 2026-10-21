@@ -66,7 +66,7 @@ class AudioLowLatencyPlayItem(AudioLowLatencyStreamItem):
             self._show_message('\n')
             self._show_message(f"Loading sound file: {self.filename} ...")
             self.wav_file = wave.open(self.filename, 'rb')
-            self._show_message('Succesfully loaded sound file...')
+            self._show_message('Successfully loaded sound file...')
         except Exception as e:
             raise OSException(f"Could not load audio file\n\nMessage: {e}")
 
@@ -99,7 +99,6 @@ class AudioLowLatencyPlayItem(AudioLowLatencyStreamItem):
             self._show_message(f"Number of buffers to be played: {n_buffers} buffers")
         self._show_message('')
 
-        error_msg = 'Duration must be a string named sound or a an integer greater than 1'
         if self.var.duration == 'sound':
             self.duration_check = False
             self.duration = self.wav_duration
@@ -110,7 +109,8 @@ class AudioLowLatencyPlayItem(AudioLowLatencyStreamItem):
             if self.duration < self.period_time_exact:
                 raise OSException('Duration should be larger than period duration')
         else:
-            raise OSException(error_msg)
+            raise OSException(
+                f'Duration should be sound or a positive integer (ms), not {self.var.duration}')
 
         if self.ram_cache == 'yes':
             self._show_message('Loading wave file into cache...')

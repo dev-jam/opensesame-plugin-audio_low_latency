@@ -118,7 +118,7 @@ class AudioLowLatencyInitItem(AudioLowLatencyItem):
         self._init_var()
 
         if self.dummy_mode == 'no':
-            self._show_message(f'\nChoosen {self._activity} parameters:\n')
+            self._show_message(f'\nChosen {self._activity} parameters:\n')
             self._show_message(f'Module: {self.module}')
             self._show_message(f'Device: {self.device_name}')
             self._show_message(f'Bitdepth: {self.bitdepth}bit')
@@ -244,10 +244,11 @@ class AudioLowLatencyInitItem(AudioLowLatencyItem):
 
     def _open_pyaudio(self):
         import pyaudio
-        self.device_init = pyaudio.PyAudio()
 
+        # Sample width 4 is float32 in PyAudio
         if self.bitdepth == 32:
-            raise OSException(f'{self.bitdepth}bit audio not supported\n')
+            raise OSException(f'{self.bitdepth} bit audio is not supported by PyAudio')
+        self.device_init = pyaudio.PyAudio()
         try:
             if self.kind == 'play':
                 direction = dict(output=True, output_device_index=self.device_index)
@@ -260,7 +261,9 @@ class AudioLowLatencyInitItem(AudioLowLatencyItem):
                                                 **direction)
             self._show_message("Audio device opened")
         except Exception as e:
-            raise OSException(f'{self.bitdepth}bit audio not supported\n\nMessage: {e}')
+            self.device_init.terminate()
+            del self.device_init
+            raise OSException(f'Could not open audio device {self.device_name}\n\nMessage: {e}')
 
         if self.kind == 'play':
             self._show_message(f'Estimated output latency: {self.device.get_output_latency()}ms ')

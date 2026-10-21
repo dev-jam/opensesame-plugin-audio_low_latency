@@ -221,7 +221,7 @@ class AudioLowLatencyStreamItem(AudioLowLatencyItem):
     def _check_delay(self, name, label):
         value = getattr(self.var, name)
         if not isinstance(value, int):
-            raise OSException(f'{label} should be a integer')
+            raise OSException(f'{label} should be an integer')
         if value < 0:
             raise OSException(f'{label} can not be negative')
         return value

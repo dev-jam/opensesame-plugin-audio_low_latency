@@ -55,7 +55,6 @@ class AudioLowLatencyRecordItem(AudioLowLatencyStreamItem):
         self._check_ram_cache('Cache to RAM')
         self._init_keys()
 
-        error_msg = 'Duration must be a string named infinite or a an integer greater than 1'
         if self.var.duration == 'infinite':
             # The background item can be stopped by a stop item
             if not self.background and not self._allowed_responses_stop:
@@ -70,7 +69,8 @@ class AudioLowLatencyRecordItem(AudioLowLatencyStreamItem):
                 raise OSException(
                     'Duration should be larger than period duration')
         else:
-            raise OSException(error_msg)
+            raise OSException(
+                f'Duration should be infinite or a positive integer (ms), not {self.var.duration}')
 
         self.delay_start = self._check_delay('delay_start', 'Start delay')
         self.delay_start_check = self.delay_start > 0
@@ -81,7 +81,7 @@ class AudioLowLatencyRecordItem(AudioLowLatencyStreamItem):
                 self._show_message('\n')
                 self._show_message(f"Creating wave file: {self.filename} ...")
                 self.wav_file = wave.open(self.filename, 'wb')
-                self._show_message('Succesfully created wave file...')
+                self._show_message('Successfully created wave file...')
             except Exception as e:
                 raise OSException(f"Could not create wave file\n\nMessage: {e}")
 
