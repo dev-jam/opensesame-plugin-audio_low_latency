@@ -294,6 +294,10 @@ class AudioLowLatencyStreamItem(AudioLowLatencyItem):
             self._set('locked', 0)
 
     def _sleep(self, ms):
+        # The cut at the duration after a late resume can ask for a negative
+        # time; whether every backend's clock.sleep() accepts that is not known
+        if ms <= 0:
+            return
         if self.background:
             # clock.sleep() needs pyglet.app in the thread under Windows
             target_time = time.perf_counter() + (ms / 1000.0)

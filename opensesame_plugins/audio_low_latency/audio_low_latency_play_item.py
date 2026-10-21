@@ -60,8 +60,6 @@ class AudioLowLatencyPlayItem(AudioLowLatencyStreamItem):
             if self.ram_cache == 'no':
                 # Nothing is played from it
                 self.wav_file.close()
-            if not self.background:
-                self._set_stimulus_onset()
             self._show_message('Dummy mode enabled, prepare phase')
 
     def _load_file(self):
