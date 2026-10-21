@@ -341,8 +341,9 @@ class AudioLowLatencyStreamItem(AudioLowLatencyItem):
         if self._win_keyboard is not None:
             key1, time1 = self._win_keyboard.get_key()
         else:
+            # No flush() afterwards: it would discard a key pressed after
+            # get_key() looked at the queue
             key1, time1 = self.kb.get_key(keylist=self._keylist)
-            self.kb.flush()
         if key1 in self._allowed_responses_stop:
             self._show_message('Detected key press for stopping audio')
             self._log_keys(key1, str(time1))
