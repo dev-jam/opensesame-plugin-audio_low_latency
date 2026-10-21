@@ -91,6 +91,17 @@ class AudioLowLatencyItem(Item):
         if self.verbose == 'yes':
             print(message)
 
+    def _join_thread(self):
+        self._get('thread').join()
+        self._set('thread_running', 0)
+        error = self._get('thread_error')
+        if error is not None:
+            self._set('thread_error', None)
+            if isinstance(error, OSException):
+                raise error
+            raise OSException(
+                f'Background audio {self._activity} failed\n\nMessage: {error}') from error
+
     def _set_stimulus_onset(self, time=None):
         if time is None:
             time = self.clock.time()
@@ -141,17 +152,6 @@ class AudioLowLatencyControlItem(AudioLowLatencyItem):
         if not self._get('pause_resume_key') and not self._get(other):
             raise OSException(f'`Audio Low Latency {self._title} {self.role.capitalize()}` '
                               'item is missing a resume/pause key or item')
-
-    def _join_thread(self):
-        self._get('thread').join()
-        self._set('thread_running', 0)
-        error = self._get('thread_error')
-        if error is not None:
-            self._set('thread_error', None)
-            if isinstance(error, OSException):
-                raise error
-            raise OSException(
-                f'Background audio {self._activity} failed\n\nMessage: {error}') from error
 
 
 class AudioLowLatencyStreamItem(AudioLowLatencyItem):
@@ -263,6 +263,10 @@ class AudioLowLatencyStreamItem(AudioLowLatencyItem):
             self._flags[name] = value
 
     def _start_thread(self, target, args):
+        if self._get('thread_running'):
+            # The previous thread was not joined by a wait or stop item (it
+            # has ended, the device is unlocked): raise its error
+            self._join_thread()
         thread = threading.Thread(target=self._run_thread, args=(target,) + args)
         self._set('thread', thread)
         self._set('locked', 1)
@@ -279,7 +283,10 @@ class AudioLowLatencyStreamItem(AudioLowLatencyItem):
             target(*args)
         except Exception as e:
             self._show_message(f'Error in background {self._activity}: {e}')
-            self._set('thread_error', e)
+            # Not when the experiment is ending: the display (and with it the
+            # keyboard) is closed before the cleanup stops this thread
+            if self.experiment.running:
+                self._set('thread_error', e)
         finally:
             # Only here, at the very end: a next start item starts its thread
             # as soon as it sees the unlock

@@ -308,14 +308,19 @@ class AudioLowLatencyInitItem(Item):
         # an error or a user abort) uses the device: stop it before closing
         # the device
         thread = self._get('thread', None)
-        if thread is None or not thread.is_alive():
+        if thread is None:
             return
-        self._show_message(f'Stopping background audio {self._activity}')
-        self._set('continue', 0)
-        self._set('execute_pause', 0)
-        thread.join(THREAD_STOP_TIMEOUT)
         if thread.is_alive():
-            oslogger.warning(f'background audio {self._activity} did not stop')
+            self._show_message(f'Stopping background audio {self._activity}')
+            self._set('continue', 0)
+            self._set('execute_pause', 0)
+            thread.join(THREAD_STOP_TIMEOUT)
+            if thread.is_alive():
+                oslogger.warning(f'background audio {self._activity} did not stop')
+        # An error that no wait or stop item has raised (e.g. it was skipped)
+        error = self._get('thread_error', None)
+        if error is not None:
+            oslogger.warning(f'background audio {self._activity} failed: {error}')
 
     def _init_var(self):
         self.dummy_mode = self.var.dummy_mode
