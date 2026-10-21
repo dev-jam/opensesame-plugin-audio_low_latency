@@ -9,9 +9,9 @@ Copyright, 2022, Bob Rosbag
 ## About
 
 The main goal of this plug-in is to play and record audio with minimal and predictable latencies to achieve a high accuracy and precision. The 'PyAlsaAudio' package which uses the Linux ALSA audio system provided the best results within Python. 
-'PortAudio' and 'sounddevice' are cross-platform and work on both Windows as Linux.
+'PortAudio' and 'sounddevice' are cross-platform and work on both Windows and Linux.
 
-This plug-in consist of playback and recording items as well as foreground as background (multi-threaded) items.
+This plug-in consists of playback and recording items as well as foreground and background (multi-threaded) items.
 Both playback and recording have their own *init* item. These should be placed at the beginning of an experiment.
 
 
@@ -39,7 +39,7 @@ Background:
 
 Seven items for recording:
 
-- **Record Init** initialization of the playback audio device, this should be placed at the beginning of an experiment.
+- **Record Init** initialization of the recording audio device, this should be placed at the beginning of an experiment.
 
 Foreground:
 - **Record** starts the recording of audio, it will record for the set duration before continuing to the next item in the experiment.
@@ -53,7 +53,7 @@ Background:
 - **Record Resume** resumes recording of audio.
 
 
-Timestamps can be found in the log file by the name: time_stimulus_onset_[item_name]
+Timestamps can be found in the log file by the names: time_stimulus_onset_[item_name] and time_stimulus_offset_[item_name]
 
 
 Known bugs:
