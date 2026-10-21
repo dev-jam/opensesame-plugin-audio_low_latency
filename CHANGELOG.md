@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - fixed: since 12.0.0, the play items checked the duration between the stimulus onset and the first write of the audio device; the first write follows the onset directly again, as in 11.0.1
 - fixed: a start item reported a stop or wait item as missing when that item was prepared before it, e.g. a stop item after a loop with the start item; and a pause item reported a missing resume item or key when a later start item in the same sequence was prepared after the resume item
+- fixed: while an item waited for a background playback or recording of the same kind to end, it held up that playback or recording with the legacy backend, which caused underruns with small buffers (e.g. 2 periods of 128 frames); it also unlocked the device just before its thread ended, so in rare cases two later items could play or record at the same time
 
 ## [12.0.0] - 2026-10-18
 

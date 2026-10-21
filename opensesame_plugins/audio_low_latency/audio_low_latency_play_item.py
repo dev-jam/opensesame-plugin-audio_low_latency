@@ -293,7 +293,3 @@ class AudioLowLatencyPlayItem(AudioLowLatencyStreamItem):
 
         if TIMESTAMP == 1:
             self._show_message("\n".join(timestamp_list))
-
-        if self.background:
-            self._show_message('Unlocking thread')
-            self._set('locked', 0)

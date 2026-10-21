@@ -237,8 +237,10 @@ class AudioLowLatencyStreamItem(AudioLowLatencyItem):
                               f'`Audio Low Latency {self._title} Wait` item is missing')
 
     def _wait_until_unlocked(self):
+        # Not clock.sleep(): the legacy backend's pygame.time.delay() holds
+        # up the thread that is playing or recording
         while self._get('locked'):
-            self.clock.sleep(self.lock_poll_time)
+            time.sleep(self.lock_poll_time / 1000)
 
     def _start_keys(self):
         if self._win_keyboard is not None:
@@ -279,6 +281,9 @@ class AudioLowLatencyStreamItem(AudioLowLatencyItem):
             self._show_message(f'Error in background {self._activity}: {e}')
             self._set('thread_error', e)
         finally:
+            # Only here, at the very end: a next start item starts its thread
+            # as soon as it sees the unlock
+            self._show_message('Unlocking thread')
             self._set('locked', 0)
 
     def _sleep(self, ms):

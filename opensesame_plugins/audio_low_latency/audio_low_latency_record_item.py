@@ -195,9 +195,6 @@ class AudioLowLatencyRecordItem(AudioLowLatencyStreamItem):
                              'parts of the recording are missing')
         self._show_message('Finished audio recording')
         self._show_message(f"Duration recorded wave file: {self.wav_duration} ms")
-        if self.background:
-            self._show_message('Unlocking thread')
-        self._set('locked', 0)
 
     def _free_filename(self, path_to_file):
         """Returns path_to_file, or, when that file exists, the first free
