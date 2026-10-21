@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - fixed: an error in a background playback or recording was lost when the next start item came before a wait or stop item; that start item now raises it. An error that no wait or stop item raised (e.g. it was skipped) is a warning in the log at the end
 - changed: an error in a background thread while the experiment ends (e.g. the closed keyboard after an error or a user abort) is no longer stored in `audio_low_latency_<play|record>_thread_error`
 - fixed: a pause/resume or stop key could be lost, most often a resume key during a pause (then the playback or recording stayed paused and a wait item waited forever; 5 of 36 test runs with the legacy backend); the items no longer flush the keyboard after each key check. As a result, other events during the playback or recording (e.g. mouse clicks, and with the psycho backend other keys) are no longer discarded: a later response item with flush disabled sees them
+- fixed: a paused playback or recording with pause/resume or stop keys used a full CPU core (12.0.0 fixed this only without keys)
 
 ## [12.0.0] - 2026-10-18
 

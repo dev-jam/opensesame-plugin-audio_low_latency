@@ -54,8 +54,10 @@ PYAUDIO = 'PyAudio (PortAudio)'
 # Debug tool: 1 prints the time of every period at the end, 2 prints it
 # right away
 TIMESTAMP = 0
-# Seconds between two checks of a paused playback or recording without keys
+# Seconds between two checks of a paused playback or recording
 PAUSE_POLL_TIME = 0.001
+# ms that a key check waits for a key during playback or recording
+KEY_TIMEOUT = 1
 
 
 class AudioLowLatencyItem(Item):
@@ -200,7 +202,7 @@ class AudioLowLatencyStreamItem(AudioLowLatencyItem):
         self.experiment.var.set(f'{self._key_log}_key_presses', '')
         self.experiment.var.set(f'{self._key_log}_key_timestamps', '')
 
-        self.kb = Keyboard(self.experiment, timeout=1)
+        self.kb = Keyboard(self.experiment, timeout=KEY_TIMEOUT)
         self._allowed_responses_pause_resume = self._parse_keys(self.pause_resume, 'Pause/resume')
         self._allowed_responses_stop = self._parse_keys(self.stop, 'Stop')
         self._keylist = self._allowed_responses_pause_resume + self._allowed_responses_stop
@@ -315,8 +317,10 @@ class AudioLowLatencyStreamItem(AudioLowLatencyItem):
             stream.pause(True)
         while self._paused():
             if self._keylist:
-                self._check_keys()
-            else:
+                # get_key() with a timeout busy-waits (legacy backend)
+                self._check_keys(timeout=0)
+            # The Windows key reader sleeps itself
+            if self._win_keyboard is None:
                 time.sleep(PAUSE_POLL_TIME)
             if self.duration_check:
                 if self._check_duration():
@@ -335,7 +339,7 @@ class AudioLowLatencyStreamItem(AudioLowLatencyItem):
     def _paused(self):
         return self._flag('execute_pause') == 1 and self._flag('continue') == 1
 
-    def _check_keys(self):
+    def _check_keys(self, timeout=KEY_TIMEOUT):
         # Pass the key list on every call: the psycho backend adds 'escape'
         # to a stored key list each time get_key() is called
         if self._win_keyboard is not None:
@@ -343,7 +347,7 @@ class AudioLowLatencyStreamItem(AudioLowLatencyItem):
         else:
             # No flush() afterwards: it would discard a key pressed after
             # get_key() looked at the queue
-            key1, time1 = self.kb.get_key(keylist=self._keylist)
+            key1, time1 = self.kb.get_key(keylist=self._keylist, timeout=timeout)
         if key1 in self._allowed_responses_stop:
             self._show_message('Detected key press for stopping audio')
             self._log_keys(key1, str(time1))
