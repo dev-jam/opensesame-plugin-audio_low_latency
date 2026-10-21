@@ -123,6 +123,9 @@ class AudioLowLatencyPlayItem(AudioLowLatencyStreamItem):
     def run(self):
         if self.background:
             self._check_stop_wait()
+            # The pause and resume items check the keys of the start item
+            # that ran last, not of the one that was prepared last
+            self._set('pause_resume_key', self.pause_resume)
         self.set_item_onset()
         _start_time = self.clock.time()
 

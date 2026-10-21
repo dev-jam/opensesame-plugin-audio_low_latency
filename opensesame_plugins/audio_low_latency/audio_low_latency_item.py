@@ -188,8 +188,11 @@ class AudioLowLatencyStreamItem(AudioLowLatencyItem):
             self._set('continue', 1)
             self._set('start', True)
             self._set('execute_pause', 0)
+            # Not reset when already set: these items may have been prepared
+            # before this one (e.g. after a later start item, or outside a loop)
             for role in ('stop', 'wait', 'pause', 'resume'):
-                self._set(role, False)
+                if not self._get(role, False):
+                    self._set(role, False)
             self._key_log = f'audio_low_latency_{self.kind}_start'
         else:
             self._key_log = f'audio_low_latency_{self.kind}'
