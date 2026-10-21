@@ -54,9 +54,12 @@ class AudioLowLatencyPlayItem(AudioLowLatencyStreamItem):
         self.delay = self._check_delay('delay', 'Delay')
         self.delay_check = self.delay > 0
 
-        if self.dummy_mode == 'no':
-            self._load_file()
-        else:
+        # Also in dummy mode, so that a dummy test fails like the lab would
+        self._load_file()
+        if self.dummy_mode == 'yes':
+            if self.ram_cache == 'no':
+                # Nothing is played from it
+                self.wav_file.close()
             if not self.background:
                 self._set_stimulus_onset()
             self._show_message('Dummy mode enabled, prepare phase')

@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - fixed: a pause/resume or stop key could be lost, most often a resume key during a pause (then the playback or recording stayed paused and a wait item waited forever; 5 of 36 test runs with the legacy backend); the items no longer flush the keyboard after each key check. As a result, other events during the playback or recording (e.g. mouse clicks, and with the psycho backend other keys) are no longer discarded: a later response item with flush disabled sees them
 - fixed: a paused playback or recording with pause/resume or stop keys used a full CPU core (12.0.0 fixed this only without keys)
 - changed: clearer messages: a PyAudio device that can't be opened (e.g. an unsupported number of channels) gives "Could not open audio device" instead of "16bit audio not supported"; the duration errors say that sound/infinite or a positive integer is allowed (they said "greater than 1", but 1 is accepted) and show the value; spelling fixes
+- fixed: in dummy mode, the play items did not check the wave file and the duration: a missing file, a file with another bit depth, sample rate or number of channels than the init item, a period size larger than the file, and an invalid duration only failed outside dummy mode. Now the dummy mode loads the file (and preloads it into RAM) and gives the same errors; `wav_duration` is now also set in dummy mode
 
 ## [12.0.0] - 2026-10-18
 
