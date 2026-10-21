@@ -61,7 +61,7 @@ KEY_TIMEOUT = 1
 
 
 class AudioLowLatencyItem(Item):
-    """Base class of all items except the init items."""
+    """Base class of all items."""
 
     # 'play' or 'record'
     kind = None
@@ -104,17 +104,15 @@ class AudioLowLatencyItem(Item):
             raise OSException(
                 f'Background audio {self._activity} failed\n\nMessage: {error}') from error
 
-    def _set_stimulus_onset(self, time=None):
-        if time is None:
-            time = self.clock.time()
-        self.experiment.var.set(f"time_stimulus_onset_{self.name}", time)
-        return time
+    def _set_stimulus_onset(self):
+        timestamp = self.clock.time()
+        self.experiment.var.set(f"time_stimulus_onset_{self.name}", timestamp)
+        return timestamp
 
-    def _set_stimulus_offset(self, time=None):
-        if time is None:
-            time = self.clock.time()
-        self.experiment.var.set(f"time_stimulus_offset_{self.name}", time)
-        return time
+    def _set_stimulus_offset(self):
+        timestamp = self.clock.time()
+        self.experiment.var.set(f"time_stimulus_offset_{self.name}", timestamp)
+        return timestamp
 
 
 class AudioLowLatencyControlItem(AudioLowLatencyItem):

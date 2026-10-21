@@ -23,11 +23,10 @@ import re
 
 import pygame
 
-from libopensesame.item import Item
 from libopensesame.exceptions import OSException
 from libopensesame.oslogging import oslogger
 
-from .audio_low_latency_item import PYALSAAUDIO, PYAUDIO, SOUNDDEVICE
+from .audio_low_latency_item import AudioLowLatencyItem, PYALSAAUDIO, PYAUDIO, SOUNDDEVICE
 
 MODULES_ENABLED = ['alsaaudio', 'sounddevice', 'pyaudio']
 # Seconds to wait for a background thread to stop at the end of the experiment
@@ -35,24 +34,11 @@ THREAD_STOP_TIMEOUT = 10
 SOUNDDEVICE_FORMATS = {8: 'uint8', 16: 'int16', 24: 'int24', 32: 'int32'}
 
 
-class AudioLowLatencyInitItem(Item):
+class AudioLowLatencyInitItem(AudioLowLatencyItem):
     """Base class of the play init and record init items: opens the audio
     device and stores the settings on the experiment (see
     audio_low_latency_item.py).
     """
-
-    # 'play' or 'record'
-    kind = None
-
-    @property
-    def _activity(self):
-        return 'playback' if self.kind == 'play' else 'recording'
-
-    def _get(self, name, *default):
-        return getattr(self.experiment, f'audio_low_latency_{self.kind}_{name}', *default)
-
-    def _set(self, name, value):
-        setattr(self.experiment, f'audio_low_latency_{self.kind}_{name}', value)
 
     def _set_var(self, name, value):
         self.experiment.var.set(f'audio_low_latency_{self.kind}_{name}', value)
@@ -91,7 +77,7 @@ class AudioLowLatencyInitItem(Item):
                 self._get('device_dict')[module] = devices[module]
                 self._get('device_selected_dict')[module] = devices[module][0]
 
-        self._show_message(f'Audio Low Latency {"Play" if self.kind == "play" else "Record"} plug-in has been initialized!')
+        self._show_message(f'Audio Low Latency {self._title} plug-in has been initialized!')
 
         module_list = self._get('module_list')
         self.var.module = module_list[0] if module_list else ''
@@ -411,8 +397,3 @@ class AudioLowLatencyInitItem(Item):
             self._show_message("Audio device closed")
         except Exception as e:
             oslogger.warning(f'failed to close audio device: {e}')
-
-    def _show_message(self, message):
-        oslogger.debug(message)
-        if self.verbose == 'yes':
-            print(message)
