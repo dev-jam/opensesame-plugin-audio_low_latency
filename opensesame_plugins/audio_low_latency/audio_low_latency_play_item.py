@@ -218,7 +218,8 @@ class AudioLowLatencyPlayItem(AudioLowLatencyStreamItem):
             if PADDING and data_length < self.data_size:
                 self._show_message('Padding last period with silence')
                 padding = self.data_size - data_length
-                data = data + b'\x00' * padding
+                # 8 bit wave data is unsigned: silence is 0x80
+                data = data + (b'\x80' if self.samplewidth == 1 else b'\x00') * padding
 
             if self._keylist:
                 self._check_keys()
