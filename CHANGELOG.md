@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 
 - fixed: since 10.9.0, an 8 bit sound that is not a whole number of periods long ended with a click: the last period was filled with 0x00, the most negative value of unsigned 8 bit audio, instead of silence (0x80)
+- readme: list the variables that the items write to the log file
 
 ## [12.0.1] - 2026-10-21
 

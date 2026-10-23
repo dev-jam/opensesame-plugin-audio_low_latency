@@ -32,6 +32,19 @@ Inline scripts may use these attributes: keep their names and types.
   records without end: infinite duration and no stop key, else 0).
 - start, stop, wait, pause and resume: True when that item has been prepared,
   so that the items can check that the others exist.
+
+Variables for the log file (experiment.var), also for inline scripts:
+- Set by the init item: audio_low_latency_<kind>_<name> with name module,
+  device_name, period_size, period_time, period_time_exact, bitdepth,
+  samplewidth, samplerate and channels, for PyAlsaAudio also buffer_size,
+  periods and buffer_time (_set_var() in audio_low_latency_init_item.py).
+- Set by the play, record and start items: time_stimulus_onset_<item name>
+  and time_stimulus_offset_<item name> (not in dummy mode);
+  audio_low_latency_<kind>_key_presses and _key_timestamps, for the start
+  items audio_low_latency_<kind>_start_key_presses and _key_timestamps (keys
+  and times separated by ';').
+- Set by the play and play start items: wav_duration (ms) and
+  wait_to_finish (ms, not in dummy mode); one variable for all these items.
 """
 
 __author__ = "Bob Rosbag"

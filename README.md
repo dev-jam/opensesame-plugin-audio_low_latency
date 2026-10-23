@@ -53,7 +53,12 @@ Background:
 - **Record Resume** resumes recording of audio.
 
 
-Timestamps can be found in the log file by the names: time_stimulus_onset_[item_name] and time_stimulus_offset_[item_name]
+Variables in the log file ([kind] is play or record):
+
+- Init items: audio_low_latency_[kind]_module, _device_name, _period_size, _period_time, _period_time_exact, _bitdepth, _samplewidth, _samplerate and _channels; with PyAlsaAudio also _buffer_size, _periods and _buffer_time.
+- Play, record and start items: the timestamps time_stimulus_onset_[item_name] and time_stimulus_offset_[item_name] (no offset in dummy mode).
+- Keys: audio_low_latency_[kind]_key_presses and audio_low_latency_[kind]_key_timestamps (play and record items), audio_low_latency_[kind]_start_key_presses and audio_low_latency_[kind]_start_key_timestamps (start items), separated by ';'.
+- Play and play start items: wav_duration and wait_to_finish (in ms; wait_to_finish not in dummy mode).
 
 
 Known bugs:
