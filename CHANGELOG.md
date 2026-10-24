@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - fixed: since 10.9.0, an 8 bit sound that is not a whole number of periods long ended with a click: the last period was filled with 0x00, the most negative value of unsigned 8 bit audio, instead of silence (0x80)
 - readme: list the variables that the items write to the log file
+- added: the init items log the sound card of the device as `audio_low_latency_play_soundcard` and `audio_low_latency_record_soundcard` (e.g. "MOTU M2" or "Realtek ALC1220"; on Linux from /proc/asound, on Windows and macOS the device name)
 
 ## [12.0.1] - 2026-10-21
 

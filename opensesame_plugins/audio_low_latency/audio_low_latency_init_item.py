@@ -20,6 +20,7 @@ __license__ = "GPLv3"
 
 import os
 import re
+import sys
 
 import pygame
 
@@ -32,6 +33,10 @@ MODULES_ENABLED = ['alsaaudio', 'sounddevice', 'pyaudio']
 # Seconds to wait for a background thread to stop at the end of the experiment
 THREAD_STOP_TIMEOUT = 10
 SOUNDDEVICE_FORMATS = {8: 'uint8', 16: 'int16', 24: 'int24', 32: 'int32'}
+# Sound cards and their PCM devices (Linux)
+ASOUND_PATH = '/proc/asound'
+# Suffixes of the PCM names of HD Audio codecs (generic parser)
+HDA_PCM_SUFFIXES = (' Alt Analog', ' Analog', ' Digital')
 
 
 class AudioLowLatencyInitItem(AudioLowLatencyItem):
@@ -156,9 +161,13 @@ class AudioLowLatencyInitItem(AudioLowLatencyItem):
                 self._open_sounddevice()
 
             self._set('device', self.device)
+            soundcard = self._soundcard()
+            self._show_message(f'Sound card: {soundcard}')
+            self._set_var('soundcard', soundcard)
             self.experiment.cleanup_functions.append(self.close)
         elif self.dummy_mode == 'yes':
             self._set('device', None)
+            self._set_var('soundcard', 'dummy mode')
             self._show_message('Dummy mode enabled, run phase')
         else:
             raise OSException(f'Dummy mode should be yes or no, not {self.dummy_mode}')
@@ -220,6 +229,65 @@ class AudioLowLatencyInitItem(AudioLowLatencyItem):
             error_msg_list.append(f'Samplerate of {self.samplerate} Hz not supported\n')
         if error_msg_list:
             raise OSException(f'Error with device: {self.device_name}\n{"".join(error_msg_list)}')
+
+    def _soundcard(self):
+        """Returns the name of the sound card of the opened device, e.g.
+        'MOTU M2' or 'Realtek ALC1220', or 'unknown' (e.g. a sound server).
+        """
+        if self.module == PYALSAAUDIO:
+            # -1 when the device is not on a sound card (e.g. pipewire, null)
+            device_info = self.device.info()
+            return self._alsa_soundcard(device_info['card_no'], device_info['device_no'])
+        if sys.platform.startswith('linux'):
+            # The ALSA devices of PortAudio, e.g. 'M2: USB Audio (hw:1,0)'
+            hw = re.search(r'\(hw:(\d+),(\d+)\)$', self.device_name)
+            if hw:
+                return self._alsa_soundcard(int(hw.group(1)), int(hw.group(2)))
+            return 'unknown'
+        # Windows and macOS: the device name holds the card, e.g.
+        # 'Speakers (Realtek(R) Audio)'
+        return self.device_name
+
+    def _alsa_soundcard(self, card, device):
+        """Returns the HD Audio codec of the PCM device (e.g. 'Realtek
+        ALC1220'), else the long name of the card without its address
+        (e.g. 'MOTU M2', 'HDA Intel PCH'), else 'unknown'.
+        """
+        if card < 0:
+            return 'unknown'
+        direction = 'p' if self.kind == 'play' else 'c'
+        card_path = os.path.join(ASOUND_PATH, f'card{card}')
+        try:
+            # e.g. "id: ALC1220 Analog"
+            with open(os.path.join(card_path, f'pcm{device}{direction}', 'info')) as f:
+                pcm_info = dict(line.rstrip('\n').split(': ', 1) for line in f if ': ' in line)
+            pcm_id = pcm_info['id']
+            for suffix in HDA_PCM_SUFFIXES:
+                if pcm_id.endswith(suffix):
+                    chip = pcm_id[:-len(suffix)]
+                    for filename in sorted(os.listdir(card_path)):
+                        if not filename.startswith('codec#'):
+                            continue
+                        # e.g. "Codec: Realtek ALC1220"
+                        with open(os.path.join(card_path, filename)) as f:
+                            codec = f.readline().rstrip('\n').partition('Codec: ')[2]
+                        if re.search(rf'(^| ){re.escape(chip)}( |$)', codec):
+                            return codec
+                    break
+        except (OSError, KeyError, ValueError):
+            pass
+        try:
+            # e.g. " 1 [M2             ]: USB-Audio - M2", then the long name
+            # "MOTU M2 at usb-0000:00:14.0-2, high speed" on the next line
+            with open(os.path.join(ASOUND_PATH, 'cards')) as f:
+                lines = f.read().splitlines()
+            for line, next_line in zip(lines, lines[1:]):
+                if re.match(rf'\s*{card} \[', line):
+                    longname = next_line.strip()
+                    return longname.rpartition(' at ')[0] if ' at ' in longname else longname
+        except OSError:
+            pass
+        return 'unknown'
 
     def _read_hw_params(self):
         """Returns buffer size, period size, channels and sample rate from
