@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [12.0.2] - 2026-10-25
 
 - fixed: since 10.9.0, an 8 bit sound that is not a whole number of periods long ended with a click: the last period was filled with 0x00, the most negative value of unsigned 8 bit audio, instead of silence (0x80)
 - readme: list the variables that the items write to the log file
@@ -206,7 +206,8 @@ Bug fixes:
 - fixed wav duration bug
 - implemented delay for stopping the audio recording 
 
-[Unreleased]: https://github.com/dev-jam/opensesame-plugin-audio_low_latency/compare/12.0.1...HEAD
+[Unreleased]: https://github.com/dev-jam/opensesame-plugin-audio_low_latency/compare/12.0.2...HEAD
+[12.0.2]: https://github.com/dev-jam/opensesame-plugin-audio_low_latency/compare/12.0.1...12.0.2
 [12.0.1]: https://github.com/dev-jam/opensesame-plugin-audio_low_latency/compare/12.0.0...12.0.1
 [12.0.0]: https://github.com/dev-jam/opensesame-plugin-audio_low_latency/compare/11.0.1...12.0.0
 [11.0.1]: https://github.com/dev-jam/opensesame-plugin-audio_low_latency/compare/11.0.0...11.0.1
