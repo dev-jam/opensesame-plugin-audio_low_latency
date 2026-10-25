@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - fixed: the plug-in accepted pyalsaaudio 0.8.4 and later, but since 11.0.0 the init items need 0.11.0 (`info()` reports `physical_bits` since 0.11.0): with an older pyalsaaudio, which pip keeps when it is installed already, PyAlsaAudio gave "An unexpected error occurred" (KeyError: 'physical_bits'). The plug-in now requires pyalsaaudio 0.11.0 or later
 - readme: the buffer of SoundDevice follows the number of periods since 13.0.0; which log variables only SoundDevice sets, and how a text can show them with PyAlsaAudio; where recordings are saved; hw: and plughw: devices. Item texts: "at the beginning", "in the foreground"; the package description no longer says "on Linux"
 - changed: the hints that were in tooltips, which OpenSesame doesn't show, are in the labels: the allowed bit depths, "ms or sound" and "ms or infinite" for the duration, the separator of the pause/resume and stop keys, and that the recording filename gets ".wav"; the other tooltips are removed (GUI texts only)
+- changed: the plug-in requires sounddevice 0.5.1 or later: the ASIO devices of 13.0.0 need `SD_ENABLE_ASIO`, which sounddevice has since 0.5.1. Before, any version was accepted and pip kept an older one, which listed no ASIO devices (with the message "ASIO is not available"). Installing the plug-in now upgrades an older sounddevice
 
 ## [13.0.0] - 2026-10-25
 
