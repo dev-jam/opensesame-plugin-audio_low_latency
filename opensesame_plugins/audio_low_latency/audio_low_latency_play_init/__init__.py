@@ -28,6 +28,13 @@ controls = [
        "tooltip": "Module name"
     }, {
        "type": "combobox",
+       "var": "host_api",
+       "label": "Host API (SoundDevice and PyAudio)",
+       "options": [
+       ],
+       "name": "combobox_host_api"
+    }, {
+       "type": "combobox",
        "var": "device_name",
        "label": "Device",
        "options": [

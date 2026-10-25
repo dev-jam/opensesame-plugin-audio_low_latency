@@ -20,19 +20,19 @@ __license__ = "GPLv3"
 
 from libqtopensesame.items.qtautoplugin import QtAutoPlugin
 
-from .audio_low_latency_item import PYALSAAUDIO
+from .audio_low_latency_item import ALL_HOST_APIS, PYALSAAUDIO
 
 
 class QtAudioLowLatencyInitItem(QtAutoPlugin):
-    """GUI of the init items: the device list follows the chosen module, the
-    module and device are disabled in dummy mode, and the number of periods
-    is only enabled for PyAlsaAudio.
+    """GUI of the init items: the host API list follows the chosen module
+    (SoundDevice and PyAudio), the device list follows the module and the
+    host API, the module, host API and device are disabled in dummy mode,
+    and the number of periods is only enabled for PyAlsaAudio.
     """
 
     def init_edit_widget(self):
         super().init_edit_widget()
         module_list = self._get('module_list')
-        device_dict = self._get('device_dict')
         if not module_list:
             return
 
@@ -41,23 +41,46 @@ class QtAudioLowLatencyInitItem(QtAutoPlugin):
         else:
             self.current_module = module_list[0]
             self.var.module = self.current_module
-
-        if self.var.device_name in device_dict[self.current_module]:
-            self.current_device_name = self.var.device_name
-        else:
-            self.current_device_name = device_dict[self.current_module][0]
-            self._get('device_selected_dict')[self.current_module] = self.current_device_name
-            self.var.device_name = self.current_device_name
-
-        device_index = device_dict[self.current_module].index(self.current_device_name)
+        if self.var.host_api not in self._host_api_list(self.current_module):
+            self.var.host_api = ALL_HOST_APIS
 
         self.combobox_module.clear()
         self.combobox_module.addItems(module_list)
         self.combobox_module.setCurrentIndex(module_list.index(self.current_module))
+        self._fill_host_apis()
+        self._fill_devices()
 
+    def _host_api_list(self, module):
+        return [ALL_HOST_APIS] + self._get('host_api_dict').get(module, [])
+
+    def _device_list(self, module, host_api):
+        device_list = self._get('device_dict')[module]
+        if host_api == ALL_HOST_APIS:
+            return device_list
+        host_apis = self._get('device_host_api_dict')[module]
+        return [name for name, device_host_api in zip(device_list, host_apis) if device_host_api == host_api]
+
+    def _fill_host_apis(self):
+        """Shows the host APIs of the current module, with var.host_api
+        selected.
+        """
+        host_api_list = self._host_api_list(self.current_module)
+        self.combobox_host_api.clear()
+        self.combobox_host_api.addItems(host_api_list)
+        self.combobox_host_api.setCurrentIndex(host_api_list.index(self.var.host_api))
+        self.current_host_api = self.var.host_api
+
+    def _fill_devices(self):
+        """Shows the devices of the current module and host API, with
+        var.device_name selected, or else the first one.
+        """
+        device_list = self._device_list(self.current_module, self.current_host_api)
+        if self.var.device_name not in device_list:
+            self.var.device_name = device_list[0]
         self.combobox_device_name.clear()
-        self.combobox_device_name.addItems(device_dict[self.current_module])
-        self.combobox_device_name.setCurrentIndex(device_index)
+        self.combobox_device_name.addItems(device_list)
+        self.combobox_device_name.setCurrentIndex(device_list.index(self.var.device_name))
+        self.current_device_name = self.var.device_name
 
     def apply_edit_changes(self):
         if not QtAutoPlugin.apply_edit_changes(self) or self.lock:
@@ -79,27 +102,25 @@ class QtAudioLowLatencyInitItem(QtAutoPlugin):
             # No modules with devices
             return
         if self.current_module != self.var.module:
-            device_dict = self._get('device_dict')
             device_selected_dict = self._get('device_selected_dict')
             device_selected_dict[self.current_module] = self.var.device_name
-
-            new_module_name = self.var.module
-            new_device_name = device_selected_dict[new_module_name]
-            new_device_index = device_dict[new_module_name].index(new_device_name)
-
-            self.combobox_device_name.clear()
-            self.combobox_device_name.addItems(device_dict[new_module_name])
-            self.combobox_device_name.setCurrentIndex(new_device_index)
-
-            self.current_module = new_module_name
-            self.current_device_name = new_device_name
-            self.var.device_name = self.current_device_name
+            self.current_module = self.var.module
+            if self.var.host_api not in self._host_api_list(self.current_module):
+                self.var.host_api = ALL_HOST_APIS
+            self._fill_host_apis()
+            self.var.device_name = device_selected_dict[self.current_module]
+            self._fill_devices()
+        elif self.current_host_api != self.var.host_api:
+            self.current_host_api = self.var.host_api
+            self._fill_devices()
 
         if self.var.dummy_mode == 'yes':
             self.combobox_module.setDisabled(True)
+            self.combobox_host_api.setDisabled(True)
             self.combobox_device_name.setDisabled(True)
         elif self.var.dummy_mode == 'no':
             self.combobox_module.setEnabled(True)
+            self.combobox_host_api.setEnabled(self.current_module != PYALSAAUDIO)
             self.combobox_device_name.setEnabled(True)
 
         self.line_edit_periods.setEnabled(self.current_module == PYALSAAUDIO)

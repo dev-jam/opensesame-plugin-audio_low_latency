@@ -25,8 +25,9 @@ Inline scripts may use these attributes: keep their names and types.
   period_size, data_size, period_time, period_time_exact, for PyAlsaAudio
   also buffer_size, periods and buffer_time; module_list, device_dict and
   device_selected_dict (devices per module, for the GUI), device_index_dict
-  (the library's index of each device in device_dict) and
-  unusable_device_dict (per module the devices left out: {name: host
+  and device_host_api_dict (the library's index and the host API of each
+  device in device_dict), host_api_dict (the host APIs of SoundDevice and
+  PyAudio) and unusable_device_dict (per module the devices left out: {name: host
   API}); locked and thread_running (0/1).
 - Set by the start item: thread, thread_error (exception of the thread, or
   None), continue and execute_pause (0/1), pause_resume_key (the pause/resume
@@ -45,7 +46,8 @@ Variables for the log file (experiment.var), also for inline scripts:
   buffer_size_actual (frames that the sound card or WASAPI uses; 'unknown'
   when the system doesn't report it, 'dummy mode' in dummy mode); for
   SoundDevice and PyAudio also portaudio_latency (ms, as PortAudio reports
-  it; 'dummy mode' in dummy mode).
+  it) and host_api (of the opened device, e.g. 'Windows WASAPI'); 'dummy
+  mode' in dummy mode.
 - Set by the play, record and start items: time_stimulus_onset_<item name>
   and time_stimulus_offset_<item name> (not in dummy mode);
   audio_low_latency_<kind>_key_presses and _key_timestamps, for the start
@@ -72,6 +74,8 @@ from .win_keyboard import WinKeyboard
 PYALSAAUDIO = 'PyAlsaAudio (Linux only)'
 SOUNDDEVICE = 'SoundDevice (PortAudio)'
 PYAUDIO = 'PyAudio (PortAudio)'
+# Host API setting of the init items: devices of all host APIs
+ALL_HOST_APIS = 'all'
 
 # Debug tool: 1 prints the time of every period at the end, 2 prints it
 # right away

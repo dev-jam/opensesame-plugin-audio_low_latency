@@ -28,7 +28,7 @@ import pygame
 from libopensesame.exceptions import OSException
 from libopensesame.oslogging import oslogger
 
-from .audio_low_latency_item import AudioLowLatencyItem, PYALSAAUDIO, PYAUDIO, SOUNDDEVICE
+from .audio_low_latency_item import AudioLowLatencyItem, ALL_HOST_APIS, PYALSAAUDIO, PYAUDIO, SOUNDDEVICE
 
 MODULES_ENABLED = ['alsaaudio', 'sounddevice', 'pyaudio']
 # Seconds to wait for a background thread to stop at the end of the experiment
@@ -71,6 +71,7 @@ class AudioLowLatencyInitItem(AudioLowLatencyItem):
         self.var.channels = 2
         self.var.period_size = 1024
         self.var.periods = 4
+        self.var.host_api = ALL_HOST_APIS
 
         self.pyalsaaudio_module_name = PYALSAAUDIO
         self.pyaudio_module_name = PYAUDIO
@@ -91,8 +92,11 @@ class AudioLowLatencyInitItem(AudioLowLatencyItem):
         self._set('module_list', [])
         self._set('device_dict', {})
         self._set('device_selected_dict', {})
-        # The index of each device of device_dict for the library
+        # The index and host API of each device of device_dict
         self._set('device_index_dict', {})
+        self._set('device_host_api_dict', {})
+        # The host APIs per module (SoundDevice and PyAudio)
+        self._set('host_api_dict', {})
         # Devices left out, with their host API, for the error message
         self._set('unusable_device_dict', {})
         for module in (PYALSAAUDIO, SOUNDDEVICE, PYAUDIO):
@@ -103,6 +107,9 @@ class AudioLowLatencyInitItem(AudioLowLatencyItem):
                 self._get('module_list').append(module)
                 self._get('device_dict')[module] = [name for _, name, _ in usable]
                 self._get('device_index_dict')[module] = [index for index, _, _ in usable]
+                self._get('device_host_api_dict')[module] = [host_api for _, _, host_api in usable]
+                if module != PYALSAAUDIO:
+                    self._get('host_api_dict')[module] = list(dict.fromkeys(host_api for _, _, host_api in usable))
                 self._get('device_selected_dict')[module] = usable[0][1]
 
         self._show_message(f'Audio Low Latency {self._title} plug-in has been initialized!')
@@ -175,16 +182,7 @@ class AudioLowLatencyInitItem(AudioLowLatencyItem):
             if self.module not in module_list:
                 raise OSException(f'Module {self.module} is not available\n\n'
                                   f'Available modules: {", ".join(module_list)}')
-            device_list = self._get('device_dict')[self.module]
-            if self.device_name not in device_list:
-                host_api = self._get('unusable_device_dict')[self.module].get(self.device_name)
-                if host_api is not None:
-                    raise OSException(f'Device {self.device_name} uses {host_api}, which the plugin can\'t use: '
-                                      f'{UNUSABLE_HOST_APIS[host_api]}\n\n'
-                                      f'Available devices: {", ".join(device_list)}')
-                raise OSException(f'Device {self.device_name} is not available for module {self.module}\n\n'
-                                  f'Available devices: {", ".join(device_list)}')
-            self.device_index = self._get('device_index_dict')[self.module][device_list.index(self.device_name)]
+            self.device_index = self._find_device()
 
             if self.module == PYALSAAUDIO:
                 self._open_alsa()
@@ -194,6 +192,9 @@ class AudioLowLatencyInitItem(AudioLowLatencyItem):
                 self._open_sounddevice()
 
             self._set('device', self.device)
+            if self.module != PYALSAAUDIO:
+                self._show_message(f'Host API: {self.device_host_api}')
+                self._set_var('host_api', self.device_host_api)
             soundcard = self._soundcard()
             self._show_message(f'Sound card: {soundcard}')
             self._set_var('soundcard', soundcard)
@@ -207,10 +208,42 @@ class AudioLowLatencyInitItem(AudioLowLatencyItem):
             self._set_var('period_size_actual', 'dummy mode')
             self._set_var('buffer_size_actual', 'dummy mode')
             if self.module != PYALSAAUDIO:
+                self._set_var('host_api', 'dummy mode')
                 self._set_var('portaudio_latency', 'dummy mode')
             self._show_message('Dummy mode enabled, run phase')
         else:
             raise OSException(f'Dummy mode should be yes or no, not {self.dummy_mode}')
+
+    def _find_device(self):
+        """Returns the library's index of the chosen device. SoundDevice and
+        PyAudio: only the devices of the chosen host API count; with
+        duplicate names the first device is used.
+        """
+        device_list = self._get('device_dict')[self.module]
+        positions = range(len(device_list))
+        if self.module != PYALSAAUDIO and self.host_api != ALL_HOST_APIS:
+            host_api_list = self._get('host_api_dict')[self.module]
+            if self.host_api in UNUSABLE_HOST_APIS:
+                raise OSException(f'Host API {self.host_api} can\'t be used: {UNUSABLE_HOST_APIS[self.host_api]}\n\n'
+                                  f'Available host APIs: {", ".join([ALL_HOST_APIS] + host_api_list)}')
+            if self.host_api not in host_api_list:
+                raise OSException(f'Host API {self.host_api} is not available for module {self.module}\n\n'
+                                  f'Available host APIs: {", ".join([ALL_HOST_APIS] + host_api_list)}')
+            host_apis = self._get('device_host_api_dict')[self.module]
+            positions = [i for i in positions if host_apis[i] == self.host_api]
+        names = [device_list[i] for i in positions]
+        if self.device_name not in names:
+            host_api = self._get('unusable_device_dict')[self.module].get(self.device_name)
+            if host_api is not None and self.host_api in (ALL_HOST_APIS, host_api):
+                raise OSException(f'Device {self.device_name} uses {host_api}, which the plugin can\'t use: '
+                                  f'{UNUSABLE_HOST_APIS[host_api]}\n\n'
+                                  f'Available devices: {", ".join(names)}')
+            host_api_text = f' and host API {self.host_api}' if self.host_api != ALL_HOST_APIS and self.module != PYALSAAUDIO else ''
+            raise OSException(f'Device {self.device_name} is not available for module {self.module}{host_api_text}\n\n'
+                              f'Available devices: {", ".join(names)}')
+        position = positions[names.index(self.device_name)]
+        self.device_host_api = self._get('device_host_api_dict')[self.module][position]
+        return self._get('device_index_dict')[self.module][position]
 
     def _open_alsa(self):
         import alsaaudio
@@ -498,6 +531,7 @@ class AudioLowLatencyInitItem(AudioLowLatencyItem):
         self.verbose = self.var.verbose
         self.module = self.var.module
         self.device_name = self.var.device_name
+        self.host_api = self.var.host_api
 
         self.period_size = self._positive_int('period_size', 'Period size value')
         self.samplerate = self._positive_int('samplerate', 'Sample rate value')
