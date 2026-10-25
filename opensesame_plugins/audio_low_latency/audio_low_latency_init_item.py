@@ -160,9 +160,8 @@ class AudioLowLatencyInitItem(AudioLowLatencyItem):
             self._show_message(f'Channels: {self.channels}')
             self._show_message(f'Period size: {self.period_size} frames')
             self._show_message(f'Period time: {self.period_time} ms')
-            if self.module == PYALSAAUDIO:
-                self._show_message(f'Buffer size: {self.buffer_size} frames')
-                self._show_message(f'Number of periods per buffer: {self.periods}')
+            self._show_message(f'Buffer size: {self.buffer_size} frames')
+            self._show_message(f'Number of periods per buffer: {self.periods}')
             self._show_message('')
 
             try:
@@ -384,7 +383,9 @@ class AudioLowLatencyInitItem(AudioLowLatencyItem):
         """
         if self.kind != 'play' or not self.wasapi_exclusive:
             return 0
-        frames = math.ceil(self.device.latency * self.samplerate)
+        # PortAudio's latency can be the buffer minus one period (ALSA:
+        # exactly that with the latency the stream asks for), so add one
+        frames = math.ceil(self.device.latency * self.samplerate) + self.period_size
         self._show_message(f'WASAPI exclusive mode: {frames} frames of silence after each sound and at a pause')
         return frames
 
@@ -470,10 +471,17 @@ class AudioLowLatencyInitItem(AudioLowLatencyItem):
             extra_settings = sounddevice.WasapiSettings(exclusive=True)
             self._show_message('WASAPI exclusive mode')
         stream_class = sounddevice.RawOutputStream if self.kind == 'play' else sounddevice.RawInputStream
+        # PortAudio makes its host buffer the period size plus the
+        # suggested latency (WASAPI exclusive; ALSA and WASAPI shared: plus
+        # at least one period), so this asks for a buffer of the chosen
+        # number of periods; PortAudio and the sound card round it (see
+        # buffer_size_actual)
+        latency = (self.periods - 1) * self.period_size / self.samplerate
         try:
             self.device = stream_class(samplerate=float(self.samplerate),
                                        dtype=SOUNDDEVICE_FORMATS[self.bitdepth],
                                        blocksize=int(self.period_size),
+                                       latency=latency,
                                        device=int(self.device_index),
                                        channels=int(self.channels),
                                        extra_settings=extra_settings)
@@ -575,21 +583,18 @@ class AudioLowLatencyInitItem(AudioLowLatencyItem):
         self._set('data_size', self.data_size)
         self._set('period_time_exact', self.period_time_exact)
         self._set('period_time', self.period_time)
-        if self.module == PYALSAAUDIO:
-            self._set('buffer_size', self.buffer_size)
-            self._set('periods', self.periods)
-            self._set('buffer_time', round(self.periods * self.period_time, 1))
+        self._set('buffer_size', self.buffer_size)
+        self._set('periods', self.periods)
+        self._set('buffer_time', round(self.periods * self.period_time, 1))
 
         self._set_var('module', self.module)
         self._set_var('device_name', self.device_name)
         self._set_var('period_size', self.period_size)
         self._set_var('period_time_exact', self.period_time_exact)
         self._set_var('period_time', self.period_time)
-        # SoundDevice doesn't use them: PortAudio chooses the buffer (see
-        # buffer_size_actual)
         self._set_var('buffer_size', self.buffer_size)
         self._set_var('periods', self.periods)
-        self._set_var('buffer_time', round(self.periods * self.period_time, 1))
+        self._set_var('buffer_time', self._get('buffer_time'))
         if self.module == SOUNDDEVICE:
             self._set_var('wasapi_exclusive', 'yes' if self.wasapi_exclusive else 'no')
         self._set_var('bitdepth', self.bitdepth)

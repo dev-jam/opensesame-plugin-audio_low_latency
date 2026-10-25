@@ -22,8 +22,8 @@ Inline scripts may use these attributes: keep their names and types.
 
 - Set by the init item: device (None in dummy mode), dummy_mode and verbose
   ('yes'/'no'), module, bitdepth, samplewidth, samplerate, channels,
-  period_size, data_size, period_time, period_time_exact, for PyAlsaAudio
-  also buffer_size, periods and buffer_time; module_list, device_dict and
+  period_size, data_size, period_time, period_time_exact, buffer_size,
+  periods and buffer_time; module_list, device_dict and
   device_selected_dict (devices per module, for the GUI), device_index_dict
   and device_host_api_dict (the library's index and the host API of each
   device in device_dict), host_api_dict (the host APIs of SoundDevice) and
@@ -41,9 +41,9 @@ Inline scripts may use these attributes: keep their names and types.
 Variables for the log file (experiment.var), also for inline scripts:
 - Set by the init item: audio_low_latency_<kind>_<name> with name module,
   device_name, period_size, period_time, period_time_exact, periods,
-  buffer_size (period size times the number of periods), buffer_time (only
-  PyAlsaAudio uses these three), bitdepth, samplewidth, samplerate and
-  channels (_set_var() in audio_low_latency_init_item.py);
+  buffer_size (period size times the number of periods), buffer_time,
+  bitdepth, samplewidth, samplerate and channels (_set_var() in
+  audio_low_latency_init_item.py);
   also soundcard (e.g. 'MOTU M2' or 'Realtek ALC1220'; 'unknown' when it
   can't be found, 'dummy mode' in dummy mode), period_size_actual and
   buffer_size_actual (frames that the sound card or WASAPI uses; 'unknown'

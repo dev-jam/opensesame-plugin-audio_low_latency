@@ -27,8 +27,8 @@ class QtAudioLowLatencyInitItem(QtAutoPlugin):
     """GUI of the init items: the host API list follows the chosen module
     (SoundDevice), the device list follows the module and the
     host API, the module, host API and device are disabled in dummy mode,
-    the number of periods is only enabled for PyAlsaAudio and WASAPI
-    exclusive mode only for SoundDevice with host API WASAPI.
+    and WASAPI exclusive mode is only enabled for SoundDevice with host
+    API WASAPI.
     """
 
     def init_edit_widget(self):
@@ -124,5 +124,4 @@ class QtAudioLowLatencyInitItem(QtAutoPlugin):
             self.combobox_host_api.setEnabled(self.current_module != PYALSAAUDIO)
             self.combobox_device_name.setEnabled(True)
 
-        self.line_edit_periods.setEnabled(self.current_module == PYALSAAUDIO)
         self.checkbox_wasapi_exclusive.setEnabled(self.current_module == SOUNDDEVICE and self.current_host_api == WASAPI)
