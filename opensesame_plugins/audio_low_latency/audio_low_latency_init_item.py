@@ -51,6 +51,9 @@ UNUSABLE_HOST_APIS = {
     'Windows WDM-KS': NO_BLOCKING_IO,
     'OSS': 'the OSS emulation bypasses ALSA; use PyAlsaAudio, or ALSA with SoundDevice or PyAudio'
 }
+# SoundDevice loads its PortAudio library with ASIO (Windows) only when this
+# environment variable exists when it is imported
+SD_ENABLE_ASIO = 'SD_ENABLE_ASIO'
 # PortAudio's error code paInvalidSampleRate
 PA_INVALID_SAMPLE_RATE = -9997
 
@@ -130,8 +133,13 @@ class AudioLowLatencyInitItem(AudioLowLatencyItem):
         return alsaaudio.pcms(alsaaudio.PCM_PLAYBACK if self.kind == 'play' else alsaaudio.PCM_CAPTURE)
 
     def _sounddevice_devices(self):
+        if sys.platform == 'win32' and 'sounddevice' not in sys.modules:
+            os.environ.setdefault(SD_ENABLE_ASIO, '1')
         try:
             import sounddevice
+            if sys.platform == 'win32' and '-asio' not in os.path.basename(getattr(sounddevice, '_libname', '')):
+                self._show_message('ASIO is not available: SoundDevice was imported before the plug-in, '
+                                   'or it uses a PortAudio library without ASIO')
             host_apis = [host_api['name'] for host_api in sounddevice.query_hostapis()]
             return [(card['index'], card['name'], host_apis[card['hostapi']])
                     for card in sounddevice.query_devices()]
