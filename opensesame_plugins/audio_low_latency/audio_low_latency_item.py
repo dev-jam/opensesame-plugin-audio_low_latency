@@ -211,9 +211,8 @@ class AudioLowLatencyStreamItem(AudioLowLatencyItem):
         self.module = self._get('module')
         if self.dummy_mode == 'no':
             self.device = self._get('device')
-        if self.module == PYALSAAUDIO:
-            self.buffer_size = self._get('buffer_size')
-            self.periods = self._get('periods')
+        self.buffer_size = self._get('buffer_size')
+        self.periods = self._get('periods')
         self.period_size = self._get('period_size')
         self.period_time_exact = self._get('period_time_exact')
         self.period_time = self._get('period_time')
