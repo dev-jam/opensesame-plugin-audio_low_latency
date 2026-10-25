@@ -373,19 +373,23 @@ class AudioLowLatencyInitItem(AudioLowLatencyItem):
             oslogger.warning(f'the sound card uses a period size of {period_size} frames instead of {self.period_size}')
         self._set_var('period_size_actual', period_size)
         self._set_var('buffer_size_actual', buffer_size)
+        self.buffer_size_actual = buffer_size
 
     def _silence_frames(self):
         """Returns the number of frames of silence that the play items write
         after a sound and at a pause, else 0. In WASAPI exclusive mode the
         sound card plays its buffer again as long as no new data comes in
         (PortAudio 19.7.0 fills it only while the items write; heard as
-        ringing after a sound); PortAudio's latency covers the buffer.
+        ringing after a sound): the whole WASAPI buffer, as PortAudio
+        reports it (buffer_size_actual), else PortAudio's latency plus one
+        period, which covers it.
         """
         if self.kind != 'play' or not self.wasapi_exclusive:
             return 0
-        # PortAudio's latency can be the buffer minus one period (ALSA:
-        # exactly that with the latency the stream asks for), so add one
-        frames = math.ceil(self.device.latency * self.samplerate) + self.period_size
+        if isinstance(self.buffer_size_actual, int) and self.buffer_size_actual > 0:
+            frames = self.buffer_size_actual
+        else:
+            frames = math.ceil(self.device.latency * self.samplerate) + self.period_size
         self._show_message(f'WASAPI exclusive mode: {frames} frames of silence after each sound and at a pause')
         return frames
 
