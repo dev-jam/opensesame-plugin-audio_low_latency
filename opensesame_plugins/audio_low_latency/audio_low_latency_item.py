@@ -28,7 +28,9 @@ Inline scripts may use these attributes: keep their names and types.
   and device_host_api_dict (the library's index and the host API of each
   device in device_dict), host_api_dict (the host APIs of SoundDevice and
   PyAudio) and unusable_device_dict (per module the devices left out: {name: host
-  API}); locked and thread_running (0/1).
+  API}); locked and thread_running (0/1); silence_frames (play: the
+  frames of silence that the play items write after a sound and at a
+  pause, WASAPI exclusive mode only, else 0).
 - Set by the start item: thread, thread_error (exception of the thread, or
   None), continue and execute_pause (0/1), pause_resume_key (the pause/resume
   keys as entered); the record start item also sets infinite (1 when it
@@ -357,6 +359,8 @@ class AudioLowLatencyStreamItem(AudioLowLatencyItem):
         pause_start_time = self.clock.time()
         if self.module == PYALSAAUDIO:
             stream.pause(True)
+        elif self.kind == 'play':
+            self._write_silence(stream)
         while self._paused():
             if self._keylist:
                 # get_key() with a timeout busy-waits (legacy backend)
@@ -377,6 +381,16 @@ class AudioLowLatencyStreamItem(AudioLowLatencyItem):
                 stream.pause(False)
             self._show_message(f'Resumed audio {self._activity}')
         return self.clock.time() - pause_start_time
+
+    def _write_silence(self, stream):
+        """Fills the buffer of a WASAPI exclusive stream with silence, which
+        the sound card plays again until new data comes in (see
+        silence_frames in the init item); does nothing otherwise.
+        """
+        frames = self._get('silence_frames', 0)
+        if frames:
+            # 8 bit wave data is unsigned: silence is 0x80
+            stream.write((b'\x80' if self.samplewidth == 1 else b'\x00') * (frames * self.samplewidth * self.channels))
 
     def _paused(self):
         return self._flag('execute_pause') == 1 and self._flag('continue') == 1

@@ -251,6 +251,8 @@ class AudioLowLatencyPlayItem(AudioLowLatencyStreamItem):
             else:
                 stream.drain()
                 self._show_message('Draining ALSA stream')
+        elif self.module != PYALSAAUDIO:
+            self._write_silence(stream)
 
         self._set_stimulus_offset()
 

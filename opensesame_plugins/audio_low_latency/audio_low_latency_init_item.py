@@ -19,6 +19,7 @@ __author__ = "Bob Rosbag"
 __license__ = "GPLv3"
 
 import ctypes
+import math
 import os
 import re
 import sys
@@ -213,9 +214,11 @@ class AudioLowLatencyInitItem(AudioLowLatencyItem):
             self._log_actual_sizes()
             if self.module != PYALSAAUDIO:
                 self._log_portaudio_latency()
+            self._set('silence_frames', self._silence_frames())
             self.experiment.cleanup_functions.append(self.close)
         elif self.dummy_mode == 'yes':
             self._set('device', None)
+            self._set('silence_frames', 0)
             self._set_var('soundcard', 'dummy mode')
             self._set_var('period_size_actual', 'dummy mode')
             self._set_var('buffer_size_actual', 'dummy mode')
@@ -392,6 +395,17 @@ class AudioLowLatencyInitItem(AudioLowLatencyItem):
             oslogger.warning(f'the sound card uses a period size of {period_size} frames instead of {self.period_size}')
         self._set_var('period_size_actual', period_size)
         self._set_var('buffer_size_actual', buffer_size)
+
+    def _silence_frames(self):
+        """Returns the number of frames of silence that the play items write
+        after a sound and at a pause, else 0. In WASAPI exclusive mode the
+        sound card plays its buffer again as long as no new data comes in
+        (PortAudio 19.7.0 fills it only while the items write; heard as
+        ringing after a sound); PortAudio's latency covers the buffer.
+        """
+        if self.kind != 'play' or not self.wasapi_exclusive:
+            return 0
+        return math.ceil(self.device.latency * self.samplerate)
 
     def _log_portaudio_latency(self):
         """Logs the latency in ms that PortAudio reports for the stream."""

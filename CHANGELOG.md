@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - added: on Windows, SoundDevice lists ASIO devices: the plug-in sets `SD_ENABLE_ASIO` before SoundDevice is imported, so SoundDevice loads its PortAudio library with ASIO. Behaviour change: PortAudio then loads every installed ASIO driver when the init items are created, also in experiments without ASIO
 - added: with SoundDevice and PyAudio, the init items also log `audio_low_latency_<play|record>_periods`, `_buffer_size` (the period size times the number of periods) and `_buffer_time`, as with PyAlsaAudio; PortAudio doesn't use them, the buffer it uses is in `_buffer_size_actual`
 - added: a sample rate that an ASIO driver refuses explains that the driver refuses it and names the driver's current sample rate (0 Hz: the driver may not work at all)
+- added: in WASAPI exclusive mode the play items write one buffer of silence after each sound and when they pause: the sound card plays its buffer again until new data comes in, which sounded as ringing after a sound (also with long pauses). The play items then end about one buffer later (when the sound has been played, as with PyAlsaAudio), which also moves `time_stimulus_offset_<item>`
 
 ## [12.0.2] - 2026-10-25
 
