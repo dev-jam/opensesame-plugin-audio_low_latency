@@ -51,6 +51,8 @@ class AudioLowLatencyRecordItem(AudioLowLatencyStreamItem):
         self._check_init()
         self._init_var()
         self.file_exists_action = self.var.file_exists_action
+        if self.file_exists_action not in ('yes', 'no'):
+            raise OSException(f'Do not overwrite existing files should be yes or no, not {self.file_exists_action}')
         self.filename = self._build_output_file()
         self._check_ram_cache('Cache to RAM')
         self._init_keys()
