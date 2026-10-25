@@ -610,10 +610,11 @@ class AudioLowLatencyInitItem(AudioLowLatencyItem):
         self._set_var('period_size', self.period_size)
         self._set_var('period_time_exact', self.period_time_exact)
         self._set_var('period_time', self.period_time)
-        if self.module == PYALSAAUDIO:
-            self._set_var('buffer_size', self.buffer_size)
-            self._set_var('periods', self.periods)
-            self._set_var('buffer_time', self._get('buffer_time'))
+        # SoundDevice and PyAudio don't use them: PortAudio chooses the
+        # buffer (see buffer_size_actual)
+        self._set_var('buffer_size', self.buffer_size)
+        self._set_var('periods', self.periods)
+        self._set_var('buffer_time', round(self.periods * self.period_time, 1))
         if self.module == SOUNDDEVICE:
             self._set_var('wasapi_exclusive', 'yes' if self.wasapi_exclusive else 'no')
         self._set_var('bitdepth', self.bitdepth)
