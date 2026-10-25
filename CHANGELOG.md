@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [13.0.0] - 2026-10-25
 
 - added: the init items log the period size and buffer size that the sound card uses as `audio_low_latency_play_period_size_actual`, `_buffer_size_actual` and the same for record (on Linux from /proc/asound for PyAlsaAudio devices with CARD= and the "(hw:X,Y)" devices of SoundDevice and PyAudio; on Windows the WASAPI buffer size with SoundDevice; else "unknown"); with SoundDevice and PyAudio, a period size other than the chosen one is a warning
 - fixed: the PyAudio init items showed the estimated latency in seconds with "ms" as unit (e.g. "0.0232ms" for 23.2 ms); the record init item showed the frames recorded so far as "Buffer size", the play init item shows the frames available for writing as such instead of as "Buffer size" (messages only)
@@ -225,7 +225,8 @@ Bug fixes:
 - fixed wav duration bug
 - implemented delay for stopping the audio recording 
 
-[Unreleased]: https://github.com/dev-jam/opensesame-plugin-audio_low_latency/compare/12.0.2...HEAD
+[Unreleased]: https://github.com/dev-jam/opensesame-plugin-audio_low_latency/compare/13.0.0...HEAD
+[13.0.0]: https://github.com/dev-jam/opensesame-plugin-audio_low_latency/compare/12.0.2...13.0.0
 [12.0.2]: https://github.com/dev-jam/opensesame-plugin-audio_low_latency/compare/12.0.1...12.0.2
 [12.0.1]: https://github.com/dev-jam/opensesame-plugin-audio_low_latency/compare/12.0.0...12.0.1
 [12.0.0]: https://github.com/dev-jam/opensesame-plugin-audio_low_latency/compare/11.0.1...12.0.0
