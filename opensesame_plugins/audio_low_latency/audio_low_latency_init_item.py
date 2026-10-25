@@ -28,7 +28,7 @@ import pygame
 from libopensesame.exceptions import OSException
 from libopensesame.oslogging import oslogger
 
-from .audio_low_latency_item import AudioLowLatencyItem, ALL_HOST_APIS, PYALSAAUDIO, PYAUDIO, SOUNDDEVICE
+from .audio_low_latency_item import AudioLowLatencyItem, ALL_HOST_APIS, PYALSAAUDIO, PYAUDIO, SOUNDDEVICE, WASAPI
 
 MODULES_ENABLED = ['alsaaudio', 'sounddevice', 'pyaudio']
 # Seconds to wait for a background thread to stop at the end of the experiment
@@ -51,6 +51,8 @@ UNUSABLE_HOST_APIS = {
     'Windows WDM-KS': NO_BLOCKING_IO,
     'OSS': 'the OSS emulation bypasses ALSA; use PyAlsaAudio, or ALSA with SoundDevice or PyAudio'
 }
+# PortAudio's error code paInvalidSampleRate
+PA_INVALID_SAMPLE_RATE = -9997
 
 
 class AudioLowLatencyInitItem(AudioLowLatencyItem):
@@ -72,6 +74,7 @@ class AudioLowLatencyInitItem(AudioLowLatencyItem):
         self.var.period_size = 1024
         self.var.periods = 4
         self.var.host_api = ALL_HOST_APIS
+        self.var.wasapi_exclusive = 'no'
 
         self.pyalsaaudio_module_name = PYALSAAUDIO
         self.pyaudio_module_name = PYAUDIO
@@ -401,7 +404,7 @@ class AudioLowLatencyInitItem(AudioLowLatencyItem):
         import sounddevice
 
         hostapi = sounddevice.query_hostapis(sounddevice.query_devices(self.device_index)['hostapi'])
-        if hostapi['name'] != 'Windows WASAPI':
+        if hostapi['name'] != WASAPI:
             return 'unknown'
         # Not in the API of SoundDevice: call PortAudio with the PaStream
         # pointer of the stream
@@ -482,7 +485,8 @@ class AudioLowLatencyInitItem(AudioLowLatencyItem):
         except Exception as e:
             self.device_init.terminate()
             del self.device_init
-            raise OSException(f'Could not open audio device {self.device_name}\n\nMessage: {e}')
+            raise OSException(f'Could not open audio device {self.device_name}\n\nMessage: {e}'
+                              f'{self._wasapi_shared_hint(e)}')
 
         if self.kind == 'play':
             self._show_message(f'Frames available for writing: {self.device.get_write_available()}')
@@ -490,18 +494,35 @@ class AudioLowLatencyInitItem(AudioLowLatencyItem):
     def _open_sounddevice(self):
         import sounddevice
 
+        extra_settings = None
+        if self.wasapi_exclusive:
+            extra_settings = sounddevice.WasapiSettings(exclusive=True)
+            self._show_message('WASAPI exclusive mode')
         stream_class = sounddevice.RawOutputStream if self.kind == 'play' else sounddevice.RawInputStream
         try:
             self.device = stream_class(samplerate=float(self.samplerate),
                                        dtype=SOUNDDEVICE_FORMATS[self.bitdepth],
                                        blocksize=int(self.period_size),
                                        device=int(self.device_index),
-                                       channels=int(self.channels))
+                                       channels=int(self.channels),
+                                       extra_settings=extra_settings)
             self._show_message("Audio device opened")
             self.device.start()
         except Exception as e:
             raise OSException(
-                f'Could not start audio device\n\nMessage: {e}')
+                f'Could not start audio device\n\nMessage: {e}{self._wasapi_shared_hint(e)}')
+
+    def _wasapi_shared_hint(self, error):
+        """Returns an explanation for a sample rate that WASAPI refuses in
+        shared mode, else ''.
+        """
+        if (self.device_host_api == WASAPI and not (self.module == SOUNDDEVICE and self.wasapi_exclusive)
+                and str(PA_INVALID_SAMPLE_RATE) in str(error)):
+            alternative = (f'WASAPI exclusive mode (host API {WASAPI})' if self.module == SOUNDDEVICE
+                           else 'SoundDevice with WASAPI exclusive mode')
+            return ('\n\nIn shared mode, WASAPI only accepts the sample rate that is set for the device in the '
+                    f'Windows sound settings: choose that sample rate or {alternative}')
+        return ''
 
     def close(self):
         self._stop_thread()
@@ -532,6 +553,14 @@ class AudioLowLatencyInitItem(AudioLowLatencyItem):
         self.module = self.var.module
         self.device_name = self.var.device_name
         self.host_api = self.var.host_api
+        wasapi_exclusive = self.var.wasapi_exclusive
+        if wasapi_exclusive not in ('yes', 'no'):
+            raise OSException(f'WASAPI exclusive mode should be yes or no, not {wasapi_exclusive}')
+        # Only with SoundDevice and the host API setting WASAPI (the GUI
+        # disables the setting otherwise)
+        self.wasapi_exclusive = wasapi_exclusive == 'yes' and self.module == SOUNDDEVICE and self.host_api == WASAPI
+        if wasapi_exclusive == 'yes' and self.module == SOUNDDEVICE and not self.wasapi_exclusive:
+            self._show_message(f'WASAPI exclusive mode is not used: it needs host API {WASAPI}')
 
         self.period_size = self._positive_int('period_size', 'Period size value')
         self.samplerate = self._positive_int('samplerate', 'Sample rate value')
@@ -577,6 +606,8 @@ class AudioLowLatencyInitItem(AudioLowLatencyItem):
             self._set_var('buffer_size', self.buffer_size)
             self._set_var('periods', self.periods)
             self._set_var('buffer_time', self._get('buffer_time'))
+        if self.module == SOUNDDEVICE:
+            self._set_var('wasapi_exclusive', 'yes' if self.wasapi_exclusive else 'no')
         self._set_var('bitdepth', self.bitdepth)
         self._set_var('samplewidth', self.samplewidth)
         self._set_var('samplerate', self.samplerate)

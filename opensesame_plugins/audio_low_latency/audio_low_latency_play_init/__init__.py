@@ -34,6 +34,11 @@ controls = [
        ],
        "name": "combobox_host_api"
     }, {
+        "type": "checkbox",
+        "var": "wasapi_exclusive",
+        "label": "WASAPI exclusive mode (SoundDevice)",
+        "name": "checkbox_wasapi_exclusive"
+    }, {
        "type": "combobox",
        "var": "device_name",
        "label": "Device",

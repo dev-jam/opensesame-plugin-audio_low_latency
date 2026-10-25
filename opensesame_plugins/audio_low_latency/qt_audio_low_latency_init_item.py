@@ -20,14 +20,15 @@ __license__ = "GPLv3"
 
 from libqtopensesame.items.qtautoplugin import QtAutoPlugin
 
-from .audio_low_latency_item import ALL_HOST_APIS, PYALSAAUDIO
+from .audio_low_latency_item import ALL_HOST_APIS, PYALSAAUDIO, SOUNDDEVICE, WASAPI
 
 
 class QtAudioLowLatencyInitItem(QtAutoPlugin):
     """GUI of the init items: the host API list follows the chosen module
     (SoundDevice and PyAudio), the device list follows the module and the
     host API, the module, host API and device are disabled in dummy mode,
-    and the number of periods is only enabled for PyAlsaAudio.
+    the number of periods is only enabled for PyAlsaAudio and WASAPI
+    exclusive mode only for SoundDevice with host API WASAPI.
     """
 
     def init_edit_widget(self):
@@ -124,3 +125,4 @@ class QtAudioLowLatencyInitItem(QtAutoPlugin):
             self.combobox_device_name.setEnabled(True)
 
         self.line_edit_periods.setEnabled(self.current_module == PYALSAAUDIO)
+        self.checkbox_wasapi_exclusive.setEnabled(self.current_module == SOUNDDEVICE and self.current_host_api == WASAPI)

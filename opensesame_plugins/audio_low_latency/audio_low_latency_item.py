@@ -47,7 +47,8 @@ Variables for the log file (experiment.var), also for inline scripts:
   when the system doesn't report it, 'dummy mode' in dummy mode); for
   SoundDevice and PyAudio also portaudio_latency (ms, as PortAudio reports
   it) and host_api (of the opened device, e.g. 'Windows WASAPI'); 'dummy
-  mode' in dummy mode.
+  mode' in dummy mode; for SoundDevice also wasapi_exclusive ('yes' when
+  exclusive mode is used, else 'no').
 - Set by the play, record and start items: time_stimulus_onset_<item name>
   and time_stimulus_offset_<item name> (not in dummy mode);
   audio_low_latency_<kind>_key_presses and _key_timestamps, for the start
@@ -76,6 +77,7 @@ SOUNDDEVICE = 'SoundDevice (PortAudio)'
 PYAUDIO = 'PyAudio (PortAudio)'
 # Host API setting of the init items: devices of all host APIs
 ALL_HOST_APIS = 'all'
+WASAPI = 'Windows WASAPI'
 
 # Debug tool: 1 prints the time of every period at the end, 2 prints it
 # right away
