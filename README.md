@@ -68,7 +68,7 @@ The sound card (audio_low_latency_[kind]_soundcard) is found as follows:
 
 The period size and buffer size that are actually used, in frames (audio_low_latency_[kind]_period_size_actual and _buffer_size_actual):
 
-- Linux (PyAlsaAudio devices with CARD=, and the "(hw:X,Y)" devices of SoundDevice and PyAudio): the hardware parameters of the sound card, from /proc/asound. With PyAlsaAudio, a period size or number of periods other than the chosen one is an error; with SoundDevice and PyAudio, a period size other than the chosen one is a warning in the debug window (they have no buffer size setting: PortAudio chooses the buffer size). Other devices, such as "default" with a sound server, "pipewire" or "null", give "unknown".
+- Linux (PyAlsaAudio devices on a sound card, also through a plug or dmix device such as "default:CARD=X", and the "(hw:X,Y)" devices of SoundDevice and PyAudio): the hardware parameters of the sound card, from /proc/asound. With PyAlsaAudio, a period size or number of periods other than the chosen one is an error; with SoundDevice and PyAudio, a period size other than the chosen one is a warning in the debug window (they have no buffer size setting: PortAudio chooses the buffer size). Other devices, such as "default" with a sound server, "pipewire" or "null", give "unknown".
 - Windows, SoundDevice with a WASAPI device: the buffer size of WASAPI (from PortAudio); the period size is "unknown". Other host APIs (MME, DirectSound, WDM-KS, ASIO) and PyAudio give "unknown" for both: PortAudio doesn't report them (and PyAudio includes PortAudio, so its WASAPI functions can't be called).
 - macOS: "unknown".
 - In dummy mode: "dummy mode".

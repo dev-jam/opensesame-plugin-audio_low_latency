@@ -358,30 +358,36 @@ class AudioLowLatencyInitItem(AudioLowLatencyItem):
         return frames_out.value if self.kind == 'play' else frames_in.value
 
     def _hw_pcm(self):
-        """Returns the card and the PCM device number of the device, as in
-        /proc/asound/<card>/pcm<device><p|c>, or None.
+        """Returns the card, PCM device and subdevice number of the opened
+        device, as in /proc/asound/card<card>/pcm<device><p|c>/sub<subdevice>,
+        or None.
         """
         if self.module == PYALSAAUDIO:
-            card = re.search("CARD=(.*?),", self.device_name)
-            if not card:
+            # Also for plug and dmix devices: ALSA reports the card below
+            # them; -1 when the device is not on a sound card (e.g.
+            # pipewire, null)
+            device_info = self.device.info()
+            if device_info['card_no'] < 0:
                 return None
-            device_number = re.search(r'DEV=(\d+)', self.device_name)
-            return card.group(1), device_number.group(1) if device_number else '0'
+            return device_info['card_no'], device_info['device_no'], device_info['subdevice_no']
         hw = re.search(PORTAUDIO_HW_DEVICE, self.device_name)
         if not hw:
             return None
-        return f'card{hw.group(1)}', hw.group(2)
+        # PortAudio doesn't report the subdevice
+        return int(hw.group(1)), int(hw.group(2)), 0
 
     def _read_hw_params(self):
         """Returns buffer size, period size, channels and sample rate from
-        /proc/asound/<card>/pcm<device><p|c>/sub0/hw_params, or None.
+        /proc/asound/card<card>/pcm<device><p|c>/sub<subdevice>/hw_params,
+        or None.
         """
         pcm = self._hw_pcm()
         if pcm is None:
             return None
-        card, device_number = pcm
+        card, device_number, subdevice = pcm
         direction = 'p' if self.kind == 'play' else 'c'
-        filename_alsa = os.path.join(ASOUND_PATH, card, f'pcm{device_number}{direction}', 'sub0', 'hw_params')
+        filename_alsa = os.path.join(ASOUND_PATH, f'card{card}', f'pcm{device_number}{direction}',
+                                     f'sub{subdevice}', 'hw_params')
         try:
             with open(filename_alsa) as f:
                 params = dict(line.split(':', 1) for line in f if ':' in line)
