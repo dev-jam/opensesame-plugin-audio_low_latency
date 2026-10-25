@@ -630,7 +630,9 @@ class AudioLowLatencyInitItem(AudioLowLatencyItem):
             device.close()
 
             delattr(self.experiment, f'audio_low_latency_{self.kind}_device')
-            del self.device
+            # Not set when another init item opened the device
+            if hasattr(self, 'device'):
+                del self.device
             self._show_message("Audio device closed")
         except Exception as e:
             oslogger.warning(f'failed to close audio device: {e}')
