@@ -39,7 +39,9 @@ Variables for the log file (experiment.var), also for inline scripts:
   samplewidth, samplerate and channels, for PyAlsaAudio also buffer_size,
   periods and buffer_time (_set_var() in audio_low_latency_init_item.py);
   also soundcard (e.g. 'MOTU M2' or 'Realtek ALC1220'; 'unknown' when it
-  can't be found, 'dummy mode' in dummy mode).
+  can't be found, 'dummy mode' in dummy mode), period_size_actual and
+  buffer_size_actual (frames that the sound card or WASAPI uses; 'unknown'
+  when the system doesn't report it, 'dummy mode' in dummy mode).
 - Set by the play, record and start items: time_stimulus_onset_<item name>
   and time_stimulus_offset_<item name> (not in dummy mode);
   audio_low_latency_<kind>_key_presses and _key_timestamps, for the start

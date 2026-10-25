@@ -55,7 +55,7 @@ Background:
 
 Variables in the log file ([kind] is play or record):
 
-- Init items: audio_low_latency_[kind]_module, _device_name, _period_size, _period_time, _period_time_exact, _bitdepth, _samplewidth, _samplerate and _channels; with PyAlsaAudio also _buffer_size, _periods and _buffer_time; and audio_low_latency_[kind]_soundcard (see below).
+- Init items: audio_low_latency_[kind]_module, _device_name, _period_size, _period_time, _period_time_exact, _bitdepth, _samplewidth, _samplerate and _channels; with PyAlsaAudio also _buffer_size, _periods and _buffer_time; and audio_low_latency_[kind]_soundcard, _period_size_actual and _buffer_size_actual (see below).
 - Play, record and start items: the timestamps time_stimulus_onset_[item_name] and time_stimulus_offset_[item_name] (no offset in dummy mode).
 - Keys: audio_low_latency_[kind]_key_presses and audio_low_latency_[kind]_key_timestamps (play and record items), audio_low_latency_[kind]_start_key_presses and audio_low_latency_[kind]_start_key_timestamps (start items), separated by ';'.
 - Play and play start items: wav_duration and wait_to_finish (in ms; wait_to_finish not in dummy mode).
@@ -64,6 +64,13 @@ The sound card (audio_low_latency_[kind]_soundcard) is found as follows:
 
 - Linux (PyAlsaAudio, and the "(hw:X,Y)" devices of SoundDevice and PyAudio): the codec of an onboard (HD Audio) device, e.g. "Realtek ALC1220", else the name of the card, e.g. "MOTU M2", from /proc/asound. Devices that are not on a sound card, such as "default" with a sound server, "pipewire" or "null", give "unknown".
 - Windows and macOS (SoundDevice and PyAudio): the device name, e.g. "Speakers (Realtek(R) Audio)".
+- In dummy mode: "dummy mode".
+
+The period size and buffer size that are actually used, in frames (audio_low_latency_[kind]_period_size_actual and _buffer_size_actual):
+
+- Linux (PyAlsaAudio devices with CARD=, and the "(hw:X,Y)" devices of SoundDevice and PyAudio): the hardware parameters of the sound card, from /proc/asound. With PyAlsaAudio, a period size or number of periods other than the chosen one is an error; with SoundDevice and PyAudio, a period size other than the chosen one is a warning in the debug window (they have no buffer size setting: PortAudio chooses the buffer size). Other devices, such as "default" with a sound server, "pipewire" or "null", give "unknown".
+- Windows, SoundDevice with a WASAPI device: the buffer size of WASAPI (from PortAudio); the period size is "unknown". Other host APIs (MME, DirectSound, WDM-KS, ASIO) and PyAudio give "unknown" for both: PortAudio doesn't report them (and PyAudio includes PortAudio, so its WASAPI functions can't be called).
+- macOS: "unknown".
 - In dummy mode: "dummy mode".
 
 

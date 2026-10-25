@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+- added: the init items log the period size and buffer size that the sound card uses as `audio_low_latency_play_period_size_actual`, `_buffer_size_actual` and the same for record (on Linux from /proc/asound for PyAlsaAudio devices with CARD= and the "(hw:X,Y)" devices of SoundDevice and PyAudio; on Windows the WASAPI buffer size with SoundDevice; else "unknown"); with SoundDevice and PyAudio, a period size other than the chosen one is a warning
+
 ## [12.0.2] - 2026-10-25
 
 - fixed: since 10.9.0, an 8 bit sound that is not a whole number of periods long ended with a click: the last period was filled with 0x00, the most negative value of unsigned 8 bit audio, instead of silence (0x80)

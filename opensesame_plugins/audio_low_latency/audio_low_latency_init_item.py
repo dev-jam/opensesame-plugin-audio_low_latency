@@ -18,6 +18,7 @@ along with OpenSesame.  If not, see <http://www.gnu.org/licenses/>.
 __author__ = "Bob Rosbag"
 __license__ = "GPLv3"
 
+import ctypes
 import os
 import re
 import sys
@@ -37,6 +38,8 @@ SOUNDDEVICE_FORMATS = {8: 'uint8', 16: 'int16', 24: 'int24', 32: 'int32'}
 ASOUND_PATH = '/proc/asound'
 # Suffixes of the PCM names of HD Audio codecs (generic parser)
 HDA_PCM_SUFFIXES = (' Alt Analog', ' Analog', ' Digital')
+# The ALSA devices of PortAudio, e.g. 'M2: USB Audio (hw:1,0)'
+PORTAUDIO_HW_DEVICE = r'\(hw:(\d+),(\d+)\)$'
 
 
 class AudioLowLatencyInitItem(AudioLowLatencyItem):
@@ -164,10 +167,13 @@ class AudioLowLatencyInitItem(AudioLowLatencyItem):
             soundcard = self._soundcard()
             self._show_message(f'Sound card: {soundcard}')
             self._set_var('soundcard', soundcard)
+            self._log_actual_sizes()
             self.experiment.cleanup_functions.append(self.close)
         elif self.dummy_mode == 'yes':
             self._set('device', None)
             self._set_var('soundcard', 'dummy mode')
+            self._set_var('period_size_actual', 'dummy mode')
+            self._set_var('buffer_size_actual', 'dummy mode')
             self._show_message('Dummy mode enabled, run phase')
         else:
             raise OSException(f'Dummy mode should be yes or no, not {self.dummy_mode}')
@@ -239,8 +245,7 @@ class AudioLowLatencyInitItem(AudioLowLatencyItem):
             device_info = self.device.info()
             return self._alsa_soundcard(device_info['card_no'], device_info['device_no'])
         if sys.platform.startswith('linux'):
-            # The ALSA devices of PortAudio, e.g. 'M2: USB Audio (hw:1,0)'
-            hw = re.search(r'\(hw:(\d+),(\d+)\)$', self.device_name)
+            hw = re.search(PORTAUDIO_HW_DEVICE, self.device_name)
             if hw:
                 return self._alsa_soundcard(int(hw.group(1)), int(hw.group(2)))
             return 'unknown'
@@ -289,17 +294,77 @@ class AudioLowLatencyInitItem(AudioLowLatencyItem):
             pass
         return 'unknown'
 
+    def _log_actual_sizes(self):
+        """Logs the period size and buffer size that the sound card (Linux)
+        or WASAPI (Windows, SoundDevice: buffer size only) uses, 'unknown'
+        when the system doesn't report it. PortAudio: a period size other
+        than the chosen one is a warning.
+        """
+        period_size, buffer_size = 'unknown', 'unknown'
+        if sys.platform.startswith('linux'):
+            hw_params = self._read_hw_params()
+            if hw_params is not None:
+                buffer_size, period_size = hw_params[0], hw_params[1]
+        elif sys.platform == 'win32' and self.module == SOUNDDEVICE:
+            buffer_size = self._wasapi_buffer_size()
+        self._show_message(f'Actual period size (frames): {period_size}')
+        self._show_message(f'Actual buffer size (frames): {buffer_size}')
+        if self.module != PYALSAAUDIO and period_size not in ('unknown', self.period_size):
+            oslogger.warning(f'the sound card uses a period size of {period_size} frames instead of {self.period_size}')
+        self._set_var('period_size_actual', period_size)
+        self._set_var('buffer_size_actual', buffer_size)
+
+    def _wasapi_buffer_size(self):
+        """Returns the size in frames of the WASAPI buffer of a SoundDevice
+        stream, or 'unknown' for the other Windows host APIs.
+        """
+        import sounddevice
+
+        hostapi = sounddevice.query_hostapis(sounddevice.query_devices(self.device_index)['hostapi'])
+        if hostapi['name'] != 'Windows WASAPI':
+            return 'unknown'
+        # Not in the API of SoundDevice: call PortAudio with the PaStream
+        # pointer of the stream
+        try:
+            get_frames = ctypes.CDLL(sounddevice._libname).PaWasapi_GetFramesPerHostBuffer
+            get_frames.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_uint), ctypes.POINTER(ctypes.c_uint)]
+            get_frames.restype = ctypes.c_int
+            stream = int(sounddevice._ffi.cast('uintptr_t', self.device._ptr))
+            frames_in, frames_out = ctypes.c_uint(), ctypes.c_uint()
+            error = get_frames(stream, ctypes.byref(frames_in), ctypes.byref(frames_out))
+        except (AttributeError, OSError) as e:
+            oslogger.warning(f'could not read the WASAPI buffer size: {e}')
+            return 'unknown'
+        if error:
+            oslogger.warning(f'could not read the WASAPI buffer size: PortAudio error {error}')
+            return 'unknown'
+        return frames_out.value if self.kind == 'play' else frames_in.value
+
+    def _hw_pcm(self):
+        """Returns the card and the PCM device number of the device, as in
+        /proc/asound/<card>/pcm<device><p|c>, or None.
+        """
+        if self.module == PYALSAAUDIO:
+            card = re.search("CARD=(.*?),", self.device_name)
+            if not card:
+                return None
+            device_number = re.search(r'DEV=(\d+)', self.device_name)
+            return card.group(1), device_number.group(1) if device_number else '0'
+        hw = re.search(PORTAUDIO_HW_DEVICE, self.device_name)
+        if not hw:
+            return None
+        return f'card{hw.group(1)}', hw.group(2)
+
     def _read_hw_params(self):
         """Returns buffer size, period size, channels and sample rate from
         /proc/asound/<card>/pcm<device><p|c>/sub0/hw_params, or None.
         """
-        card = re.search("CARD=(.*?),", self.device_name)
-        if not card:
+        pcm = self._hw_pcm()
+        if pcm is None:
             return None
-        device_number = re.search(r'DEV=(\d+)', self.device_name)
-        device_number = device_number.group(1) if device_number else '0'
+        card, device_number = pcm
         direction = 'p' if self.kind == 'play' else 'c'
-        filename_alsa = f'/proc/asound/{card.group(1)}/pcm{device_number}{direction}/sub0/hw_params'
+        filename_alsa = os.path.join(ASOUND_PATH, card, f'pcm{device_number}{direction}', 'sub0', 'hw_params')
         try:
             with open(filename_alsa) as f:
                 params = dict(line.split(':', 1) for line in f if ':' in line)
