@@ -168,12 +168,16 @@ class AudioLowLatencyInitItem(AudioLowLatencyItem):
             self._show_message(f'Sound card: {soundcard}')
             self._set_var('soundcard', soundcard)
             self._log_actual_sizes()
+            if self.module != PYALSAAUDIO:
+                self._log_portaudio_latency()
             self.experiment.cleanup_functions.append(self.close)
         elif self.dummy_mode == 'yes':
             self._set('device', None)
             self._set_var('soundcard', 'dummy mode')
             self._set_var('period_size_actual', 'dummy mode')
             self._set_var('buffer_size_actual', 'dummy mode')
+            if self.module != PYALSAAUDIO:
+                self._set_var('portaudio_latency', 'dummy mode')
             self._show_message('Dummy mode enabled, run phase')
         else:
             raise OSException(f'Dummy mode should be yes or no, not {self.dummy_mode}')
@@ -314,6 +318,19 @@ class AudioLowLatencyInitItem(AudioLowLatencyItem):
         self._set_var('period_size_actual', period_size)
         self._set_var('buffer_size_actual', buffer_size)
 
+    def _log_portaudio_latency(self):
+        """Logs the latency in ms that PortAudio reports for the stream."""
+        if self.module == SOUNDDEVICE:
+            latency = self.device.latency
+        elif self.kind == 'play':
+            latency = self.device.get_output_latency()
+        else:
+            latency = self.device.get_input_latency()
+        # PortAudio reports the latency in seconds
+        latency = latency * 1000
+        self._show_message(f'PortAudio latency: {latency} ms')
+        self._set_var('portaudio_latency', latency)
+
     def _wasapi_buffer_size(self):
         """Returns the size in frames of the WASAPI buffer of a SoundDevice
         stream, or 'unknown' for the other Windows host APIs.
@@ -398,12 +415,8 @@ class AudioLowLatencyInitItem(AudioLowLatencyItem):
             del self.device_init
             raise OSException(f'Could not open audio device {self.device_name}\n\nMessage: {e}')
 
-        # PortAudio reports the latency in seconds
         if self.kind == 'play':
-            self._show_message(f'Estimated output latency: {self.device.get_output_latency() * 1000} ms')
             self._show_message(f'Frames available for writing: {self.device.get_write_available()}')
-        else:
-            self._show_message(f'Estimated input latency: {self.device.get_input_latency() * 1000} ms')
 
     def _open_sounddevice(self):
         import sounddevice

@@ -55,7 +55,7 @@ Background:
 
 Variables in the log file ([kind] is play or record):
 
-- Init items: audio_low_latency_[kind]_module, _device_name, _period_size, _period_time, _period_time_exact, _bitdepth, _samplewidth, _samplerate and _channels; with PyAlsaAudio also _buffer_size, _periods and _buffer_time; and audio_low_latency_[kind]_soundcard, _period_size_actual and _buffer_size_actual (see below).
+- Init items: audio_low_latency_[kind]_module, _device_name, _period_size, _period_time, _period_time_exact, _bitdepth, _samplewidth, _samplerate and _channels; with PyAlsaAudio also _buffer_size, _periods and _buffer_time; and audio_low_latency_[kind]_soundcard, _period_size_actual and _buffer_size_actual (see below); with SoundDevice and PyAudio also audio_low_latency_[kind]_portaudio_latency: the latency in ms that PortAudio reports for the stream (on all systems, "dummy mode" in dummy mode).
 - Play, record and start items: the timestamps time_stimulus_onset_[item_name] and time_stimulus_offset_[item_name] (no offset in dummy mode).
 - Keys: audio_low_latency_[kind]_key_presses and audio_low_latency_[kind]_key_timestamps (play and record items), audio_low_latency_[kind]_start_key_presses and audio_low_latency_[kind]_start_key_timestamps (start items), separated by ';'.
 - Play and play start items: wav_duration and wait_to_finish (in ms; wait_to_finish not in dummy mode).
