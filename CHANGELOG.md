@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [13.1.0] - 2026-10-26
 
 - fixed: the record and record start items overwrote an existing file when *Do not overwrite existing files* had a value other than yes or no (e.g. `Yes` or `1` from a variable); now it is an error, also in dummy mode
 - fixed: since 12.0.0, a second init item of the same kind (e.g. to switch to another device) gave the warning "failed to close audio device", although it had closed the device of the first one
@@ -234,7 +234,8 @@ Bug fixes:
 - fixed wav duration bug
 - implemented delay for stopping the audio recording 
 
-[Unreleased]: https://github.com/dev-jam/opensesame-plugin-audio_low_latency/compare/13.0.0...HEAD
+[Unreleased]: https://github.com/dev-jam/opensesame-plugin-audio_low_latency/compare/13.1.0...HEAD
+[13.1.0]: https://github.com/dev-jam/opensesame-plugin-audio_low_latency/compare/13.0.0...13.1.0
 [13.0.0]: https://github.com/dev-jam/opensesame-plugin-audio_low_latency/compare/12.0.2...13.0.0
 [12.0.2]: https://github.com/dev-jam/opensesame-plugin-audio_low_latency/compare/12.0.1...12.0.2
 [12.0.1]: https://github.com/dev-jam/opensesame-plugin-audio_low_latency/compare/12.0.0...12.0.1
