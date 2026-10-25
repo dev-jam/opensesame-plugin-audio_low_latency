@@ -14,7 +14,6 @@ repository = "https://github.com/dev-jam/opensesame-plugin-audio_low_latency"
 [tool.poetry.dependencies]
 python = ">= 3.10"
 sounddevice = "*"
-pyaudio = "*"
 pygame = ">= 2.0.0"
 pyalsaaudio = {version = ">= 0.8.4", platform = "linux"}
 

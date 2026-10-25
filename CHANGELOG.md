@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - added: a sample rate that an ASIO driver refuses explains that the driver refuses it and names the driver's current sample rate (0 Hz: the driver may not work at all)
 - added: in WASAPI exclusive mode the play items write one buffer of silence after each sound and when they pause: the sound card plays its buffer again until new data comes in, which sounded as ringing after a sound (also with long pauses). The play items then end about one buffer later (when the sound has been played, as with PyAlsaAudio), which also moves `time_stimulus_offset_<item>`
 - added: in WASAPI exclusive mode the init item and the play items show a message about the silence they write (with verbose mode)
+- removed: the PyAudio module. PyAudio is no longer maintained (last release 0.2.14, November 2023) and has wheels for Windows only, so installing the plug-in built it from source on Linux and macOS; SoundDevice uses the same PortAudio and can do more (WASAPI exclusive mode, ASIO, 32 bit). An experiment with module PyAudio gives an error, also in dummy mode, that points to SoundDevice, which lists the same devices; the buffer and latency may differ (SoundDevice asks PortAudio for its high default latency, PyAudio asked for the low one). The plug-in no longer depends on pyaudio, and `experiment.pyaudio_module_name` is gone
 
 ## [12.0.2] - 2026-10-25
 

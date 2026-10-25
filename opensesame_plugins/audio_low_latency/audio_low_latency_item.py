@@ -26,8 +26,8 @@ Inline scripts may use these attributes: keep their names and types.
   also buffer_size, periods and buffer_time; module_list, device_dict and
   device_selected_dict (devices per module, for the GUI), device_index_dict
   and device_host_api_dict (the library's index and the host API of each
-  device in device_dict), host_api_dict (the host APIs of SoundDevice and
-  PyAudio) and unusable_device_dict (per module the devices left out: {name: host
+  device in device_dict), host_api_dict (the host APIs of SoundDevice) and
+  unusable_device_dict (per module the devices left out: {name: host
   API}); locked and thread_running (0/1); silence_frames (play: the
   frames of silence that the play items write after a sound and at a
   pause, WASAPI exclusive mode only, else 0).
@@ -48,7 +48,7 @@ Variables for the log file (experiment.var), also for inline scripts:
   can't be found, 'dummy mode' in dummy mode), period_size_actual and
   buffer_size_actual (frames that the sound card or WASAPI uses; 'unknown'
   when the system doesn't report it, 'dummy mode' in dummy mode); for
-  SoundDevice and PyAudio also portaudio_latency (ms, as PortAudio reports
+  SoundDevice also portaudio_latency (ms, as PortAudio reports
   it) and host_api (of the opened device, e.g. 'Windows WASAPI'); 'dummy
   mode' in dummy mode; for SoundDevice also wasapi_exclusive ('yes' when
   exclusive mode is used, else 'no').
@@ -77,6 +77,7 @@ from .win_keyboard import WinKeyboard
 
 PYALSAAUDIO = 'PyAlsaAudio (Linux only)'
 SOUNDDEVICE = 'SoundDevice (PortAudio)'
+# Removed after 12.0.2: the init items refuse it with a message
 PYAUDIO = 'PyAudio (PortAudio)'
 # Host API setting of the init items: devices of all host APIs
 ALL_HOST_APIS = 'all'

@@ -25,7 +25,7 @@ from libopensesame.exceptions import OSException
 from libopensesame.oslogging import oslogger
 
 from .audio_low_latency_item import (AudioLowLatencyStreamItem, PYALSAAUDIO,
-                                     PYAUDIO, SOUNDDEVICE, TIMESTAMP)
+                                     SOUNDDEVICE, TIMESTAMP)
 
 
 class AudioLowLatencyRecordItem(AudioLowLatencyStreamItem):
@@ -238,9 +238,6 @@ class AudioLowLatencyRecordItem(AudioLowLatencyStreamItem):
             # A negative length is an overrun: audio data was lost
             if l < 0:
                 self.overruns += 1
-        elif self.module == PYAUDIO:
-            # PyAudio raises an exception on an overflow by default
-            data = stream.read(chunk, exception_on_overflow=False)
         elif self.module == SOUNDDEVICE:
             data = bytes(stream.read(chunk)[0])
 

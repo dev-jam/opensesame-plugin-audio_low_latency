@@ -31,7 +31,7 @@ from libopensesame.oslogging import oslogger
 
 from .audio_low_latency_item import AudioLowLatencyItem, ALL_HOST_APIS, PYALSAAUDIO, PYAUDIO, SOUNDDEVICE, WASAPI
 
-MODULES_ENABLED = ['alsaaudio', 'sounddevice', 'pyaudio']
+MODULES_ENABLED = ['alsaaudio', 'sounddevice']
 # Seconds to wait for a background thread to stop at the end of the experiment
 THREAD_STOP_TIMEOUT = 10
 SOUNDDEVICE_FORMATS = {8: 'uint8', 16: 'int16', 24: 'int24', 32: 'int32'}
@@ -50,7 +50,7 @@ NO_BLOCKING_IO = 'PortAudio can\'t play or record with it the way the items do'
 UNUSABLE_HOST_APIS = {
     'Windows DirectSound': NO_BLOCKING_IO,
     'Windows WDM-KS': NO_BLOCKING_IO,
-    'OSS': 'the OSS emulation bypasses ALSA; use PyAlsaAudio, or ALSA with SoundDevice or PyAudio'
+    'OSS': 'the OSS emulation bypasses ALSA; use PyAlsaAudio, or ALSA with SoundDevice'
 }
 # SoundDevice loads its PortAudio library with ASIO (Windows) only when this
 # environment variable exists when it is imported
@@ -82,11 +82,9 @@ class AudioLowLatencyInitItem(AudioLowLatencyItem):
         self.var.wasapi_exclusive = 'no'
 
         self.pyalsaaudio_module_name = PYALSAAUDIO
-        self.pyaudio_module_name = PYAUDIO
         self.sounddevice_module_name = SOUNDDEVICE
         self.experiment.pyalsaaudio_module_name = PYALSAAUDIO
         self.experiment.sounddevice_module_name = SOUNDDEVICE
-        self.experiment.pyaudio_module_name = PYAUDIO
 
         # (index, name, host API) per device
         devices = {}
@@ -94,8 +92,6 @@ class AudioLowLatencyInitItem(AudioLowLatencyItem):
             devices[PYALSAAUDIO] = [(index, name, None) for index, name in enumerate(self._alsa_devices())]
         if 'sounddevice' in MODULES_ENABLED:
             devices[SOUNDDEVICE] = self._sounddevice_devices()
-        if 'pyaudio' in MODULES_ENABLED:
-            devices[PYAUDIO] = self._pyaudio_devices()
         # Only modules with devices, in the order of preference
         self._set('module_list', [])
         self._set('device_dict', {})
@@ -103,11 +99,11 @@ class AudioLowLatencyInitItem(AudioLowLatencyItem):
         # The index and host API of each device of device_dict
         self._set('device_index_dict', {})
         self._set('device_host_api_dict', {})
-        # The host APIs per module (SoundDevice and PyAudio)
+        # The host APIs per module (SoundDevice)
         self._set('host_api_dict', {})
         # Devices left out, with their host API, for the error message
         self._set('unusable_device_dict', {})
-        for module in (PYALSAAUDIO, SOUNDDEVICE, PYAUDIO):
+        for module in (PYALSAAUDIO, SOUNDDEVICE):
             usable = [device for device in devices.get(module, []) if device[2] not in UNUSABLE_HOST_APIS]
             self._get('unusable_device_dict')[module] = {name: host_api for _, name, host_api in devices.get(module, [])
                                                          if host_api in UNUSABLE_HOST_APIS}
@@ -150,21 +146,6 @@ class AudioLowLatencyInitItem(AudioLowLatencyItem):
             self._show_message(f'Could not import sounddevice: {e}')
             return []
 
-    def _pyaudio_devices(self):
-        try:
-            import pyaudio
-        except ImportError:
-            self._show_message('Could not import pyaudio')
-            return []
-        pyaudio_device = pyaudio.PyAudio()
-        cards = []
-        for di in range(pyaudio_device.get_device_count()):
-            card = pyaudio_device.get_device_info_by_index(di)
-            host_api = pyaudio_device.get_host_api_info_by_index(card['hostApi'])['name']
-            cards.append((di, card['name'], host_api))
-        pyaudio_device.terminate()
-        return cards
-
     def prepare(self):
         super().prepare()
         self._reset_device()
@@ -199,8 +180,6 @@ class AudioLowLatencyInitItem(AudioLowLatencyItem):
 
             if self.module == PYALSAAUDIO:
                 self._open_alsa()
-            elif self.module == PYAUDIO:
-                self._open_pyaudio()
             elif self.module == SOUNDDEVICE:
                 self._open_sounddevice()
 
@@ -230,9 +209,9 @@ class AudioLowLatencyInitItem(AudioLowLatencyItem):
             raise OSException(f'Dummy mode should be yes or no, not {self.dummy_mode}')
 
     def _find_device(self):
-        """Returns the library's index of the chosen device. SoundDevice and
-        PyAudio: only the devices of the chosen host API count; with
-        duplicate names the first device is used.
+        """Returns the library's index of the chosen device. SoundDevice:
+        only the devices of the chosen host API count; with duplicate names
+        the first device is used.
         """
         device_list = self._get('device_dict')[self.module]
         positions = range(len(device_list))
@@ -411,14 +390,8 @@ class AudioLowLatencyInitItem(AudioLowLatencyItem):
 
     def _log_portaudio_latency(self):
         """Logs the latency in ms that PortAudio reports for the stream."""
-        if self.module == SOUNDDEVICE:
-            latency = self.device.latency
-        elif self.kind == 'play':
-            latency = self.device.get_output_latency()
-        else:
-            latency = self.device.get_input_latency()
         # PortAudio reports the latency in seconds
-        latency = latency * 1000
+        latency = self.device.latency * 1000
         self._show_message(f'PortAudio latency: {latency} ms')
         self._set_var('portaudio_latency', latency)
 
@@ -489,35 +462,6 @@ class AudioLowLatencyInitItem(AudioLowLatencyItem):
             # e.g. "closed" when another program changed the device
             return None
 
-    def _open_pyaudio(self):
-        import pyaudio
-
-        # Sample width 4 is float32 in PyAudio
-        if self.bitdepth == 32:
-            raise OSException(f'{self.bitdepth} bit audio is not supported by PyAudio')
-        self.device_init = pyaudio.PyAudio()
-        try:
-            if self.kind == 'play':
-                direction = dict(output=True, output_device_index=self.device_index)
-            else:
-                direction = dict(input=True, input_device_index=self.device_index)
-            self.device = self.device_init.open(format=self.device_init.get_format_from_width(self.samplewidth),
-                                                channels=self.channels,
-                                                rate=self.samplerate,
-                                                frames_per_buffer=self.period_size,
-                                                **direction)
-            self._show_message("Audio device opened")
-        except Exception as e:
-            # The device's default sample rate, for the explanation
-            default_samplerate = self.device_init.get_device_info_by_index(self.device_index)['defaultSampleRate']
-            self.device_init.terminate()
-            del self.device_init
-            raise OSException(f'Could not open audio device {self.device_name}\n\nMessage: {e}'
-                              f'{self._sample_rate_hint(e, default_samplerate)}')
-
-        if self.kind == 'play':
-            self._show_message(f'Frames available for writing: {self.device.get_write_available()}')
-
     def _open_sounddevice(self):
         import sounddevice
 
@@ -549,9 +493,8 @@ class AudioLowLatencyInitItem(AudioLowLatencyItem):
         if str(PA_INVALID_SAMPLE_RATE) not in str(error):
             return ''
         rate = round(default_samplerate)
-        if self.device_host_api == WASAPI and not (self.module == SOUNDDEVICE and self.wasapi_exclusive):
-            alternative = (f'WASAPI exclusive mode (host API {WASAPI})' if self.module == SOUNDDEVICE
-                           else 'SoundDevice with WASAPI exclusive mode')
+        if self.device_host_api == WASAPI and not self.wasapi_exclusive:
+            alternative = f'WASAPI exclusive mode (host API {WASAPI})'
             return ('\n\nIn shared mode, WASAPI only accepts the sample rate that is set for the device in the '
                     f'Windows sound settings ({rate} Hz): choose that sample rate or {alternative}')
         if self.device_host_api == ASIO:
@@ -587,6 +530,10 @@ class AudioLowLatencyInitItem(AudioLowLatencyItem):
         self.dummy_mode = self.var.dummy_mode
         self.verbose = self.var.verbose
         self.module = self.var.module
+        if self.module == PYAUDIO:
+            # Also in dummy mode, so that a test fails like the lab would
+            raise OSException(f'{PYAUDIO} is no longer supported: choose {SOUNDDEVICE}, '
+                              f'which lists the same devices')
         self.device_name = self.var.device_name
         self.host_api = self.var.host_api
         wasapi_exclusive = self.var.wasapi_exclusive
@@ -638,8 +585,8 @@ class AudioLowLatencyInitItem(AudioLowLatencyItem):
         self._set_var('period_size', self.period_size)
         self._set_var('period_time_exact', self.period_time_exact)
         self._set_var('period_time', self.period_time)
-        # SoundDevice and PyAudio don't use them: PortAudio chooses the
-        # buffer (see buffer_size_actual)
+        # SoundDevice doesn't use them: PortAudio chooses the buffer (see
+        # buffer_size_actual)
         self._set_var('buffer_size', self.buffer_size)
         self._set_var('periods', self.periods)
         self._set_var('buffer_time', round(self.periods * self.period_time, 1))
@@ -671,13 +618,7 @@ class AudioLowLatencyInitItem(AudioLowLatencyItem):
             return
         try:
             self._show_message("Closing audio device")
-            if self.module == PYAUDIO:
-                device.stop_stream()
-                device.close()
-                self.device_init.terminate()
-                del self.device_init
-            else:
-                device.close()
+            device.close()
 
             delattr(self.experiment, f'audio_low_latency_{self.kind}_device')
             del self.device

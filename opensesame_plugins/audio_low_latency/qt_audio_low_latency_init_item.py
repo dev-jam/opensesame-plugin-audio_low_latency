@@ -25,7 +25,7 @@ from .audio_low_latency_item import ALL_HOST_APIS, PYALSAAUDIO, SOUNDDEVICE, WAS
 
 class QtAudioLowLatencyInitItem(QtAutoPlugin):
     """GUI of the init items: the host API list follows the chosen module
-    (SoundDevice and PyAudio), the device list follows the module and the
+    (SoundDevice), the device list follows the module and the
     host API, the module, host API and device are disabled in dummy mode,
     the number of periods is only enabled for PyAlsaAudio and WASAPI
     exclusive mode only for SoundDevice with host API WASAPI.

@@ -29,7 +29,7 @@ controls = [
     }, {
        "type": "combobox",
        "var": "host_api",
-       "label": "Host API (SoundDevice and PyAudio)",
+       "label": "Host API (SoundDevice)",
        "options": [
        ],
        "name": "combobox_host_api"
