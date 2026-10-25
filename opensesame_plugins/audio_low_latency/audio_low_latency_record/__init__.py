@@ -9,51 +9,43 @@ controls = [
     {
         "type": "line_edit",
         "var": "filename",
-        "label": "Audio Filename",
-        "name": "line_edit_filename",
-        "tooltip": "Give output filename without extension"
+        "label": "Audio Filename (without .wav)",
+        "name": "line_edit_filename"
     }, {
         "type": "checkbox",
         "var": "file_exists_action",
         "label": "Do not overwrite existing files, automatically append suffix",
-        "name": "checkbox_file_exists_action",
-        "tooltip": "If file exists append suffix to filename?"
+        "name": "checkbox_file_exists_action"
     }, {
         "type": "line_edit",
         "var": "duration",
-        "label": "Duration (ms)",
-        "name": "line_edit_duration",
-        "tooltip": "Value in ms"
+        "label": "Duration (ms or infinite)",
+        "name": "line_edit_duration"
     }, {
         "type": "line_edit",
         "var": "delay_start",
         "label": "Start delay (ms)",
-        "name": "line_edit_delay_start",
-        "tooltip": "Value in ms"
+        "name": "line_edit_delay_start"
     }, {
         "type": "line_edit",
         "var": "delay_stop",
         "label": "Stop delay (ms)",
-        "name": "line_edit_delay_stop",
-        "tooltip": "Value in ms"
+        "name": "line_edit_delay_stop"
     }, {
         "type": "line_edit",
         "var": "pause_resume",
-        "label": "Pause/Resume",
-        "name": "line_edit_pause_resume",
-        "tooltip": "Expecting a semicolon-separated list of button characters, e.g., a;b;c"
+        "label": "Pause/Resume keys (separated by ;)",
+        "name": "line_edit_pause_resume"
     }, {
         "type": "line_edit",
         "var": "stop",
-        "label": "Stop",
-        "name": "line_edit_stop",
-        "tooltip": "Expecting a semicolon-separated list of button characters, e.g., a;b;c"
+        "label": "Stop keys (separated by ;)",
+        "name": "line_edit_stop"
     }, {
         "type": "checkbox",
         "var": "ram_cache",
         "label": "Cache to RAM",
-        "name": "checkbox_ram_cache",
-        "tooltip": "Cache to RAM before saving?"
+        "name": "checkbox_ram_cache"
     }, {
         "type": "text",
         "label": "<b>IMPORTANT:</b> this is a foreground item, it will wait for the recording to finish before advancing to the next item."

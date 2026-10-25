@@ -10,38 +10,32 @@ controls = [
         "type": "filepool",
         "var": "filename",
         "label": "Audio Filename",
-        "name": "filepool_filename",
-        "tooltip": "Give filename"
+        "name": "filepool_filename"
     }, {
         "type": "line_edit",
         "var": "duration",
-        "label": "Duration (ms)",
-        "name": "line_edit_duration",
-        "tooltip": "Value in ms"
+        "label": "Duration (ms or sound)",
+        "name": "line_edit_duration"
     }, {
         "type": "line_edit",
         "var": "delay",
         "label": "Delay (ms)",
-        "name": "line_edit_delay",
-        "tooltip": "Value in ms"
+        "name": "line_edit_delay"
     }, {
         "type": "line_edit",
         "var": "pause_resume",
-        "label": "Pause/Resume",
-        "name": "line_edit_pause_resume",
-        "tooltip": "Expecting a semicolon-separated list of button characters, e.g., a;b;c"
+        "label": "Pause/Resume keys (separated by ;)",
+        "name": "line_edit_pause_resume"
     }, {
         "type": "line_edit",
         "var": "stop",
-        "label": "Stop",
-        "name": "line_edit_stop",
-        "tooltip": "Expecting a semicolon-separated list of button characters, e.g., a;b;c"
+        "label": "Stop keys (separated by ;)",
+        "name": "line_edit_stop"
     }, {
         "type": "checkbox",
         "var": "ram_cache",
         "label": "Preload",
-        "name": "checkbox_ram_cache",
-        "tooltip": "Preload file to RAM?"
+        "name": "checkbox_ram_cache"
     }, {
         "type": "text",
         "label": "<b>IMPORTANT:</b> this is a multi-threaded background item, it will immediately advance to the next item, it will NOT wait for the playback to finish."
