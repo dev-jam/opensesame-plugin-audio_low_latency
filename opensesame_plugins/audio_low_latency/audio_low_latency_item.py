@@ -389,6 +389,7 @@ class AudioLowLatencyStreamItem(AudioLowLatencyItem):
         """
         frames = self._get('silence_frames', 0)
         if frames:
+            self._show_message(f'Writing {frames} frames of silence')
             # 8 bit wave data is unsigned: silence is 0x80
             stream.write((b'\x80' if self.samplewidth == 1 else b'\x00') * (frames * self.samplewidth * self.channels))
 

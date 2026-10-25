@@ -405,7 +405,9 @@ class AudioLowLatencyInitItem(AudioLowLatencyItem):
         """
         if self.kind != 'play' or not self.wasapi_exclusive:
             return 0
-        return math.ceil(self.device.latency * self.samplerate)
+        frames = math.ceil(self.device.latency * self.samplerate)
+        self._show_message(f'WASAPI exclusive mode: {frames} frames of silence after each sound and at a pause')
+        return frames
 
     def _log_portaudio_latency(self):
         """Logs the latency in ms that PortAudio reports for the stream."""
