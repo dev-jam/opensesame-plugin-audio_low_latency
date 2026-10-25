@@ -54,6 +54,7 @@ UNUSABLE_HOST_APIS = {
 # SoundDevice loads its PortAudio library with ASIO (Windows) only when this
 # environment variable exists when it is imported
 SD_ENABLE_ASIO = 'SD_ENABLE_ASIO'
+ASIO = 'ASIO'
 # PortAudio's error code paInvalidSampleRate
 PA_INVALID_SAMPLE_RATE = -9997
 
@@ -491,10 +492,12 @@ class AudioLowLatencyInitItem(AudioLowLatencyItem):
                                                 **direction)
             self._show_message("Audio device opened")
         except Exception as e:
+            # The device's default sample rate, for the explanation
+            default_samplerate = self.device_init.get_device_info_by_index(self.device_index)['defaultSampleRate']
             self.device_init.terminate()
             del self.device_init
             raise OSException(f'Could not open audio device {self.device_name}\n\nMessage: {e}'
-                              f'{self._wasapi_shared_hint(e)}')
+                              f'{self._sample_rate_hint(e, default_samplerate)}')
 
         if self.kind == 'play':
             self._show_message(f'Frames available for writing: {self.device.get_write_available()}')
@@ -517,19 +520,28 @@ class AudioLowLatencyInitItem(AudioLowLatencyItem):
             self._show_message("Audio device opened")
             self.device.start()
         except Exception as e:
+            default_samplerate = sounddevice.query_devices(self.device_index)['default_samplerate']
             raise OSException(
-                f'Could not start audio device\n\nMessage: {e}{self._wasapi_shared_hint(e)}')
+                f'Could not start audio device\n\nMessage: {e}{self._sample_rate_hint(e, default_samplerate)}')
 
-    def _wasapi_shared_hint(self, error):
+    def _sample_rate_hint(self, error, default_samplerate):
         """Returns an explanation for a sample rate that WASAPI refuses in
-        shared mode, else ''.
+        shared mode or that an ASIO driver refuses, with the device's default
+        sample rate from PortAudio (WASAPI: the rate of the Windows sound
+        settings; ASIO: the driver's current rate), else ''.
         """
-        if (self.device_host_api == WASAPI and not (self.module == SOUNDDEVICE and self.wasapi_exclusive)
-                and str(PA_INVALID_SAMPLE_RATE) in str(error)):
+        if str(PA_INVALID_SAMPLE_RATE) not in str(error):
+            return ''
+        rate = round(default_samplerate)
+        if self.device_host_api == WASAPI and not (self.module == SOUNDDEVICE and self.wasapi_exclusive):
             alternative = (f'WASAPI exclusive mode (host API {WASAPI})' if self.module == SOUNDDEVICE
                            else 'SoundDevice with WASAPI exclusive mode')
             return ('\n\nIn shared mode, WASAPI only accepts the sample rate that is set for the device in the '
-                    f'Windows sound settings: choose that sample rate or {alternative}')
+                    f'Windows sound settings ({rate} Hz): choose that sample rate or {alternative}')
+        if self.device_host_api == ASIO:
+            not_working = ': the driver may not work at all' if rate == 0 else ''
+            return (f'\n\nThe ASIO driver refuses this sample rate. Its current sample rate is {rate} Hz'
+                    f'{not_working}. Check the settings in the driver\'s control panel')
         return ''
 
     def close(self):
