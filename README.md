@@ -53,6 +53,8 @@ Background:
 - **Record Resume** resumes recording of audio.
 
 
+Linux (SoundDevice and PyAudio): devices of PortAudio's OSS host API (/dev/dsp, the OSS emulation of the kernel) are not listed: they bypass ALSA, so the sound card and the actual sizes can't be found; use PyAlsaAudio, or the ALSA devices of SoundDevice and PyAudio. An experiment with such a device gives an error.
+
 Variables in the log file ([kind] is play or record):
 
 - Init items: audio_low_latency_[kind]_module, _device_name, _period_size, _period_time, _period_time_exact, _bitdepth, _samplewidth, _samplerate and _channels; with PyAlsaAudio also _buffer_size, _periods and _buffer_time; and audio_low_latency_[kind]_soundcard, _period_size_actual and _buffer_size_actual (see below); with SoundDevice and PyAudio also audio_low_latency_[kind]_portaudio_latency: the latency in ms that PortAudio reports for the stream (on all systems, "dummy mode" in dummy mode).
@@ -72,6 +74,10 @@ The period size and buffer size that are actually used, in frames (audio_low_lat
 - Windows, SoundDevice with a WASAPI device: the buffer size of WASAPI (from PortAudio); the period size is "unknown". Other host APIs (MME, DirectSound, WDM-KS, ASIO) and PyAudio give "unknown" for both: PortAudio doesn't report them (and PyAudio includes PortAudio, so its WASAPI functions can't be called).
 - macOS: "unknown".
 - In dummy mode: "dummy mode".
+
+Windows (SoundDevice and PyAudio, through PortAudio):
+
+- DirectSound and WDM-KS devices are not listed: the items play and record with blocking reads and writes, which PortAudio does not support for them (with DirectSound nothing was played or recorded, without an error; WDM-KS devices could not be opened). An experiment with such a device gives an error.
 
 
 Known bugs:

@@ -24,8 +24,10 @@ Inline scripts may use these attributes: keep their names and types.
   ('yes'/'no'), module, bitdepth, samplewidth, samplerate, channels,
   period_size, data_size, period_time, period_time_exact, for PyAlsaAudio
   also buffer_size, periods and buffer_time; module_list, device_dict and
-  device_selected_dict (devices per module, for the GUI); locked and
-  thread_running (0/1).
+  device_selected_dict (devices per module, for the GUI), device_index_dict
+  (the library's index of each device in device_dict) and
+  unusable_device_dict (per module the devices left out: {name: host
+  API}); locked and thread_running (0/1).
 - Set by the start item: thread, thread_error (exception of the thread, or
   None), continue and execute_pause (0/1), pause_resume_key (the pause/resume
   keys as entered); the record start item also sets infinite (1 when it

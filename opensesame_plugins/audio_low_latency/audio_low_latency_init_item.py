@@ -40,6 +40,17 @@ ASOUND_PATH = '/proc/asound'
 HDA_PCM_SUFFIXES = (' Alt Analog', ' Analog', ' Digital')
 # The ALSA devices of PortAudio, e.g. 'M2: USB Audio (hw:1,0)'
 PORTAUDIO_HW_DEVICE = r'\(hw:(\d+),(\d+)\)$'
+# Host APIs of PortAudio that the items don't use, with the reason.
+# DirectSound and WDM-KS have no blocking reading and writing (PortAudio
+# 19.7.0: ReadStream() and WriteStream() of DirectSound do nothing and
+# report success; WDM-KS refuses to open the stream). OSS (/dev/dsp, the
+# OSS emulation of the kernel) bypasses ALSA and the sound card lookup.
+NO_BLOCKING_IO = 'PortAudio can\'t play or record with it the way the items do'
+UNUSABLE_HOST_APIS = {
+    'Windows DirectSound': NO_BLOCKING_IO,
+    'Windows WDM-KS': NO_BLOCKING_IO,
+    'OSS': 'the OSS emulation bypasses ALSA; use PyAlsaAudio, or ALSA with SoundDevice or PyAudio'
+}
 
 
 class AudioLowLatencyInitItem(AudioLowLatencyItem):
@@ -68,9 +79,10 @@ class AudioLowLatencyInitItem(AudioLowLatencyItem):
         self.experiment.sounddevice_module_name = SOUNDDEVICE
         self.experiment.pyaudio_module_name = PYAUDIO
 
+        # (index, name, host API) per device
         devices = {}
         if os.name == 'posix' and 'alsaaudio' in MODULES_ENABLED:
-            devices[PYALSAAUDIO] = self._alsa_devices()
+            devices[PYALSAAUDIO] = [(index, name, None) for index, name in enumerate(self._alsa_devices())]
         if 'sounddevice' in MODULES_ENABLED:
             devices[SOUNDDEVICE] = self._sounddevice_devices()
         if 'pyaudio' in MODULES_ENABLED:
@@ -79,11 +91,19 @@ class AudioLowLatencyInitItem(AudioLowLatencyItem):
         self._set('module_list', [])
         self._set('device_dict', {})
         self._set('device_selected_dict', {})
+        # The index of each device of device_dict for the library
+        self._set('device_index_dict', {})
+        # Devices left out, with their host API, for the error message
+        self._set('unusable_device_dict', {})
         for module in (PYALSAAUDIO, SOUNDDEVICE, PYAUDIO):
-            if devices.get(module):
+            usable = [device for device in devices.get(module, []) if device[2] not in UNUSABLE_HOST_APIS]
+            self._get('unusable_device_dict')[module] = {name: host_api for _, name, host_api in devices.get(module, [])
+                                                         if host_api in UNUSABLE_HOST_APIS}
+            if usable:
                 self._get('module_list').append(module)
-                self._get('device_dict')[module] = devices[module]
-                self._get('device_selected_dict')[module] = devices[module][0]
+                self._get('device_dict')[module] = [name for _, name, _ in usable]
+                self._get('device_index_dict')[module] = [index for index, _, _ in usable]
+                self._get('device_selected_dict')[module] = usable[0][1]
 
         self._show_message(f'Audio Low Latency {self._title} plug-in has been initialized!')
 
@@ -102,7 +122,9 @@ class AudioLowLatencyInitItem(AudioLowLatencyItem):
     def _sounddevice_devices(self):
         try:
             import sounddevice
-            return [card['name'] for card in sounddevice.query_devices()]
+            host_apis = [host_api['name'] for host_api in sounddevice.query_hostapis()]
+            return [(card['index'], card['name'], host_apis[card['hostapi']])
+                    for card in sounddevice.query_devices()]
         except (ImportError, OSError) as e:
             # sounddevice raises an OSError when the PortAudio library is missing
             self._show_message(f'Could not import sounddevice: {e}')
@@ -115,8 +137,11 @@ class AudioLowLatencyInitItem(AudioLowLatencyItem):
             self._show_message('Could not import pyaudio')
             return []
         pyaudio_device = pyaudio.PyAudio()
-        cards = [pyaudio_device.get_device_info_by_index(di)['name']
-                 for di in range(pyaudio_device.get_device_count())]
+        cards = []
+        for di in range(pyaudio_device.get_device_count()):
+            card = pyaudio_device.get_device_info_by_index(di)
+            host_api = pyaudio_device.get_host_api_info_by_index(card['hostApi'])['name']
+            cards.append((di, card['name'], host_api))
         pyaudio_device.terminate()
         return cards
 
@@ -152,9 +177,14 @@ class AudioLowLatencyInitItem(AudioLowLatencyItem):
                                   f'Available modules: {", ".join(module_list)}')
             device_list = self._get('device_dict')[self.module]
             if self.device_name not in device_list:
+                host_api = self._get('unusable_device_dict')[self.module].get(self.device_name)
+                if host_api is not None:
+                    raise OSException(f'Device {self.device_name} uses {host_api}, which the plugin can\'t use: '
+                                      f'{UNUSABLE_HOST_APIS[host_api]}\n\n'
+                                      f'Available devices: {", ".join(device_list)}')
                 raise OSException(f'Device {self.device_name} is not available for module {self.module}\n\n'
                                   f'Available devices: {", ".join(device_list)}')
-            self.device_index = device_list.index(self.device_name)
+            self.device_index = self._get('device_index_dict')[self.module][device_list.index(self.device_name)]
 
             if self.module == PYALSAAUDIO:
                 self._open_alsa()
