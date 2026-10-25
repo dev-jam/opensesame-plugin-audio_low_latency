@@ -47,7 +47,7 @@ controls = [
         "label": "<b>IMPORTANT:</b> this is a multi-threaded background item, it will immediately advance to the next item, it will NOT wait for the playback to finish."
     }, {
         "type": "text",
-        "label": "<small><b>Note:</b> Audio Low Latency Play Init item at the begin of the experiment is needed for initialization of the audio device</small>"
+        "label": "<small><b>Note:</b> Audio Low Latency Play Init item at the beginning of the experiment is needed for initialization of the audio device</small>"
     }, {
         "type": "text",
         "label": f"<small>Audio Low Latency version {__version__}</small>"

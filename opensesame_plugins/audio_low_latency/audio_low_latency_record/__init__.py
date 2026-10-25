@@ -1,4 +1,4 @@
-"""Low Latency Audio - starts audio recording on the foreground"""
+"""Low Latency Audio - starts audio recording in the foreground"""
 
 from .. import __version__
 
@@ -59,7 +59,7 @@ controls = [
         "label": "<b>IMPORTANT:</b> this is a foreground item, it will wait for the recording to finish before advancing to the next item."
     }, {
         "type": "text",
-        "label": "<small><b>Note:</b> Audio Low Latency Record Init item at the begin of the experiment is needed for initialization of the audio device</small>"
+        "label": "<small><b>Note:</b> Audio Low Latency Record Init item at the beginning of the experiment is needed for initialization of the audio device</small>"
     }, {
         "type": "text",
         "label": f"<small>Audio Low Latency version {__version__}</small>"

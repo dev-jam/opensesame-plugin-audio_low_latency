@@ -53,6 +53,10 @@ Background:
 - **Record Resume** resumes recording of audio.
 
 
+Linux (PyAlsaAudio): "hw:" devices use the sound card directly, so the card must support the bit depth, sample rate and number of channels; "plughw:" devices let ALSA convert what the card doesn't support.
+
+Recordings are saved as [Audio Filename].wav in the folder of the log file; a filename with a folder (e.g. recordings/subject_1) saves into that folder below the log folder and creates it when needed, and a full path is used as it is.
+
 Linux (SoundDevice): devices of PortAudio's OSS host API (/dev/dsp, the OSS emulation of the kernel) are not listed: they bypass ALSA, so the sound card and the actual sizes can't be found; use PyAlsaAudio, or the ALSA devices of SoundDevice. An experiment with such a device gives an error.
 
 PyAudio is no longer supported (after 12.0.2): an experiment with module "PyAudio (PortAudio)" gives an error; choose "SoundDevice (PortAudio)", which lists the same devices (the latency may differ).
@@ -64,6 +68,8 @@ Variables in the log file ([kind] is play or record):
 - Keys: audio_low_latency_[kind]_key_presses and audio_low_latency_[kind]_key_timestamps (play and record items), audio_low_latency_[kind]_start_key_presses and audio_low_latency_[kind]_start_key_timestamps (start items), separated by ';'.
 - Play and play start items: wav_duration and wait_to_finish (in ms; wait_to_finish not in dummy mode).
 
+The host API, WASAPI and PortAudio variables exist only with SoundDevice: a text that shows them (e.g. in a feedback item) stops with an error when the experiment uses PyAlsaAudio. To show a default instead, write e.g. {var.get('audio_low_latency_play_host_api', 'n/a')}.
+
 The sound card (audio_low_latency_[kind]_soundcard) is found as follows:
 
 - Linux (PyAlsaAudio, and the "(hw:X,Y)" devices of SoundDevice): the codec of an onboard (HD Audio) device, e.g. "Realtek ALC1220", else the name of the card, e.g. "MOTU M2", from /proc/asound. Devices that are not on a sound card, such as "default" with a sound server, "pipewire" or "null", give "unknown".
@@ -72,7 +78,7 @@ The sound card (audio_low_latency_[kind]_soundcard) is found as follows:
 
 The period size and buffer size that are actually used, in frames (audio_low_latency_[kind]_period_size_actual and _buffer_size_actual):
 
-- Linux (PyAlsaAudio devices on a sound card, also through a plug or dmix device such as "default:CARD=X", and the "(hw:X,Y)" devices of SoundDevice): the hardware parameters of the sound card, from /proc/asound. With PyAlsaAudio, a period size or number of periods other than the chosen one is an error; with SoundDevice, a period size other than the chosen one is a warning in the debug window (they have no buffer size setting: PortAudio chooses the buffer size). Other devices, such as "default" with a sound server, "pipewire" or "null", give "unknown".
+- Linux (PyAlsaAudio devices on a sound card, also through a plug or dmix device such as "default:CARD=X", and the "(hw:X,Y)" devices of SoundDevice): the hardware parameters of the sound card, from /proc/asound. With PyAlsaAudio, a period size or number of periods other than the chosen one is an error; with SoundDevice, a period size other than the chosen one is a warning in the debug window, and the buffer size is not checked (PortAudio is asked for a buffer of the chosen number of periods and may round it). Other devices, such as "default" with a sound server, "pipewire" or "null", give "unknown".
 - Windows, SoundDevice with a WASAPI device: the buffer size of WASAPI (from PortAudio); the period size is "unknown". Other host APIs (MME, ASIO) give "unknown" for both: PortAudio doesn't report them.
 - macOS: "unknown".
 - In dummy mode: "dummy mode".

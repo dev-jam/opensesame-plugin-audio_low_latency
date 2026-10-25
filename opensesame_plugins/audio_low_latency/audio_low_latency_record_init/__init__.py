@@ -78,7 +78,7 @@ controls = [
         "tooltip": "value is an integer"
     }, {
         "type": "text",
-        "label": "<small><b>Note:</b> Audio Low Latency Record Init item at the begin of the experiment is needed for initialization of the audio device</small>"
+        "label": "<small><b>Note:</b> Audio Low Latency Record Init item at the beginning of the experiment is needed for initialization of the audio device</small>"
     }, {
         "type": "text",
         "label": f"<small>Audio Low Latency version {__version__}</small>"
