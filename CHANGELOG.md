@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 
 - added: the init items log the period size and buffer size that the sound card uses as `audio_low_latency_play_period_size_actual`, `_buffer_size_actual` and the same for record (on Linux from /proc/asound for PyAlsaAudio devices with CARD= and the "(hw:X,Y)" devices of SoundDevice and PyAudio; on Windows the WASAPI buffer size with SoundDevice; else "unknown"); with SoundDevice and PyAudio, a period size other than the chosen one is a warning
+- fixed: the PyAudio init items showed the estimated latency in seconds with "ms" as unit (e.g. "0.0232ms" for 23.2 ms); the record init item showed the frames recorded so far as "Buffer size", the play init item shows the frames available for writing as such instead of as "Buffer size" (messages only)
 
 ## [12.0.2] - 2026-10-25
 

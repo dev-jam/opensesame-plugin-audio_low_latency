@@ -398,12 +398,12 @@ class AudioLowLatencyInitItem(AudioLowLatencyItem):
             del self.device_init
             raise OSException(f'Could not open audio device {self.device_name}\n\nMessage: {e}')
 
+        # PortAudio reports the latency in seconds
         if self.kind == 'play':
-            self._show_message(f'Estimated output latency: {self.device.get_output_latency()}ms ')
-            self._show_message(f'Buffer size: {self.device.get_write_available()} frames ')
+            self._show_message(f'Estimated output latency: {self.device.get_output_latency() * 1000} ms')
+            self._show_message(f'Frames available for writing: {self.device.get_write_available()}')
         else:
-            self._show_message(f'Estimated input latency: {self.device.get_input_latency()}ms ')
-            self._show_message(f'Buffer size: {self.device.get_read_available()} frames ')
+            self._show_message(f'Estimated input latency: {self.device.get_input_latency() * 1000} ms')
 
     def _open_sounddevice(self):
         import sounddevice
