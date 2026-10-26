@@ -57,6 +57,11 @@ Variables for the log file (experiment.var), also for inline scripts:
   audio_low_latency_<kind>_key_presses and _key_timestamps, for the start
   items audio_low_latency_<kind>_start_key_presses and _key_timestamps (keys
   and times separated by ';').
+- Set by the play and play start items:
+  audio_low_latency_play_underruns_<item name>, by the record and record
+  start items audio_low_latency_record_overruns_<item name>: the number of
+  buffer underruns or overruns (PyAlsaAudio), 'unknown' (SoundDevice) or
+  'dummy mode'; set when the playback or recording ends.
 - Set by the play and play start items: wav_duration (ms) and
   wait_to_finish (ms, not in dummy mode); one variable for all these items.
 """
@@ -138,6 +143,16 @@ class AudioLowLatencyItem(Item):
                 raise error
             raise OSException(
                 f'Background audio {self._activity} failed\n\nMessage: {error}') from error
+
+    def _set_xruns(self, value):
+        """Logs the buffer underruns (play) or overruns (record) of this
+        item: a number (PyAlsaAudio), 'unknown' (SoundDevice) or 'dummy
+        mode'. PortAudio's reports can't be counted per item: WASAPI
+        doesn't report them for blocking streams, and ALSA reports them one
+        write late, also those of the idle stream between two sounds.
+        """
+        xruns = 'underruns' if self.kind == 'play' else 'overruns'
+        self.experiment.var.set(f'audio_low_latency_{self.kind}_{xruns}_{self.name}', value)
 
     def _set_stimulus_onset(self):
         timestamp = self.clock.time()

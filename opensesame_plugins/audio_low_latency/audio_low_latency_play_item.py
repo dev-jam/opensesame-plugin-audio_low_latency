@@ -149,6 +149,7 @@ class AudioLowLatencyPlayItem(AudioLowLatencyStreamItem):
                 self._play(*args)
         else:
             self._set_stimulus_onset()
+            self._set_xruns('dummy mode')
             self._show_message('Dummy mode enabled, NOT playing audio')
 
     def _play(self, stream, wav_file, chunk, delay, wav_data=None):
@@ -282,6 +283,7 @@ class AudioLowLatencyPlayItem(AudioLowLatencyStreamItem):
         if underruns:
             oslogger.warning(f'{underruns} buffer underrun(s) during audio playback: '
                              f'{underruns} period(s) of the sound were not played')
+        self._set_xruns(underruns if self.module == PYALSAAUDIO else 'unknown')
         self._show_message('Finished audio playback')
         self._show_message(f"Audio file duration: {self.wav_duration} ms")
         self._show_message(f"Duration total: {duration_total} ms")

@@ -131,6 +131,7 @@ class AudioLowLatencyRecordItem(AudioLowLatencyStreamItem):
                 self._record(*args)
         else:
             self._set_stimulus_onset()
+            self._set_xruns('dummy mode')
             self._show_message('Dummy mode enabled, NOT recording audio')
 
     def _record(self, stream, wav_file, chunk, delay_start, delay_stop):
@@ -197,6 +198,7 @@ class AudioLowLatencyRecordItem(AudioLowLatencyStreamItem):
         if self.overruns:
             oslogger.warning(f'{self.overruns} buffer overrun(s) during audio recording: '
                              'parts of the recording are missing')
+        self._set_xruns(self.overruns if self.module == PYALSAAUDIO else 'unknown')
         self._show_message('Finished audio recording')
         self._show_message(f"Duration recorded wave file: {self.wav_duration} ms")
 

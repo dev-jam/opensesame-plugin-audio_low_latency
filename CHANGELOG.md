@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+- added: the play and play start items log the number of buffer underruns as `audio_low_latency_play_underruns_<item name>`, the record and record start items the number of overruns as `audio_low_latency_record_overruns_<item name>` (before, only a warning in the debug window). PyAlsaAudio only: with SoundDevice the value is "unknown" (PortAudio doesn't report them for WASAPI, and for ALSA one write late, including the pause between sounds); "dummy mode" in dummy mode
+
 ## [13.1.1] - 2026-10-26
 
 - changed: the host API setting of the init items no longer offers "all", which showed the devices of all host APIs together: on Windows most devices are listed once per host API with the same name, so the host API of a device couldn't be seen. Every device is still available under its own host API. PyAlsaAudio shows "ALSA" (disabled) instead of "all". Experiments with "all" (13.0.0 and 13.1.0) or without a host API setting (before 13.0.0) still open the first device with the chosen name; opening the init item in the GUI replaces "all" by the host API of that device, so the same device stays selected. The host API errors no longer list "all"
