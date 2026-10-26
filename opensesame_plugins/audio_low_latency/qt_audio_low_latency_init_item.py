@@ -20,15 +20,15 @@ __license__ = "GPLv3"
 
 from libqtopensesame.items.qtautoplugin import QtAutoPlugin
 
-from .audio_low_latency_item import ALL_HOST_APIS, PYALSAAUDIO, SOUNDDEVICE, WASAPI
+from .audio_low_latency_item import ALSA, PYALSAAUDIO, SOUNDDEVICE, WASAPI
 
 
 class QtAudioLowLatencyInitItem(QtAutoPlugin):
     """GUI of the init items: the host API list follows the chosen module
-    (SoundDevice), the device list follows the module and the
-    host API, the module, host API and device are disabled in dummy mode,
-    and WASAPI exclusive mode is only enabled for SoundDevice with host
-    API WASAPI.
+    (SoundDevice; PyAlsaAudio shows ALSA, disabled), the device list
+    follows the module and the host API, the module, host API and device
+    are disabled in dummy mode, and WASAPI exclusive mode is only enabled
+    for SoundDevice with host API WASAPI.
     """
 
     def init_edit_widget(self):
@@ -42,8 +42,11 @@ class QtAudioLowLatencyInitItem(QtAutoPlugin):
         else:
             self.current_module = module_list[0]
             self.var.module = self.current_module
+        # The host API chosen per module, when switching modules
+        self.host_api_selected = {}
         if self.var.host_api not in self._host_api_list(self.current_module):
-            self.var.host_api = ALL_HOST_APIS
+            # 'all' (13.1.0 or earlier) or not available here
+            self.var.host_api = self._device_host_api(self.current_module, self.var.device_name)
 
         self.combobox_module.clear()
         self.combobox_module.addItems(module_list)
@@ -52,11 +55,24 @@ class QtAudioLowLatencyInitItem(QtAutoPlugin):
         self._fill_devices()
 
     def _host_api_list(self, module):
-        return [ALL_HOST_APIS] + self._get('host_api_dict').get(module, [])
+        if module == PYALSAAUDIO:
+            return [ALSA]
+        return self._get('host_api_dict').get(module, [])
+
+    def _device_host_api(self, module, device_name):
+        """Returns the host API of the device that the init item opens with
+        host API 'all': the first device with that name, else the first
+        device of the module.
+        """
+        if module == PYALSAAUDIO:
+            return ALSA
+        device_list = self._get('device_dict')[module]
+        position = device_list.index(device_name) if device_name in device_list else 0
+        return self._get('device_host_api_dict')[module][position]
 
     def _device_list(self, module, host_api):
         device_list = self._get('device_dict')[module]
-        if host_api == ALL_HOST_APIS:
+        if module == PYALSAAUDIO:
             return device_list
         host_apis = self._get('device_host_api_dict')[module]
         return [name for name, device_host_api in zip(device_list, host_apis) if device_host_api == host_api]
@@ -105,11 +121,12 @@ class QtAudioLowLatencyInitItem(QtAutoPlugin):
         if self.current_module != self.var.module:
             device_selected_dict = self._get('device_selected_dict')
             device_selected_dict[self.current_module] = self.var.device_name
+            self.host_api_selected[self.current_module] = self.var.host_api
             self.current_module = self.var.module
-            if self.var.host_api not in self._host_api_list(self.current_module):
-                self.var.host_api = ALL_HOST_APIS
-            self._fill_host_apis()
             self.var.device_name = device_selected_dict[self.current_module]
+            self.var.host_api = self.host_api_selected.get(
+                self.current_module, self._device_host_api(self.current_module, self.var.device_name))
+            self._fill_host_apis()
             self._fill_devices()
         elif self.current_host_api != self.var.host_api:
             self.current_host_api = self.var.host_api

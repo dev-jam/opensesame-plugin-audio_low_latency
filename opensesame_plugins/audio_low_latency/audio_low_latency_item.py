@@ -79,8 +79,11 @@ PYALSAAUDIO = 'PyAlsaAudio (Linux only)'
 SOUNDDEVICE = 'SoundDevice (PortAudio)'
 # Removed after 12.0.2: the init items refuse it with a message
 PYAUDIO = 'PyAudio (PortAudio)'
-# Host API setting of the init items: devices of all host APIs
+# Host API setting of experiments made with 13.1.0 or earlier: the first
+# device with the chosen name, of any host API. The GUI no longer offers it.
 ALL_HOST_APIS = 'all'
+# Host API that the GUI shows for PyAlsaAudio, which uses ALSA directly
+ALSA = 'ALSA'
 WASAPI = 'Windows WASAPI'
 
 # Debug tool: 1 prints the time of every period at the end, 2 prints it

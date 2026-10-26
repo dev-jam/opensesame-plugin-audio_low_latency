@@ -78,6 +78,7 @@ class AudioLowLatencyInitItem(AudioLowLatencyItem):
         self.var.channels = 2
         self.var.period_size = 1024
         self.var.periods = 4
+        # The GUI replaces it by the host API of the device
         self.var.host_api = ALL_HOST_APIS
         self.var.wasapi_exclusive = 'no'
 
@@ -218,10 +219,10 @@ class AudioLowLatencyInitItem(AudioLowLatencyItem):
             host_api_list = self._get('host_api_dict')[self.module]
             if self.host_api in UNUSABLE_HOST_APIS:
                 raise OSException(f'Host API {self.host_api} can\'t be used: {UNUSABLE_HOST_APIS[self.host_api]}\n\n'
-                                  f'Available host APIs: {", ".join([ALL_HOST_APIS] + host_api_list)}')
+                                  f'Available host APIs: {", ".join(host_api_list)}')
             if self.host_api not in host_api_list:
                 raise OSException(f'Host API {self.host_api} is not available for module {self.module}\n\n'
-                                  f'Available host APIs: {", ".join([ALL_HOST_APIS] + host_api_list)}')
+                                  f'Available host APIs: {", ".join(host_api_list)}')
             host_apis = self._get('device_host_api_dict')[self.module]
             positions = [i for i in positions if host_apis[i] == self.host_api]
         names = [device_list[i] for i in positions]

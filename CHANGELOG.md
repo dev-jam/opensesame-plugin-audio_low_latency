@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+- changed: the host API setting of the init items no longer offers "all", which showed the devices of all host APIs together: on Windows most devices are listed once per host API with the same name, so the host API of a device couldn't be seen. Every device is still available under its own host API. PyAlsaAudio shows "ALSA" (disabled) instead of "all". Experiments with "all" (13.0.0 and 13.1.0) or without a host API setting (before 13.0.0) still open the first device with the chosen name; opening the init item in the GUI replaces "all" by the host API of that device, so the same device stays selected. The host API errors no longer list "all"
+
 ## [13.1.0] - 2026-10-26
 
 - fixed: the record and record start items overwrote an existing file when *Do not overwrite existing files* had a value other than yes or no (e.g. `Yes` or `1` from a variable); now it is an error, also in dummy mode
