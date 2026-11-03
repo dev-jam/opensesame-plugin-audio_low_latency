@@ -1,0 +1,29 @@
+Source: opensesame-plugin-audio-low-latency
+Section: python
+Priority: optional
+Maintainer: Bob Rosbag <debian@bobrosbag.nl>
+Build-Depends: debhelper-compat (= 13),
+               dh-sequence-python3,
+               pybuild-plugin-pyproject,
+               python3-all,
+               python3-poetry-core,
+Standards-Version: 4.7.2
+Rules-Requires-Root: no
+Homepage: https://github.com/dev-jam/opensesame-plugin-audio_low_latency
+Vcs-Browser: https://github.com/dev-jam/opensesame-plugin-audio_low_latency/tree/debian/latest
+Vcs-Git: https://github.com/dev-jam/opensesame-plugin-audio_low_latency.git -b debian/latest
+
+Package: python3-opensesame-plugin-audio-low-latency
+Architecture: all
+# OpenSesame (and PsychoPy) are not in Debian yet: add them to Depends
+# when they are.
+Depends: ${misc:Depends},
+         ${python3:Depends},
+         python3-alsaaudio (>= 0.11.0),
+         python3-pygame (>= 2.0.0),
+         python3-sounddevice (>= 0.5.1),
+Description: OpenSesame plugin for playing and recording audio with low latency
+ This plugin for the OpenSesame experiment builder plays and
+ records wave files with low, predictable latency, in the
+ foreground or in the background. It uses PyAlsaAudio (Linux)
+ or SoundDevice (PortAudio).
