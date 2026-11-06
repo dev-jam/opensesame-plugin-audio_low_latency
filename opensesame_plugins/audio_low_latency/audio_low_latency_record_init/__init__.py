@@ -1,3 +1,6 @@
+# Copyright (C) 2017-2026 Bob Rosbag <mail@bobrosbag.nl> and contributors
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """Low Latency Audio - initializes the recording audio device"""
 
 from .. import __version__
