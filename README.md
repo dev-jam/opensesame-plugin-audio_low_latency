@@ -3,7 +3,7 @@ OpenSesame Plug-in: Audio Low Latency
 
 *An OpenSesame plug-in for playing and recording audio files with low latency.*  
 
-Copyright, 2022, Bob Rosbag
+Copyright (C) 2017-2026 Bob Rosbag and contributors
 
 
 ## About
@@ -95,9 +95,9 @@ Windows (SoundDevice, through PortAudio):
 
 ## License
 
-This software is distributed under the terms of the GNU General Public License 3. The full license should be included in the file `COPYING`, or can be obtained from:
+This plugin is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version (GPL-3.0-or-later).
 
-- <http://www.gnu.org/licenses/gpl.txt>
+The full license text is in the file `COPYING`, and is also available at <https://www.gnu.org/licenses/gpl-3.0.html>.
 
 This plug-in contains works of others. Icons are derivatives of the Faience icon theme, Faenza icon theme and Papirus icon theme.
 
