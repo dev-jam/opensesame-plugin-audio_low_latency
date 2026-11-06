@@ -1,10 +1,10 @@
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: opensesame-plugin-audio_low_latency
-Upstream-Contact: Bob Rosbag <debian@bobrosbag.nl>
+Upstream-Contact: Bob Rosbag <mail@bobrosbag.nl>
 Source: https://github.com/dev-jam/opensesame-plugin-audio_low_latency
 
 Files: *
-Copyright: 2022-2026 Bob Rosbag
+Copyright: 2017-2026 Bob Rosbag
 License: GPL-3+
 
 Files: debian/*
