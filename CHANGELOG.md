@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [13.1.4] - 2026-11-08
 
 - readme and package description: the two modules (PyAlsaAudio, SoundDevice) in the introduction, installation with pip, documentation link with https
 
@@ -250,7 +250,8 @@ Bug fixes:
 - fixed wav duration bug
 - implemented delay for stopping the audio recording 
 
-[Unreleased]: https://github.com/dev-jam/opensesame-plugin-audio_low_latency/compare/13.1.3...HEAD
+[Unreleased]: https://github.com/dev-jam/opensesame-plugin-audio_low_latency/compare/13.1.4...HEAD
+[13.1.4]: https://github.com/dev-jam/opensesame-plugin-audio_low_latency/compare/13.1.3...13.1.4
 [13.1.3]: https://github.com/dev-jam/opensesame-plugin-audio_low_latency/compare/13.1.2...13.1.3
 [13.1.2]: https://github.com/dev-jam/opensesame-plugin-audio_low_latency/compare/13.1.1...13.1.2
 [13.1.1]: https://github.com/dev-jam/opensesame-plugin-audio_low_latency/compare/13.1.0...13.1.1
