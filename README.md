@@ -20,42 +20,44 @@ Both playback and recording have their own *init* item. These should be placed a
 Difference between foreground and background:
 
 - **Foreground** items play/record until the file ends or the set duration has passed. 
-- **Background** items consist of a 'start', 'wait' and 'stop' item. These are fully multi-threaded. After the start of the playback/recording, the item will immediately advance to the next item. When it reaches the 'stop' or 'wait' item, it will stop the audio or wait until the file ends or duration has passed.
+- **Background** items consist of a 'bg_start', 'bg_wait' and 'bg_stop' item (and 'bg_pause' and 'bg_resume'). These are fully multi-threaded. After the start of the playback/recording, the item will immediately advance to the next item. When it reaches the 'bg_stop' or 'bg_wait' item, it will stop the audio or wait until the file ends or duration has passed.
 
 
 Seven items for playback:
 
-- **Play Init** initialization of the playback audio device, this should be placed at the beginning of an experiment.
+- **audio_low_latency_play_init** initialization of the playback audio device, this should be placed at the beginning of an experiment.
 
 Foreground:
-- **Play** starts the playback of audio, it will play the entire audio file or will stop after the set duration has passed before continuing to the next item in the experiment.
+- **audio_low_latency_play_fg** starts the playback of audio, it will play the entire audio file or will stop after the set duration has passed before continuing to the next item in the experiment.
 
 Background:
-- **Play Start** starts the playback of audio, it will directly advance to the next item in the experiment.
-- **Play Wait** waits until the thread from 'Play Start' is finished (end of audio or surpassing the duration) before advancing to the next item in the experiment.
-- **Play Stop** sends a stop signal to the 'Play Start' thread to stop immediately and checks if the thread has finished.
-
-- **Play Pause** pauses playback of audio.
-- **Play Resume** resumes playback of audio.
+- **audio_low_latency_play_bg_start** starts the playback of audio, it will directly advance to the next item in the experiment.
+- **audio_low_latency_play_bg_wait** waits until the thread from audio_low_latency_play_bg_start is finished (end of audio or surpassing the duration) before advancing to the next item in the experiment.
+- **audio_low_latency_play_bg_stop** sends a stop signal to the audio_low_latency_play_bg_start thread to stop immediately and checks if the thread has finished.
+- **audio_low_latency_play_bg_pause** pauses the background playback of audio.
+- **audio_low_latency_play_bg_resume** resumes the background playback of audio.
 
 
 Seven items for recording:
 
-- **Record Init** initialization of the recording audio device, this should be placed at the beginning of an experiment.
+- **audio_low_latency_record_init** initialization of the recording audio device, this should be placed at the beginning of an experiment.
 
 Foreground:
-- **Record** starts the recording of audio, it will record for the set duration before continuing to the next item in the experiment.
+- **audio_low_latency_record_fg** starts the recording of audio, it will record for the set duration before continuing to the next item in the experiment.
 
 Background:
-- **Record Start** starts the recording of audio, it will directly advance to the next item in the experiment.
-- **Record Wait** waits until the thread from 'Record Start' is finished (surpassing the duration) before advancing to the next item in the experiment.
-- **Record Stop** sends a stop signal to the 'Record Start' thread to stop immediately and checks if the thread has finished.
+- **audio_low_latency_record_bg_start** starts the recording of audio, it will directly advance to the next item in the experiment.
+- **audio_low_latency_record_bg_wait** waits until the thread from audio_low_latency_record_bg_start is finished (surpassing the duration) before advancing to the next item in the experiment.
+- **audio_low_latency_record_bg_stop** sends a stop signal to the audio_low_latency_record_bg_start thread to stop immediately and checks if the thread has finished.
+- **audio_low_latency_record_bg_pause** pauses the background recording of audio.
+- **audio_low_latency_record_bg_resume** resumes the background recording of audio.
 
-- **Record Pause** pauses recording of audio.
-- **Record Resume** resumes recording of audio.
+**Renamed items (14.0.0).** The foreground items were audio_low_latency_play and audio_low_latency_record, and the background items had no "bg_" (e.g. audio_low_latency_play_start is now audio_low_latency_play_bg_start). Experiments made with an older version open and run as they are, and OpenSesame saves them with the new item types; the names of the items, and so the variables in the log file, stay the same. An experiment saved with 14.0.0 or later needs 14.0.0 or later: an older version doesn't know the new item types (OpenSesame 4.1 then runs the experiment without these items, after a warning that a plugin is missing).
 
 
 Linux (PyAlsaAudio): "hw:" devices use the sound card directly, so the card must support the bit depth, sample rate and number of channels; "plughw:" devices let ALSA convert what the card doesn't support.
+
+A record item can't be used twice as a linked copy (e.g. twice in one sequence): each use needs its own recording, so use a second record item (a copy, not a linked copy) with its own name. A record item in a loop is fine.
 
 Recordings are saved as [Audio Filename].wav in the folder of the log file; a filename with a folder (e.g. recordings/subject_1) saves into that folder below the log folder and creates it when needed, and a full path is used as it is.
 
@@ -66,10 +68,10 @@ PyAudio is no longer supported (after 12.0.2): an experiment with module "PyAudi
 Variables in the log file ([kind] is play or record):
 
 - Init items: audio_low_latency_[kind]_module, _device_name, _period_size, _period_time, _period_time_exact, _periods, _buffer_size (the period size times the number of periods), _buffer_time (with SoundDevice, PortAudio is asked for a buffer of that size and rounds it: see _buffer_size_actual), _bitdepth, _samplewidth, _samplerate and _channels; and audio_low_latency_[kind]_soundcard, _period_size_actual and _buffer_size_actual (see below); with SoundDevice also audio_low_latency_[kind]_portaudio_latency: the latency in ms that PortAudio reports for the stream, and audio_low_latency_[kind]_host_api: the host API of the device, e.g. "Windows WASAPI" (on all systems, "dummy mode" in dummy mode); with SoundDevice also audio_low_latency_[kind]_wasapi_exclusive (yes when WASAPI exclusive mode is used, else no).
-- Play, record and start items: the timestamps time_stimulus_onset_[item_name] and time_stimulus_offset_[item_name] (no offset in dummy mode).
-- Buffer underruns and overruns: audio_low_latency_play_underruns_[item_name] (play and play start items) and audio_low_latency_record_overruns_[item_name] (record and record start items): the number of underruns (periods of the sound that were not played) or overruns (parts of the recording that are missing) during that item, set when the playback or recording ends (start items: before the wait or stop item ends). With PyAlsaAudio a number; with SoundDevice "unknown": PortAudio doesn't report them for WASAPI, and with ALSA it reports them one write late, also those of the pause between two sounds, so they can't be counted per item. "dummy mode" in dummy mode. A warning in the debug window still reports them too.
-- Keys: audio_low_latency_[kind]_key_presses and audio_low_latency_[kind]_key_timestamps (play and record items), audio_low_latency_[kind]_start_key_presses and audio_low_latency_[kind]_start_key_timestamps (start items), separated by ';'.
-- Play and play start items: wav_duration and wait_to_finish (in ms; wait_to_finish not in dummy mode).
+- The fg and bg_start items: the timestamps time_stimulus_onset_[item_name] and time_stimulus_offset_[item_name] (no offset in dummy mode).
+- Buffer underruns and overruns: audio_low_latency_play_underruns_[item_name] (audio_low_latency_play_fg and _play_bg_start items) and audio_low_latency_record_overruns_[item_name] (audio_low_latency_record_fg and _record_bg_start items): the number of underruns (periods of the sound that were not played) or overruns (parts of the recording that are missing) during that item, set when the playback or recording ends (bg_start items: before the bg_wait or bg_stop item ends). With PyAlsaAudio a number; with SoundDevice "unknown": PortAudio doesn't report them for WASAPI, and with ALSA it reports them one write late, also those of the pause between two sounds, so they can't be counted per item. "dummy mode" in dummy mode. A warning in the debug window still reports them too.
+- Keys: audio_low_latency_[kind]_key_presses and audio_low_latency_[kind]_key_timestamps (fg items), audio_low_latency_[kind]_start_key_presses and audio_low_latency_[kind]_start_key_timestamps (bg_start items; these names come from the item names before 14.0.0), separated by ';'.
+- The audio_low_latency_play_fg and _play_bg_start items: wav_duration and wait_to_finish (in ms; wait_to_finish not in dummy mode).
 
 The host API, WASAPI and PortAudio variables exist only with SoundDevice: a text that shows them (e.g. in a feedback item) stops with an error when the experiment uses PyAlsaAudio. To show a default instead, write e.g. {var.get('audio_low_latency_play_host_api', 'n/a')}.
 

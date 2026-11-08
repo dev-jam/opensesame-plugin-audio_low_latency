@@ -26,6 +26,7 @@ import os
 import wave
 
 from libopensesame.exceptions import OSException
+from libopensesame.item_stack import item_stack_singleton
 from libopensesame.oslogging import oslogger
 
 from .audio_low_latency_item import (AudioLowLatencyStreamItem, PYALSAAUDIO,
@@ -39,6 +40,11 @@ class AudioLowLatencyRecordItem(AudioLowLatencyStreamItem):
 
     kind = 'record'
     lock_poll_time = 10
+    # True from a prepare until the run that uses its file; a prepare that
+    # no run followed (e.g. run if false in a loop) is replaced by the next
+    _prepared = False
+    # _current_prepare_round() of that prepare
+    _prepare_round = frozenset()
 
     def reset(self):
         self.var.filename = ''
@@ -53,6 +59,11 @@ class AudioLowLatencyRecordItem(AudioLowLatencyStreamItem):
     def prepare(self):
         super().prepare()
         self._check_init()
+        # A sequence prepares all its items before it runs them: a record
+        # item that is in it twice (a linked copy) would record both times
+        # into the file of its second prepare
+        if self._prepared and self._prepare_round & self._current_prepare_round():
+            self._raise_used_twice()
         self._init_var()
         self.file_exists_action = self.var.file_exists_action
         if self.file_exists_action not in ('yes', 'no'):
@@ -103,8 +114,30 @@ class AudioLowLatencyRecordItem(AudioLowLatencyStreamItem):
             self._show_message('')
         else:
             self._show_message('Dummy mode enabled, prepare phase')
+        self._prepared = True
+        self._prepare_round = self._current_prepare_round()
+
+    def _current_prepare_round(self):
+        """The items in whose prepare phase this prepare happens, with their
+        count, which each prepare raises: two prepares of this item that
+        share one came before either of them ran.
+        """
+        return frozenset((name, self.experiment.items[name].count)
+                         for name, phase in item_stack_singleton[:]
+                         if phase == 'prepare' and name != self.name
+                         and name in self.experiment.items)
+
+    def _raise_used_twice(self):
+        raise OSException(
+            f'`{self.name}` is used twice (a linked copy), so it would record '
+            f'both times into one file: use a second {self.item_type} item (a '
+            f'copy, not a linked copy) with its own name')
 
     def run(self):
+        # Prepared once, run twice (e.g. a linked copy elsewhere)
+        if not self._prepared:
+            self._raise_used_twice()
+        self._prepared = False
         if self.background:
             self._check_stop_wait()
             # The pause and resume items check the keys of the start item
