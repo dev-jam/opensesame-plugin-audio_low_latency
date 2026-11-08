@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [14.0.0] - 2026-11-08
 
 - changed: the play and record items have new names that say foreground or background: audio_low_latency_play and audio_low_latency_record are now audio_low_latency_play_fg and audio_low_latency_record_fg, and the background items have bg_ in their names (e.g. audio_low_latency_play_start is audio_low_latency_play_bg_start, audio_low_latency_play_pause is audio_low_latency_play_bg_pause). Experiments made with an older version open and run as they are (the old names are aliases) and are saved with the new names; item names, log variables (also audio_low_latency_[kind]_start_key_presses) and the init items stay the same. An experiment saved with this version can't be used with an older version. Error messages name the items by their item types
 - fixed: a record item that is used twice (a linked copy in the same sequence, or in two places that are prepared before either runs) is now an error that says to use a second item; before, the first recording went into the file of the second prepare, the first file stayed empty, and the second run stopped the experiment with "'NoneType' object has no attribute 'write'" ("An unexpected error occurred" for the foreground item). Also in dummy mode. A record item in a loop, also one that some iterations skip, works as before
@@ -255,7 +255,8 @@ Bug fixes:
 - fixed wav duration bug
 - implemented delay for stopping the audio recording 
 
-[Unreleased]: https://github.com/dev-jam/opensesame-plugin-audio_low_latency/compare/13.1.4...HEAD
+[Unreleased]: https://github.com/dev-jam/opensesame-plugin-audio_low_latency/compare/14.0.0...HEAD
+[14.0.0]: https://github.com/dev-jam/opensesame-plugin-audio_low_latency/compare/13.1.4...14.0.0
 [13.1.4]: https://github.com/dev-jam/opensesame-plugin-audio_low_latency/compare/13.1.3...13.1.4
 [13.1.3]: https://github.com/dev-jam/opensesame-plugin-audio_low_latency/compare/13.1.2...13.1.3
 [13.1.2]: https://github.com/dev-jam/opensesame-plugin-audio_low_latency/compare/13.1.1...13.1.2
