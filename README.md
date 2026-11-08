@@ -1,17 +1,19 @@
-OpenSesame Plug-in: Audio Low Latency
+OpenSesame Plugin: Audio Low Latency
 ==========
 
-*An OpenSesame plug-in for playing and recording audio files with low latency.*  
+*An OpenSesame plugin for playing and recording audio files with low, predictable latency.*  
 
 Copyright (C) 2017-2026 Bob Rosbag and contributors
 
 
 ## About
 
-The main goal of this plug-in is to play and record audio with minimal and predictable latencies to achieve a high accuracy and precision. The 'PyAlsaAudio' package which uses the Linux ALSA audio system provided the best results within Python. 
-'PortAudio' and 'sounddevice' are cross-platform and work on both Windows and Linux.
+The main goal of this plugin is to play and record audio with minimal and predictable latencies, for a high accuracy and precision. The init items offer two modules:
 
-This plug-in consists of playback and recording items as well as foreground and background (multi-threaded) items.
+- **PyAlsaAudio** uses the Linux ALSA audio system directly; it gave the best results within Python (Linux only).
+- **SoundDevice (PortAudio)** is cross-platform: Linux and Windows (macOS not tested).
+
+This plugin consists of playback and recording items as well as foreground and background (multi-threaded) items.
 Both playback and recording have their own *init* item. These should be placed at the beginning of an experiment.
 
 
@@ -88,9 +90,16 @@ Windows (SoundDevice, through PortAudio):
 
 - Host API: Windows lists most devices once per host API (MME, Windows WASAPI, ...), often with the same name. The init item lists the devices of the chosen host API, so it is always clear which one a device uses. PyAlsaAudio uses ALSA directly: its host API is "ALSA" and can't be changed. Experiments made with 13.1.0 or earlier have the host API "all" (or none), which uses the first device with the chosen name (MME on Windows): they still run with the same device, and opening the init item in the GUI replaces "all" by the host API of that device. MME and WASAPI in shared mode play and record through the Windows mixer: Windows may convert the bit depth and the sample rate, and the latency is higher (MME the highest). WASAPI in shared mode only accepts the sample rate set in the Windows sound settings. The host API choice also works on Linux and macOS.
 - WASAPI exclusive mode (SoundDevice): the device is used by the experiment alone, without the Windows mixer, so the bit depth, sample rate and buffer reach the sound card; the device must support them, or it can't be opened. Other programs can't play sound on that device during the experiment. It can only be switched on with host API "Windows WASAPI"; with another host API it is not used. In exclusive mode the sound card plays its buffer again as long as no new data comes in (between sounds the items write nothing), which sounds as ringing after a sound that doesn't end in silence: the play items therefore write one buffer of silence after each sound and when they pause, so they end about one buffer (e.g. 43 ms) later, when the sound has been played.
-- ASIO: the plug-in makes SoundDevice load its PortAudio library with ASIO (it sets the environment variable SD_ENABLE_ASIO before SoundDevice is imported), so ASIO devices are listed. This doesn't work when SoundDevice was imported before the plug-in (e.g. by an inline script) or uses another PortAudio library (e.g. from conda). PortAudio loads every installed ASIO driver when SoundDevice is imported, also when an ASIO device isn't used. The ASIO buffer size is set in the driver's control panel; PortAudio doesn't report the buffer it uses, so the actual sizes are "unknown".
+- ASIO: the plugin makes SoundDevice load its PortAudio library with ASIO (it sets the environment variable SD_ENABLE_ASIO before SoundDevice is imported), so ASIO devices are listed. This doesn't work when SoundDevice was imported before the plugin (e.g. by an inline script) or uses another PortAudio library (e.g. from conda). PortAudio loads every installed ASIO driver when SoundDevice is imported, also when an ASIO device isn't used. The ASIO buffer size is set in the driver's control panel; PortAudio doesn't report the buffer it uses, so the actual sizes are "unknown".
 - DirectSound and WDM-KS devices are not listed: the items play and record with blocking reads and writes, which PortAudio does not support for them (with DirectSound nothing was played or recorded, without an error; WDM-KS devices could not be opened). An experiment with such a device gives an error.
 
+
+
+## Installation
+
+Install the plugin with pip, in the Python environment of OpenSesame:
+
+    pip install opensesame-plugin-audio_low_latency
 
 
 ## License
@@ -99,11 +108,11 @@ This plugin is free software: you can redistribute it and/or modify it under the
 
 The full license text is in the file `COPYING`, and is also available at <https://www.gnu.org/licenses/gpl-3.0.html>.
 
-This plug-in contains works of others. Icons are derivatives of the Faience icon theme, Faenza icon theme and Papirus icon theme.
+This plugin contains works of others. Icons are derivatives of the Faience icon theme, Faenza icon theme and Papirus icon theme.
 
 
 ## Documentation
 
 Installation instructions and documentation on OpenSesame are available on the documentation website:
 
-- <http://osdoc.cogsci.nl/>
+- <https://osdoc.cogsci.nl/>
