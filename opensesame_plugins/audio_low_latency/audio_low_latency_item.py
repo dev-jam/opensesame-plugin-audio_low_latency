@@ -20,6 +20,13 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 Shared code of the Audio Low Latency items.
 
+The item types are audio_low_latency_<kind>_init, _fg (foreground) and
+_bg_start, _bg_wait, _bg_stop, _bg_pause and _bg_resume (background).
+Before 14.0.0, _fg was audio_low_latency_<kind> and the background items
+had no bg_ (e.g. audio_low_latency_play_start); each item's __init__.py
+lists its old type in aliases, so experiments made before still work.
+The shared state and the log variables kept their names.
+
 The items share their state on the experiment, as
 experiment.audio_low_latency_<kind>_<name>, where kind is play or record.
 Inline scripts may use these attributes: keep their names and types.
@@ -60,7 +67,8 @@ Variables for the log file (experiment.var), also for inline scripts:
   and time_stimulus_offset_<item name> (not in dummy mode);
   audio_low_latency_<kind>_key_presses and _key_timestamps, for the start
   items audio_low_latency_<kind>_start_key_presses and _key_timestamps (keys
-  and times separated by ';').
+  and times separated by ';'; named after the items as they were called
+  before 14.0.0: play/record and play/record start).
 - Set by the play and play start items:
   audio_low_latency_play_underruns_<item name>, by the record and record
   start items audio_low_latency_record_overruns_<item name>: the number of
@@ -126,11 +134,11 @@ class AudioLowLatencyItem(Item):
 
     def _check_init(self):
         if not hasattr(self.experiment, f'audio_low_latency_{self.kind}_device'):
-            raise OSException(f'`Audio Low Latency {self._title} Init` item is missing')
+            raise OSException(f'`audio_low_latency_{self.kind}_init` item is missing')
 
     def _check_start(self):
         if not self._get('start', False):
-            raise OSException(f'`Audio Low Latency {self._title} Start` item is missing')
+            raise OSException(f'`audio_low_latency_{self.kind}_bg_start` item is missing')
 
     def _show_message(self, message):
         oslogger.debug(message)
@@ -195,7 +203,7 @@ class AudioLowLatencyControlItem(AudioLowLatencyItem):
         if self.dummy_mode == 'no':
             if not self._get('thread_running'):
                 raise OSException(
-                    f'`Audio Low Latency {self._title} Start` did not run before this item')
+                    f'`audio_low_latency_{self.kind}_bg_start` did not run before this item')
             self._control()
         else:
             self._show_message(f'Dummy mode enabled, NOT {"playing" if self.kind == "play" else "recording"} audio')
@@ -208,14 +216,14 @@ class AudioLowLatencyControlItem(AudioLowLatencyItem):
         # (continue = 0) before this item.
         if self._get('infinite', 0) and self._get('continue', 1) == 1:
             raise OSException(
-                f'`Audio Low Latency {self._title} Wait` would wait forever: the duration of '
-                f'`Audio Low Latency {self._title} Start` is infinite and it has no stop key. '
-                f'Use a stop key or an `Audio Low Latency {self._title} Stop` item instead')
+                f'`audio_low_latency_{self.kind}_bg_wait` would wait forever: the duration of '
+                f'`audio_low_latency_{self.kind}_bg_start` is infinite and it has no stop key. '
+                f'Use a stop key or an `audio_low_latency_{self.kind}_bg_stop` item instead')
 
     def _check_pause_resume(self):
         other = 'resume' if self.role == 'pause' else 'pause'
         if not self._get('pause_resume_key') and not self._get(other):
-            raise OSException(f'`Audio Low Latency {self._title} {self.role.capitalize()}` '
+            raise OSException(f'`audio_low_latency_{self.kind}_bg_{self.role}` '
                               'item is missing a resume/pause key or item')
 
 
@@ -297,8 +305,8 @@ class AudioLowLatencyStreamItem(AudioLowLatencyItem):
 
     def _check_stop_wait(self):
         if not self._get('stop') and not self._get('wait'):
-            raise OSException(f'`Audio Low Latency {self._title} Stop` or '
-                              f'`Audio Low Latency {self._title} Wait` item is missing')
+            raise OSException(f'`audio_low_latency_{self.kind}_bg_stop` or '
+                              f'`audio_low_latency_{self.kind}_bg_wait` item is missing')
 
     def _wait_until_unlocked(self):
         # Not clock.sleep(): the legacy backend's pygame.time.delay() holds
