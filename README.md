@@ -57,6 +57,8 @@ Background:
 
 Linux (PyAlsaAudio): "hw:" devices use the sound card directly, so the card must support the bit depth, sample rate and number of channels; "plughw:" devices let ALSA convert what the card doesn't support.
 
+A record item can't be used twice as a linked copy (e.g. twice in one sequence): each use needs its own recording, so use a second record item (a copy, not a linked copy) with its own name. A record item in a loop is fine.
+
 Recordings are saved as [Audio Filename].wav in the folder of the log file; a filename with a folder (e.g. recordings/subject_1) saves into that folder below the log folder and creates it when needed, and a full path is used as it is.
 
 Linux (SoundDevice): devices of PortAudio's OSS host API (/dev/dsp, the OSS emulation of the kernel) are not listed: they bypass ALSA, so the sound card and the actual sizes can't be found; use PyAlsaAudio, or the ALSA devices of SoundDevice. An experiment with such a device gives an error.
