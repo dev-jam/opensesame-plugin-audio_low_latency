@@ -20,7 +20,6 @@ Architecture: all
 Depends: ${misc:Depends},
          ${python3:Depends},
          python3-alsaaudio (>= 0.11.0),
-         python3-pygame (>= 2.0.0),
          python3-sounddevice (>= 0.5.1),
 Description: OpenSesame plugin for playing and recording audio with low latency
  This plugin for the OpenSesame experiment builder plays and
