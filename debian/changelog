@@ -1,3 +1,9 @@
+opensesame-plugin-audio-low-latency (14.1.0-1) trixie; urgency=medium
+
+  * New upstream release.
+
+ -- Bob Rosbag <debian@bobrosbag.nl>  Sun, 22 Nov 2026 13:40:53 +0100
+
 opensesame-plugin-audio-low-latency (14.0.0-1) trixie; urgency=medium
 
   * New upstream release.
