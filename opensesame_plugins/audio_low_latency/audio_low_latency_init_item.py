@@ -28,7 +28,13 @@ import os
 import re
 import sys
 
-import pygame
+# Only used to stop the pygame mixer before the audio device is opened. A
+# mixer can only be running when pygame is installed, so pygame is optional;
+# pygame-ce provides the same module.
+try:
+    import pygame
+except ImportError:
+    pygame = None
 
 from libopensesame.exceptions import OSException
 from libopensesame.oslogging import oslogger
@@ -169,12 +175,15 @@ class AudioLowLatencyInitItem(AudioLowLatencyItem):
             self._show_message(f'Number of periods per buffer: {self.periods}')
             self._show_message('')
 
-            try:
-                pygame.mixer.stop()
-                pygame.mixer.quit()
-                self._show_message('Stopped pygame mixer')
-            except pygame.error:
-                self._show_message('pygame mixer not active')
+            if pygame is None:
+                self._show_message('pygame not installed, no pygame mixer to stop')
+            else:
+                try:
+                    pygame.mixer.stop()
+                    pygame.mixer.quit()
+                    self._show_message('Stopped pygame mixer')
+                except pygame.error:
+                    self._show_message('pygame mixer not active')
 
             module_list = self._get('module_list')
             if self.module not in module_list:
