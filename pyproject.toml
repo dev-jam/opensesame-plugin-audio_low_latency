@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "opensesame-plugin-audio_low_latency"
-version = "14.0.0"
+version = "14.1.0"
 description = "OpenSesame plugin for playing and recording audio with low, predictable latency"
 authors = ["Bob Rosbag <mail@bobrosbag.nl>"]
 readme = "README.md"
